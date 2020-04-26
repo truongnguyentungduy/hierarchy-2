@@ -65,7 +65,8 @@ namespace Hierarchy2
             menuOptions.StyleTop(-1);
             menuOptions.StyleWidth(128);
             menuOptions.StyleBackgroundColor(backgroundColor);
-            menuOptions.StyleBorderWidth(0, 1, 1, 1);
+            menuOptions.StyleMarginLeft(-1);
+            menuOptions.StyleBorderWidth(1, 1, 1, 1);
             menuOptions.StyleBorderRadius(0, 0, 0, 0);
             menuOptions.StyleBorderColor(borderColor);
             menuOptions.StyleDisplay(false);
