@@ -516,10 +516,10 @@ namespace Hierarchy2
                 if (deepestRow > previousRowIndex)
                     deepestRow = previousRowIndex;
 
-                if (settings.displayVersion)
-                    BottomRightArea(selectionRect);
+                // if (settings.displayVersion)
+                //     BottomRightArea(selectionRect);
 
-                Background(selectionRect);
+                // Background(selectionRect);
             }
 
             if (element.isNull)
@@ -625,7 +625,7 @@ namespace Hierarchy2
 
                 DisplayEditableIcon();
 
-                DisplayNoteIcon();
+                // DisplayNoteIcon();
 
                 widthUse.afterName += 8;
 
@@ -814,9 +814,10 @@ namespace Hierarchy2
                 if (icon.name == "GameObject Icon" || icon.name == "d_GameObject Icon" || icon.name == "Prefab Icon" || icon.name == "d_Prefab Icon" || icon.name == "PrefabModel Icon" || icon.name == "d_PrefabModel Icon")
                     return;
 
+                Color guiColor = GUI.color;
                 GUI.color = element.rowIndex % 2 != 0 ? ThemeData.colorRowEven : ThemeData.colorRowOdd;
                 GUI.DrawTexture(rect, Resources.PixelWhite);
-                GUI.color = Color.white;
+                GUI.color = guiColor;
                 GUI.DrawTexture(rect, icon, ScaleMode.ScaleToFit);
             }
         }
@@ -1032,9 +1033,10 @@ namespace Hierarchy2
 
                 if (selectedComponents.ContainsKey(comHash))
                 {
+                    Color guiColor = GUI.color;
                     GUI.color = ThemeData.comSelBGColor;
                     GUI.DrawTexture(rect, Resources.PixelWhite, ScaleMode.StretchToFill);
-                    GUI.color = Color.white;
+                    GUI.color = guiColor;
                 }
 
                 string tooltip = isMaterial ? component.name : componentType.Name;
@@ -1304,9 +1306,10 @@ namespace Hierarchy2
             if (nextRow)
                 rect.y += rect.height;
 
+            Color guiColor = GUI.color;
             GUI.color = color;
             GUI.DrawTexture(rect, Resources.PixelWhite, ScaleMode.StretchToFill);
-            GUI.color = Color.white;
+            GUI.color = guiColor;
         }
 
         void DisplayGrid()
@@ -1321,9 +1324,10 @@ namespace Hierarchy2
             rect.width += 16;
             rect.height = 1;
 
+            Color guiColor = GUI.color;
             GUI.color = ThemeData.colorGrid;
             GUI.DrawTexture(rect, Resources.PixelWhite, ScaleMode.StretchToFill);
-            GUI.color = Color.white;
+            GUI.color = guiColor;
         }
 
         void DisplayTreeView()
@@ -1337,6 +1341,7 @@ namespace Hierarchy2
             rect.x -= 34;
             var t = element.gameObject.transform.parent;
 
+            Color guiColor = GUI.color;
             GUI.color = ThemeData.colorTreeView;
 
             if (t.childCount == 1 || t.GetChild(t.childCount - 1) == element.gameObject.transform)
@@ -1365,7 +1370,7 @@ namespace Hierarchy2
                 t = t.parent;
             }
 
-            GUI.color = Color.white;
+            GUI.color = guiColor;
         }
 
         GUIContent tmpSceneContent = new GUIContent();
@@ -1477,9 +1482,10 @@ namespace Hierarchy2
 
         void GUISeparator(Rect rect, Color color)
         {
+            Color guiColor = GUI.color;
             GUI.color = color;
             GUI.DrawTexture(rect, Resources.PixelWhite, ScaleMode.StretchToFill);
-            GUI.color = Color.white;
+            GUI.color = guiColor;
         }
 
         struct WidthUse
