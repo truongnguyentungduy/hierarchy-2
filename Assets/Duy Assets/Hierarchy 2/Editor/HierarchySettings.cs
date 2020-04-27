@@ -162,9 +162,6 @@ namespace Hierarchy2
                     hierarchyTitle.StyleFont(FontStyle.Bold);
                     rootElement.Add(hierarchyTitle);
 
-                    EditorHelpBox helpBox = new EditorHelpBox("Theme selection color require editor assembly recompile to take affect.", MessageType.Info);
-                    helpBox.StyleDisplay(false);
-                    rootElement.Add(helpBox);
 
                     ScrollView scrollView = new ScrollView();
                     rootElement.Add(scrollView);
@@ -469,132 +466,145 @@ namespace Hierarchy2
                     Theme.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
                     verticalLayout.Add(Theme);
 
-                    ColorField colorRowEven = new ColorField("Row Even");
-                    colorRowEven.value = settings.usedTheme.colorRowEven;
-                    colorRowEven.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    colorRowEven.RegisterValueChangedCallback((evt) =>
+                    if (EditorApplication.isPlayingOrWillChangePlaymode)
                     {
-                        if (EditorGUIUtility.isProSkin)
-                            settings.professionalTheme.colorRowEven = evt.newValue;
-                        else
-                            settings.personalTheme.colorRowEven = evt.newValue;
-
-                        settings.OnSettingsChanged();
-                    });
-                    verticalLayout.Add(colorRowEven);
-
-                    ColorField colorRowOdd = new ColorField("Row Odd");
-                    colorRowOdd.value = settings.usedTheme.colorRowOdd;
-                    colorRowOdd.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    colorRowOdd.RegisterValueChangedCallback((evt) =>
+                        EditorHelpBox themeWarningPlaymode = new EditorHelpBox("This setting only available on edit mode.", MessageType.Info);
+                        verticalLayout.Add(themeWarningPlaymode);
+                    }
+                    else
                     {
-                        if (EditorGUIUtility.isProSkin)
-                            settings.professionalTheme.colorRowOdd = evt.newValue;
-                        else
-                            settings.personalTheme.colorRowOdd = evt.newValue;
+                        EditorHelpBox selectionColorHelpBox = new EditorHelpBox("Theme selection color require editor assembly recompile to take affect.\nBy selecting any script, right click -> Reimport. it will force the editor to recompile.", MessageType.Info);
+                        selectionColorHelpBox.StyleDisplay(false);
+                        verticalLayout.Add(selectionColorHelpBox);
 
-                        settings.OnSettingsChanged();
-                    });
-                    verticalLayout.Add(colorRowOdd);
+                        ColorField colorRowEven = new ColorField("Row Even");
+                        colorRowEven.value = settings.usedTheme.colorRowEven;
+                        colorRowEven.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                        colorRowEven.RegisterValueChangedCallback((evt) =>
+                        {
+                            if (EditorGUIUtility.isProSkin)
+                                settings.professionalTheme.colorRowEven = evt.newValue;
+                            else
+                                settings.personalTheme.colorRowEven = evt.newValue;
 
-                    ColorField colorGrid = new ColorField("Grid Color");
-                    colorGrid.value = settings.usedTheme.colorGrid;
-                    colorGrid.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    colorGrid.RegisterValueChangedCallback((evt) =>
-                    {
-                        if (EditorGUIUtility.isProSkin)
-                            settings.professionalTheme.colorGrid = evt.newValue;
-                        else
-                            settings.personalTheme.colorGrid = evt.newValue;
+                            settings.OnSettingsChanged();
+                        });
+                        verticalLayout.Add(colorRowEven);
 
-                        settings.OnSettingsChanged();
-                    });
-                    verticalLayout.Add(colorGrid);
+                        ColorField colorRowOdd = new ColorField("Row Odd");
+                        colorRowOdd.value = settings.usedTheme.colorRowOdd;
+                        colorRowOdd.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                        colorRowOdd.RegisterValueChangedCallback((evt) =>
+                        {
+                            if (EditorGUIUtility.isProSkin)
+                                settings.professionalTheme.colorRowOdd = evt.newValue;
+                            else
+                                settings.personalTheme.colorRowOdd = evt.newValue;
 
-                    ColorField colorTreeView = new ColorField("TreeView");
-                    colorTreeView.value = settings.usedTheme.colorTreeView;
-                    colorTreeView.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    colorTreeView.RegisterValueChangedCallback((evt) =>
-                    {
-                        if (EditorGUIUtility.isProSkin)
-                            settings.professionalTheme.colorTreeView = evt.newValue;
-                        else
-                            settings.personalTheme.colorTreeView = evt.newValue;
+                            settings.OnSettingsChanged();
+                        });
+                        verticalLayout.Add(colorRowOdd);
 
-                        settings.OnSettingsChanged();
-                    });
-                    verticalLayout.Add(colorTreeView);
+                        ColorField colorGrid = new ColorField("Grid Color");
+                        colorGrid.value = settings.usedTheme.colorGrid;
+                        colorGrid.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                        colorGrid.RegisterValueChangedCallback((evt) =>
+                        {
+                            if (EditorGUIUtility.isProSkin)
+                                settings.professionalTheme.colorGrid = evt.newValue;
+                            else
+                                settings.personalTheme.colorGrid = evt.newValue;
 
-                    ColorField colorLockIcon = new ColorField("Lock Icon");
-                    colorLockIcon.value = settings.usedTheme.colorLockIcon;
-                    colorLockIcon.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    colorLockIcon.RegisterValueChangedCallback((evt) =>
-                    {
-                        if (EditorGUIUtility.isProSkin)
-                            settings.professionalTheme.colorLockIcon = evt.newValue;
-                        else
-                            settings.personalTheme.colorLockIcon = evt.newValue;
+                            settings.OnSettingsChanged();
+                        });
+                        verticalLayout.Add(colorGrid);
 
-                        settings.OnSettingsChanged();
-                    });
-                    verticalLayout.Add(colorLockIcon);
+                        ColorField colorTreeView = new ColorField("TreeView");
+                        colorTreeView.value = settings.usedTheme.colorTreeView;
+                        colorTreeView.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                        colorTreeView.RegisterValueChangedCallback((evt) =>
+                        {
+                            if (EditorGUIUtility.isProSkin)
+                                settings.professionalTheme.colorTreeView = evt.newValue;
+                            else
+                                settings.personalTheme.colorTreeView = evt.newValue;
 
-                    ColorField tagColor = new ColorField("Tag Text");
-                    tagColor.value = settings.usedTheme.tagColor;
-                    tagColor.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    tagColor.RegisterValueChangedCallback((evt) =>
-                    {
-                        if (EditorGUIUtility.isProSkin)
-                            settings.professionalTheme.tagColor = evt.newValue;
-                        else
-                            settings.personalTheme.tagColor = evt.newValue;
+                            settings.OnSettingsChanged();
+                        });
+                        verticalLayout.Add(colorTreeView);
 
-                        settings.OnSettingsChanged();
-                    });
-                    verticalLayout.Add(tagColor);
+                        ColorField colorLockIcon = new ColorField("Lock Icon");
+                        colorLockIcon.value = settings.usedTheme.colorLockIcon;
+                        colorLockIcon.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                        colorLockIcon.RegisterValueChangedCallback((evt) =>
+                        {
+                            if (EditorGUIUtility.isProSkin)
+                                settings.professionalTheme.colorLockIcon = evt.newValue;
+                            else
+                                settings.personalTheme.colorLockIcon = evt.newValue;
 
-                    ColorField layerColor = new ColorField("Layer Text");
-                    layerColor.value = settings.usedTheme.layerColor;
-                    layerColor.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    layerColor.RegisterValueChangedCallback((evt) =>
-                    {
-                        if (EditorGUIUtility.isProSkin)
-                            settings.professionalTheme.layerColor = evt.newValue;
-                        else
-                            settings.personalTheme.layerColor = evt.newValue;
+                            settings.OnSettingsChanged();
+                        });
+                        verticalLayout.Add(colorLockIcon);
 
-                        settings.OnSettingsChanged();
-                    });
-                    verticalLayout.Add(layerColor);
+                        ColorField tagColor = new ColorField("Tag Text");
+                        tagColor.value = settings.usedTheme.tagColor;
+                        tagColor.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                        tagColor.RegisterValueChangedCallback((evt) =>
+                        {
+                            if (EditorGUIUtility.isProSkin)
+                                settings.professionalTheme.tagColor = evt.newValue;
+                            else
+                                settings.personalTheme.tagColor = evt.newValue;
 
-                    ColorField comSelBGColor = new ColorField("Component Selection");
-                    comSelBGColor.value = settings.usedTheme.comSelBGColor;
-                    comSelBGColor.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    comSelBGColor.RegisterValueChangedCallback((evt) =>
-                    {
-                        if (EditorGUIUtility.isProSkin)
-                            settings.professionalTheme.comSelBGColor = evt.newValue;
-                        else
-                            settings.personalTheme.comSelBGColor = evt.newValue;
+                            settings.OnSettingsChanged();
+                        });
+                        verticalLayout.Add(tagColor);
 
-                        settings.OnSettingsChanged();
-                    });
-                    verticalLayout.Add(comSelBGColor);
+                        ColorField layerColor = new ColorField("Layer Text");
+                        layerColor.value = settings.usedTheme.layerColor;
+                        layerColor.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                        layerColor.RegisterValueChangedCallback((evt) =>
+                        {
+                            if (EditorGUIUtility.isProSkin)
+                                settings.professionalTheme.layerColor = evt.newValue;
+                            else
+                                settings.personalTheme.layerColor = evt.newValue;
 
-                    ColorField selectionColor = new ColorField("Selection");
-                    selectionColor.value = settings.usedTheme.selectionColor;
-                    selectionColor.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    selectionColor.RegisterValueChangedCallback((evt) =>
-                    {
-                        if (EditorGUIUtility.isProSkin)
-                            settings.professionalTheme.selectionColor = evt.newValue;
-                        else
-                            settings.personalTheme.selectionColor = evt.newValue;
+                            settings.OnSettingsChanged();
+                        });
+                        verticalLayout.Add(layerColor);
 
-                        helpBox.StyleDisplay(true);
-                        settings.OnSettingsChanged();
-                    });
-                    verticalLayout.Add(selectionColor);
+                        ColorField comSelBGColor = new ColorField("Component Selection");
+                        comSelBGColor.value = settings.usedTheme.comSelBGColor;
+                        comSelBGColor.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                        comSelBGColor.RegisterValueChangedCallback((evt) =>
+                        {
+                            if (EditorGUIUtility.isProSkin)
+                                settings.professionalTheme.comSelBGColor = evt.newValue;
+                            else
+                                settings.personalTheme.comSelBGColor = evt.newValue;
+
+                            settings.OnSettingsChanged();
+                        });
+                        verticalLayout.Add(comSelBGColor);
+
+                        ColorField selectionColor = new ColorField("Selection");
+                        selectionColor.value = settings.usedTheme.selectionColor;
+                        selectionColor.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                        selectionColor.RegisterValueChangedCallback((evt) =>
+                        {
+                            if (EditorGUIUtility.isProSkin)
+                                settings.professionalTheme.selectionColor = evt.newValue;
+                            else
+                                settings.personalTheme.selectionColor = evt.newValue;
+
+                            selectionColorHelpBox.StyleDisplay(true);
+                            settings.OnSettingsChanged();
+                        });
+                        verticalLayout.Add(selectionColor);
+                    }
+
                 },
 
                 keywords = new HashSet<string>(new[] { "Hierarchy" })
