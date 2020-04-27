@@ -26,6 +26,32 @@ namespace Hierarchy2
             public Color layerColor;
             public Color comSelBGColor;
             public Color selectionColor;
+
+            public ThemeData(ThemeData themeData)
+            {
+                colorRowEven = themeData.colorRowEven;
+                colorRowOdd = themeData.colorRowOdd;
+                colorGrid = themeData.colorGrid;
+                colorTreeView = themeData.colorTreeView;
+                colorLockIcon = themeData.colorLockIcon;
+                tagColor = themeData.tagColor;
+                layerColor = themeData.layerColor;
+                comSelBGColor = themeData.comSelBGColor;
+                selectionColor = themeData.selectionColor;
+            }
+
+            public void BlendMultiply(Color blend)
+            {
+                colorRowEven = colorRowEven * blend;
+                colorRowOdd = colorRowOdd * blend;
+                colorGrid = colorGrid * blend;
+                colorTreeView = colorTreeView * blend;
+                colorLockIcon = colorLockIcon * blend;
+                tagColor = tagColor * blend;
+                layerColor = layerColor * blend;
+                comSelBGColor = comSelBGColor * blend;
+                selectionColor = selectionColor * blend;
+            }
         }
 
         public enum ComponentSize { Small, Normal, Large }
@@ -36,11 +62,27 @@ namespace Hierarchy2
 
         public ThemeData personalTheme;
         public ThemeData professionalTheme;
+        public ThemeData playmodeTheme;
+        private bool useThemePlaymode = false;
         public ThemeData usedTheme
         {
             get
             {
-                return EditorGUIUtility.isProSkin ? professionalTheme : personalTheme;
+                if (EditorApplication.isPlayingOrWillChangePlaymode)
+                {
+                    if (useThemePlaymode == false)
+                    {
+                        playmodeTheme = new ThemeData(EditorGUIUtility.isProSkin ? professionalTheme : personalTheme);
+                        playmodeTheme.BlendMultiply(GUI.color);
+                        useThemePlaymode = true;
+                    }
+                    return playmodeTheme;
+                }
+                else
+                {
+                    useThemePlaymode = false;
+                    return EditorGUIUtility.isProSkin ? professionalTheme : personalTheme;
+                }
             }
         }
 

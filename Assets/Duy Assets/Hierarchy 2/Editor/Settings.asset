@@ -32,12 +32,22 @@ MonoBehaviour:
     layerColor: {r: 0.7058824, g: 0.7058824, b: 0.7058824, a: 1}
     comSelBGColor: {r: 1, g: 0.16078432, b: 0.16078432, a: 0.5529412}
     selectionColor: {r: 0.17254902, g: 0.3647059, b: 0.5294118, a: 1}
+  playmodeTheme:
+    colorRowEven: {r: 0.34450614, g: 0.34450614, b: 0.34450614, a: 1}
+    colorRowOdd: {r: 0.3545746, g: 0.3545746, b: 0.3545746, a: 1}
+    colorGrid: {r: 0, g: 0, b: 0, a: 0.16078432}
+    colorTreeView: {r: 0.21664818, g: 0.21664818, b: 0.21664818, a: 1}
+    colorLockIcon: {r: 0.14384018, g: 0.14384018, b: 0.14384018, a: 1}
+    tagColor: {r: 0, g: 0, b: 0, a: 1}
+    layerColor: {r: 0, g: 0, b: 0, a: 1}
+    comSelBGColor: {r: 0.41651833, g: 0.43675774, b: 0.4528302, a: 1}
+    selectionColor: {r: 0, g: 0.24861267, b: 0.4528302, a: 0.5019608}
   activeHierarchy: 1
   autoCreateHLD: 0
   pingHierarchyLocalDataObject: 0
   displayVersion: 1
-  displayObjectIcon: 0
-  displayCustomObjectIcon: 0
+  displayObjectIcon: 1
+  displayCustomObjectIcon: 1
   displayTreeView: 1
   displayRowBackground: 1
   displayGrid: 1
