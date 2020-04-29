@@ -26,6 +26,8 @@ namespace Hierarchy2
             public Color layerColor;
             public Color comSelBGColor;
             public Color selectionColor;
+            public Color colorHeaderTitle;
+            public Color colorHeaderBackground;
 
             public ThemeData(ThemeData themeData)
             {
@@ -38,6 +40,8 @@ namespace Hierarchy2
                 layerColor = themeData.layerColor;
                 comSelBGColor = themeData.comSelBGColor;
                 selectionColor = themeData.selectionColor;
+                colorHeaderTitle = themeData.colorHeaderTitle;
+                colorHeaderBackground = themeData.colorHeaderBackground;
             }
 
             public void BlendMultiply(Color blend)
@@ -51,6 +55,8 @@ namespace Hierarchy2
                 layerColor = layerColor * blend;
                 comSelBGColor = comSelBGColor * blend;
                 selectionColor = selectionColor * blend;
+                colorHeaderTitle = colorHeaderTitle * blend;
+                colorHeaderBackground = colorHeaderBackground * blend;
             }
         }
 
@@ -574,6 +580,34 @@ namespace Hierarchy2
                             settings.OnSettingsChanged();
                         });
                         verticalLayout.Add(layerColor);
+
+                        ColorField colorHeaderTitle = new ColorField("Header Title");
+                        colorHeaderTitle.value = settings.usedTheme.colorHeaderTitle;
+                        colorHeaderTitle.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                        colorHeaderTitle.RegisterValueChangedCallback((evt) =>
+                        {
+                            if (EditorGUIUtility.isProSkin)
+                                settings.professionalTheme.colorHeaderTitle = evt.newValue;
+                            else
+                                settings.personalTheme.colorHeaderTitle = evt.newValue;
+
+                            settings.OnSettingsChanged();
+                        });
+                        verticalLayout.Add(colorHeaderTitle);
+
+                        ColorField colorHeaderBackground = new ColorField("Header Background");
+                        colorHeaderBackground.value = settings.usedTheme.colorHeaderBackground;
+                        colorHeaderBackground.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                        colorHeaderBackground.RegisterValueChangedCallback((evt) =>
+                        {
+                            if (EditorGUIUtility.isProSkin)
+                                settings.professionalTheme.colorHeaderBackground = evt.newValue;
+                            else
+                                settings.personalTheme.colorHeaderBackground = evt.newValue;
+
+                            settings.OnSettingsChanged();
+                        });
+                        verticalLayout.Add(colorHeaderBackground);
 
                         ColorField comSelBGColor = new ColorField("Component Selection");
                         comSelBGColor.value = settings.usedTheme.comSelBGColor;

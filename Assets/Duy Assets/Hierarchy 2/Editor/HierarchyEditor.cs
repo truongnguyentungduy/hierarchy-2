@@ -713,15 +713,15 @@ namespace Hierarchy2
 
             rect.x += GLOBAL_SPACE_OFFSET_LEFT;
 
-            GUI.color = EditorGUIUtility.isProSkin ? new Color32(128, 128, 128, 255) : new Color32(232, 232, 232, 255);
+            Color guiColor = GUI.color;
+            GUI.color = ThemeData.colorHeaderBackground;
             GUI.DrawTexture(rect, Resources.PixelWhite, ScaleMode.StretchToFill);
-            GUI.color = Color.white;
-
-            var style = Styles.Header;
 
             var content = new GUIContent(element.name.Remove(0, settings.headerPrefix.Length));
-            rect.x += (rect.width - style.CalcSize(content).x) / 2;
-            GUI.Label(rect, content, style);
+            rect.x += (rect.width - Styles.Header.CalcSize(content).x) / 2;
+            GUI.color = ThemeData.colorHeaderTitle;
+            GUI.Label(rect, content, Styles.Header);
+            GUI.color = guiColor;
         }
 
         void ElementEvent(Element element)
@@ -1660,7 +1660,11 @@ namespace Hierarchy2
                 alignment = TextAnchor.UpperLeft,
             };
 
-            internal static GUIStyle Header = new GUIStyle(TreeBoldLabel) { richText = true };
+            internal static GUIStyle Header = new GUIStyle(TreeBoldLabel)
+            {
+                richText = true,
+                normal = new GUIStyleState() { textColor = Color.white }
+            };
 
             internal static GUIStyle TreeBoldLabel { get { return TreeView.DefaultStyles.boldLabel; } }
 

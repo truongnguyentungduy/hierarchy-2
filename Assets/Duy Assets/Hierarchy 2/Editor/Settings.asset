@@ -22,6 +22,8 @@ MonoBehaviour:
     layerColor: {r: 0, g: 0, b: 0, a: 1}
     comSelBGColor: {r: 0.9198113, g: 0.9645067, b: 1, a: 1}
     selectionColor: {r: 0, g: 0.54901963, b: 1, a: 0.5019608}
+    colorHeaderTitle: {r: 0.078431375, g: 0.078431375, b: 0.078431375, a: 1}
+    colorHeaderBackground: {r: 0.9098039, g: 0.9098039, b: 0.9098039, a: 1}
   professionalTheme:
     colorRowEven: {r: 0.21176471, g: 0.21176471, b: 0.21176471, a: 1}
     colorRowOdd: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
@@ -32,6 +34,20 @@ MonoBehaviour:
     layerColor: {r: 0.7058824, g: 0.7058824, b: 0.7058824, a: 1}
     comSelBGColor: {r: 1, g: 0.16078432, b: 0.16078432, a: 0.5529412}
     selectionColor: {r: 0.17254902, g: 0.3647059, b: 0.5294118, a: 1}
+    colorHeaderTitle: {r: 0.8235295, g: 0.8235295, b: 0.8235295, a: 1}
+    colorHeaderBackground: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 1}
+  playmodeTheme:
+    colorRowEven: {r: 0.10388456, g: 0.10388456, b: 0.10388456, a: 1}
+    colorRowOdd: {r: 0.10773214, g: 0.10773214, b: 0.10773214, a: 1}
+    colorGrid: {r: 0.07887532, g: 0.07887532, b: 0.07887532, a: 1}
+    colorTreeView: {r: 0.20584534, g: 0.20584534, b: 0.20584534, a: 1}
+    colorLockIcon: {r: 0.34243432, g: 0.34243432, b: 0.34243432, a: 1}
+    tagColor: {r: 0.3462819, g: 0.3462819, b: 0.3462819, a: 1}
+    layerColor: {r: 0.3462819, g: 0.3462819, b: 0.3462819, a: 1}
+    comSelBGColor: {r: 0.490566, g: 0.07887532, b: 0.07887532, a: 0.5529412}
+    selectionColor: {r: 0.08464668, g: 0.17891231, b: 0.2597114, a: 1}
+    colorHeaderTitle: {r: 0.40399554, g: 0.40399554, b: 0.40399554, a: 1}
+    colorHeaderBackground: {r: 0.2462449, g: 0.2462449, b: 0.2462449, a: 1}
   activeHierarchy: 1
   autoCreateHLD: 0
   pingHierarchyLocalDataObject: 0
