@@ -10,6 +10,7 @@ namespace Hierarchy2
 {
     public class GroupSelection : IHierarchyShelf
     {
+        HierarchyCanvas canvas;
 
         Color backgroundColor = EditorGUIUtility.isProSkin ? new Color32(60, 60, 60, 255) : new Color32(203, 203, 203, 255);
         Color borderColor = new Color32(40, 40, 40, 255);
@@ -38,7 +39,7 @@ namespace Hierarchy2
 
         public int ShelfPriority()
         {
-            return 98;
+            return 97;
         }
 
         public VisualElement CreateShelfElement()
@@ -236,5 +237,7 @@ namespace Hierarchy2
 
             return shelfButton;
         }
+
+        public void Canvas(HierarchyCanvas canvas) => this.canvas = canvas;
     }
 }

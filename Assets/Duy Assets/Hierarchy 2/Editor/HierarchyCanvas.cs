@@ -9,7 +9,7 @@ using DlfU.UIElements;
 
 namespace Hierarchy2
 {
-    internal class HierarchyCanvas : VisualElement
+    public class HierarchyCanvas : VisualElement
     {
         Dictionary<string, object> customHierarchys = new Dictionary<string, object>();
         List<VisualElement> elementCanvas = new List<VisualElement>();
@@ -27,7 +27,7 @@ namespace Hierarchy2
                 customHierarchyTypes.Add(type);
         }
 
-        internal HierarchyCanvas()
+        public HierarchyCanvas()
         {
             pickingMode = PickingMode.Ignore;
             this.StretchToParentSize();
@@ -81,12 +81,14 @@ namespace Hierarchy2
                 if (typeof(IHierarchyShelf).IsAssignableFrom(customHierarchyType))
                 {
                     var instance = Activator.CreateInstance(customHierarchyType) as IHierarchyShelf;
+                    instance.Canvas(this);
                     listShelf.Add(instance);
                 }
 
                 if (typeof(IHierarchyElement).IsAssignableFrom(customHierarchyType))
                 {
                     var instance = Activator.CreateInstance(customHierarchyType) as IHierarchyElement;
+                    instance.Canvas(this);
                     listCanvasElement.Add(instance);
                 }
             }

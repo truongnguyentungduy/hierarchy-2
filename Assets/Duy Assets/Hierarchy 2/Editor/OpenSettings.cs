@@ -8,6 +8,10 @@ namespace Hierarchy2
 {
     public class OpenSettings : IHierarchyShelf
     {
+        HierarchyCanvas canvas;
+
+        public void Canvas(HierarchyCanvas canvas) => this.canvas = canvas;
+
         public VisualElement CreateShelfElement()
         {
             VisualElement shelfButton = new VisualElement();
