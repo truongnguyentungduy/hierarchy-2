@@ -19,8 +19,6 @@ using UnityEngine.UIElements;
 using DlfU.Textures;
 using DlfU.UIElements;
 
-using Debug = UnityEngine.Debug;
-
 namespace Hierarchy2
 {
     [InitializeOnLoad]
@@ -763,8 +761,9 @@ namespace Hierarchy2
             if (!rowItem.gameObject.CompareTag("Untagged"))
                 rowItem.gameObject.tag = "Untagged";
 
-            var rect = RectFromLeft(rowItem.rect, Screen.width, 0);
-
+            var rect = EditorGUIUtility.PixelsToPoints(RectFromLeft(rowItem.rect, Screen.width, 0));
+            rect.y = rowItem.rect.y;
+            rect.height = rowItem.rect.height;
             rect.x += GLOBAL_SPACE_OFFSET_LEFT;
 
             Color guiColor = GUI.color;
