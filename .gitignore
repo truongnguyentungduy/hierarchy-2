@@ -3,5 +3,6 @@ Logs
 Temp
 obj
 .vscode
+.idea
 *.csproj
 *.sln
