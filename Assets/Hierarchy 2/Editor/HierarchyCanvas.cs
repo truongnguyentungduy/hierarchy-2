@@ -5,8 +5,6 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor;
 
-using DlfU.UIElements;
-
 namespace Hierarchy2
 {
     public class HierarchyCanvas : VisualElement
@@ -22,7 +20,9 @@ namespace Hierarchy2
         static HierarchyCanvas()
         {
             var itypes = typeof(HierarchyEditor).Assembly.GetTypes().ToList();
-            itypes.RemoveAll(type => (!typeof(IHierarchyShelf).IsAssignableFrom(type) && !typeof(IHierarchyElement).IsAssignableFrom(type)) || type.IsInterface || type.IsAbstract);
+            itypes.RemoveAll(type =>
+                (!typeof(IHierarchyShelf).IsAssignableFrom(type) &&
+                 !typeof(IHierarchyElement).IsAssignableFrom(type)) || type.IsInterface || type.IsAbstract);
             foreach (var type in itypes)
                 customHierarchyTypes.Add(type);
         }
@@ -41,7 +41,9 @@ namespace Hierarchy2
 
             shelfContentElement = new VerticalLayout();
             shelfContentElement.name = nameof(shelfContentElement).ToUpper();
-            Color backgroundColor = EditorGUIUtility.isProSkin ? new Color32(60, 60, 60, 255) : new Color32(203, 203, 203, 255);
+            Color backgroundColor = EditorGUIUtility.isProSkin
+                ? new Color32(60, 60, 60, 255)
+                : new Color32(203, 203, 203, 255);
             shelfContentElement.StyleBackgroundColor(backgroundColor);
             shelfContentElement.StylePosition(Position.Absolute);
             shelfContentElement.StyleMargin(0, 0, 19, 0);
@@ -52,10 +54,26 @@ namespace Hierarchy2
             Color borderColor = new Color32(40, 40, 40, 255);
             shelfContentElement.StyleBorderColor(borderColor);
             shelfContentElement.StyleDisplay(false);
-            shelfHoverElement.RegisterCallback<MouseEnterEvent>((evt) => { shelfContentElement.StyleDisplay(true); evt.StopPropagation(); });
-            shelfContentElement.RegisterCallback<MouseLeaveEvent>((evt) => { shelfContentElement.StyleDisplay(false); evt.StopPropagation(); });
-            RegisterCallback<MouseEnterEvent>((evt) => { shelfContentElement.StyleDisplay(false); evt.StopPropagation(); });
-            RegisterCallback<MouseLeaveEvent>((evt) => { shelfContentElement.StyleDisplay(false); evt.StopPropagation(); });
+            shelfHoverElement.RegisterCallback<MouseEnterEvent>((evt) =>
+            {
+                shelfContentElement.StyleDisplay(true);
+                evt.StopPropagation();
+            });
+            shelfContentElement.RegisterCallback<MouseLeaveEvent>((evt) =>
+            {
+                shelfContentElement.StyleDisplay(false);
+                evt.StopPropagation();
+            });
+            RegisterCallback<MouseEnterEvent>((evt) =>
+            {
+                shelfContentElement.StyleDisplay(false);
+                evt.StopPropagation();
+            });
+            RegisterCallback<MouseLeaveEvent>((evt) =>
+            {
+                shelfContentElement.StyleDisplay(false);
+                evt.StopPropagation();
+            });
             Add(shelfContentElement);
 
             VisualElement mask = new VisualElement();
@@ -102,6 +120,7 @@ namespace Hierarchy2
                 {
                     shelfContentElement.Add(visualElement);
                 }
+
                 customHierarchys.Add(shelf.GetType().Name, shelf);
             }
 
@@ -122,6 +141,7 @@ namespace Hierarchy2
                     this.Add(visualElement);
                     elementCanvas.Add(visualElement);
                 }
+
                 customHierarchys.Add(canvasElement.GetType().Name, canvasElement);
             }
 
@@ -132,7 +152,7 @@ namespace Hierarchy2
         {
             object result = null;
             customHierarchys.TryGetValue(name, out result);
-            return (T)result;
+            return (T) result;
         }
 
         public void CloseAllElementCanvas()

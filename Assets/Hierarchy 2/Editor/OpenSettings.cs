@@ -2,8 +2,6 @@
 using UnityEngine.UIElements;
 using UnityEditor;
 
-using DlfU.UIElements;
-
 namespace Hierarchy2
 {
     public class OpenSettings : IHierarchyShelf
@@ -43,10 +41,7 @@ namespace Hierarchy2
                 shelfButton.StyleBackgroundColor(new Color(.5f, .5f, .5f, .5f));
             });
 
-            shelfButton.RegisterCallback<MouseLeaveEvent>((evt) =>
-            {
-                shelfButton.StyleBackgroundColor(Color.clear);
-            });
+            shelfButton.RegisterCallback<MouseLeaveEvent>((evt) => { shelfButton.StyleBackgroundColor(Color.clear); });
 
             return shelfButton;
         }

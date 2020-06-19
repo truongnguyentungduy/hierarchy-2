@@ -1,10 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UIElements;
-
 using UnityEditor;
 using UnityEditor.SceneManagement;
-
-using DlfU.UIElements;
 
 namespace Hierarchy2
 {
@@ -12,7 +9,9 @@ namespace Hierarchy2
     {
         HierarchyCanvas canvas;
 
-        Color backgroundColor = EditorGUIUtility.isProSkin ? new Color32(60, 60, 60, 255) : new Color32(203, 203, 203, 255);
+        Color backgroundColor =
+            EditorGUIUtility.isProSkin ? new Color32(60, 60, 60, 255) : new Color32(203, 203, 203, 255);
+
         Color borderColor = new Color32(40, 40, 40, 255);
 
         bool IsSelectionsSameScene()
@@ -23,6 +22,7 @@ namespace Hierarchy2
                 if (scene != gameObject.scene)
                     return false;
             }
+
             return true;
         }
 
@@ -34,6 +34,7 @@ namespace Hierarchy2
                 if (parent != gameObject.transform.parent)
                     return false;
             }
+
             return true;
         }
 
@@ -217,10 +218,7 @@ namespace Hierarchy2
             });
             menuOptions.Add(option3);
 
-            shelfButton.RegisterCallback<MouseDownEvent>((evt) =>
-            {
-                evt.StopPropagation();
-            });
+            shelfButton.RegisterCallback<MouseDownEvent>((evt) => { evt.StopPropagation(); });
 
             shelfButton.RegisterCallback<MouseEnterEvent>((evt) =>
             {

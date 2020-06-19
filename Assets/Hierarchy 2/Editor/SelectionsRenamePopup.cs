@@ -1,16 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-
 using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEditor.UIElements;
-
 using UnityEngine;
-
-using DlfU.UIElements;
-using DlfU.UIElements.Editor;
-using System;
 
 namespace Hierarchy2
 {
@@ -21,7 +16,12 @@ namespace Hierarchy2
         EnumField enumModeField;
         EditorHelpBox helpBox;
 
-        enum Mode { None, Number, NumberReverse }
+        enum Mode
+        {
+            None,
+            Number,
+            NumberReverse
+        }
 
 
         new public static SelectionsRenamePopup ShowPopup()
@@ -52,7 +52,10 @@ namespace Hierarchy2
             textField = new TextField();
             textField.value = "New Name...";
             rootVisualElement.Add(textField);
-            textField.RegisterCallback<KeyUpEvent>((evt) => { if (evt.keyCode == KeyCode.Return) Apply(); });
+            textField.RegisterCallback<KeyUpEvent>((evt) =>
+            {
+                if (evt.keyCode == KeyCode.Return) Apply();
+            });
 
             enumModeField = new EnumField(new Mode());
             enumModeField.label = "Mode";
@@ -89,7 +92,6 @@ namespace Hierarchy2
                 else
                 {
                     helpBox.StyleDisplay(false);
-
                 }
             }
             else
@@ -109,6 +111,7 @@ namespace Hierarchy2
                 if (parent != gameObject.transform.parent)
                     return false;
             }
+
             return true;
         }
 
@@ -122,11 +125,13 @@ namespace Hierarchy2
 
             if (System.Enum.Equals(enumModeField.value, Mode.NumberReverse))
             {
-                sortedSelections = Selection.gameObjects.ToList().OrderByDescending(gameObject => gameObject.transform.GetSiblingIndex()).ToList();
+                sortedSelections = Selection.gameObjects.ToList()
+                    .OrderByDescending(gameObject => gameObject.transform.GetSiblingIndex()).ToList();
             }
             else
             {
-                sortedSelections = Selection.gameObjects.ToList().OrderBy(gameObject => gameObject.transform.GetSiblingIndex()).ToList();
+                sortedSelections = Selection.gameObjects.ToList()
+                    .OrderBy(gameObject => gameObject.transform.GetSiblingIndex()).ToList();
             }
 
             foreach (GameObject gameObject in sortedSelections)
@@ -141,6 +146,7 @@ namespace Hierarchy2
                         gameObject.name = textField.value;
                 }
             }
+
             rootVisualElement.StyleDisplay(DisplayStyle.None);
 
             if (!EditorApplication.isPlaying)

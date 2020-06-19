@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEditor.Experimental.SceneManagement;
@@ -11,13 +10,9 @@ using UnityEditorInternal;
 using UnityEditor.Callbacks;
 using UnityEditor.UIElements;
 using UnityEditor.IMGUI.Controls;
-
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
-
-using DlfU.Textures;
-using DlfU.UIElements;
 
 namespace Hierarchy2
 {
@@ -27,6 +22,7 @@ namespace Hierarchy2
         internal const int GLOBAL_SPACE_OFFSET_LEFT = 16 * 2;
 
         static HierarchyEditor instance;
+
         public static HierarchyEditor Instance
         {
             get
@@ -35,10 +31,7 @@ namespace Hierarchy2
                     instance = new HierarchyEditor();
                 return instance;
             }
-            private set
-            {
-                instance = value;
-            }
+            private set { instance = value; }
         }
 
         Dictionary<int, HierarchyCanvas> hierarchyCanvas = new Dictionary<int, HierarchyCanvas>();
@@ -52,7 +45,11 @@ namespace Hierarchy2
         const string customIconDefaultTooltip = "M2-click: To customize";
 
         HierarchySettings settings;
-        HierarchySettings.ThemeData ThemeData { get { return settings.usedTheme; } }
+
+        HierarchySettings.ThemeData ThemeData
+        {
+            get { return settings.usedTheme; }
+        }
 
         int deepestRow = int.MinValue;
         int previousRowIndex = int.MinValue;
@@ -60,7 +57,11 @@ namespace Hierarchy2
         int sceneIndex = 0;
         Scene currentScene;
         Scene previousScene;
-        public static bool IsMultiScene { get { return SceneManager.sceneCount > 1; } }
+
+        public static bool IsMultiScene
+        {
+            get { return SceneManager.sceneCount > 1; }
+        }
 
         bool selectionStyleAfterInvoke = false;
         bool checkingAllHierarchy = false;
@@ -76,6 +77,7 @@ namespace Hierarchy2
             if (instance == null)
                 instance = new HierarchyEditor();
         }
+
         public HierarchyEditor()
         {
             InternalReflection();
@@ -106,59 +108,89 @@ namespace Hierarchy2
         {
             dicInternalEditorType = typeof(Editor).Assembly.GetTypes().ToDictionary(type => type.FullName);
 
-            FieldInfo refreshHierarchy = typeof(EditorApplication).GetField(nameof(refreshHierarchy), BindingFlags.Static | BindingFlags.NonPublic);
-            MethodInfo OnRepaintHierarchyWindow = typeof(HierarchyEditor).GetMethod(nameof(OnRepaintHierarchyWindow), BindingFlags.NonPublic | BindingFlags.Static);
-            Delegate refreshHierarchyDelegate = Delegate.CreateDelegate(typeof(EditorApplication.CallbackFunction), OnRepaintHierarchyWindow);
+            FieldInfo refreshHierarchy = typeof(EditorApplication).GetField(nameof(refreshHierarchy),
+                BindingFlags.Static | BindingFlags.NonPublic);
+            MethodInfo OnRepaintHierarchyWindow = typeof(HierarchyEditor).GetMethod(nameof(OnRepaintHierarchyWindow),
+                BindingFlags.NonPublic | BindingFlags.Static);
+            Delegate refreshHierarchyDelegate =
+                Delegate.CreateDelegate(typeof(EditorApplication.CallbackFunction), OnRepaintHierarchyWindow);
             refreshHierarchy.SetValue(null, refreshHierarchyDelegate);
 
 
-            FieldInfo windowsReordered = typeof(EditorApplication).GetField(nameof(windowsReordered), BindingFlags.Static | BindingFlags.NonPublic);
-            MethodInfo OnWindowsReordered = typeof(HierarchyEditor).GetMethod(nameof(OnWindowsReordered), BindingFlags.NonPublic | BindingFlags.Static);
-            Delegate windowsReorderedDelegate = Delegate.CreateDelegate(typeof(EditorApplication.CallbackFunction), OnWindowsReordered);
+            FieldInfo windowsReordered = typeof(EditorApplication).GetField(nameof(windowsReordered),
+                BindingFlags.Static | BindingFlags.NonPublic);
+            MethodInfo OnWindowsReordered = typeof(HierarchyEditor).GetMethod(nameof(OnWindowsReordered),
+                BindingFlags.NonPublic | BindingFlags.Static);
+            Delegate windowsReorderedDelegate =
+                Delegate.CreateDelegate(typeof(EditorApplication.CallbackFunction), OnWindowsReordered);
             windowsReordered.SetValue(null, windowsReorderedDelegate);
 
             {
-                dicInternalEditorType.TryGetValue(nameof(UnityEditor) + "." + nameof(SceneHierarchyWindow), out SceneHierarchyWindow);
-                dicInternalEditorType.TryGetValue(nameof(UnityEditor) + "." + nameof(GameObjectTreeViewGUI), out GameObjectTreeViewGUI);    //GameObjectTreeViewGUI : TreeViewGUI
-                dicInternalEditorType.TryGetValue(nameof(UnityEditor) + "." + nameof(SceneHierarchy), out SceneHierarchy);
+                dicInternalEditorType.TryGetValue(nameof(UnityEditor) + "." + nameof(SceneHierarchyWindow),
+                    out SceneHierarchyWindow);
+                dicInternalEditorType.TryGetValue(nameof(UnityEditor) + "." + nameof(GameObjectTreeViewGUI),
+                    out GameObjectTreeViewGUI); //GameObjectTreeViewGUI : TreeViewGUI
+                dicInternalEditorType.TryGetValue(nameof(UnityEditor) + "." + nameof(SceneHierarchy),
+                    out SceneHierarchy);
             }
 
-            FieldInfo s_LastInteractedHierarchy = SceneHierarchyWindow.GetField(nameof(s_LastInteractedHierarchy), BindingFlags.NonPublic | BindingFlags.Static);
+            FieldInfo s_LastInteractedHierarchy = SceneHierarchyWindow.GetField(nameof(s_LastInteractedHierarchy),
+                BindingFlags.NonPublic | BindingFlags.Static);
 
-            MethodInfo lastInteractedHierarchyWindow = SceneHierarchyWindow.GetProperty(nameof(lastInteractedHierarchyWindow), BindingFlags.Static | BindingFlags.Public).GetGetMethod();
-            lastInteractedHierarchyWindowDelegate = Delegate.CreateDelegate(typeof(Func<SearchableEditorWindow>), lastInteractedHierarchyWindow) as Func<SearchableEditorWindow>;
+            MethodInfo lastInteractedHierarchyWindow = SceneHierarchyWindow
+                .GetProperty(nameof(lastInteractedHierarchyWindow), BindingFlags.Static | BindingFlags.Public)
+                .GetGetMethod();
+            lastInteractedHierarchyWindowDelegate =
+                Delegate.CreateDelegate(typeof(Func<SearchableEditorWindow>), lastInteractedHierarchyWindow) as
+                    Func<SearchableEditorWindow>;
 
-            MethodInfo GetAllSceneHierarchyWindows = SceneHierarchyWindow.GetMethod(nameof(GetAllSceneHierarchyWindows), BindingFlags.Static | BindingFlags.Public);
-            GetAllSceneHierarchyWindowsDelegate = Delegate.CreateDelegate(typeof(Func<IEnumerable>), GetAllSceneHierarchyWindows) as Func<IEnumerable>;
+            MethodInfo GetAllSceneHierarchyWindows = SceneHierarchyWindow.GetMethod(nameof(GetAllSceneHierarchyWindows),
+                BindingFlags.Static | BindingFlags.Public);
+            GetAllSceneHierarchyWindowsDelegate =
+                Delegate.CreateDelegate(typeof(Func<IEnumerable>), GetAllSceneHierarchyWindows) as Func<IEnumerable>;
 
 
             {
-                m_SceneHierarchy = SceneHierarchyWindow.GetField(nameof(m_SceneHierarchy), BindingFlags.NonPublic | BindingFlags.Instance);
-                m_TreeView = SceneHierarchy.GetField(nameof(m_TreeView), BindingFlags.NonPublic | BindingFlags.Instance);
-                gui = m_TreeView.FieldType.GetProperty(nameof(gui).ToLower(), BindingFlags.Public | BindingFlags.Instance);
-                k_IconWidth = GameObjectTreeViewGUI.GetField(nameof(k_IconWidth), BindingFlags.Public | BindingFlags.Instance);
+                m_SceneHierarchy = SceneHierarchyWindow.GetField(nameof(m_SceneHierarchy),
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                m_TreeView =
+                    SceneHierarchy.GetField(nameof(m_TreeView), BindingFlags.NonPublic | BindingFlags.Instance);
+                gui = m_TreeView.FieldType.GetProperty(nameof(gui).ToLower(),
+                    BindingFlags.Public | BindingFlags.Instance);
+                k_IconWidth =
+                    GameObjectTreeViewGUI.GetField(nameof(k_IconWidth), BindingFlags.Public | BindingFlags.Instance);
             }
 
-            MethodInfo DisplayObjectContextMenu = typeof(EditorUtility).GetMethods(BindingFlags.Static | BindingFlags.NonPublic).Single
-            (
-                method => method.Name == nameof(DisplayObjectContextMenu) && method.GetParameters()[1].ParameterType == typeof(UnityEngine.Object)
-            );
-            DisplayObjectContextMenuDelegate = Delegate.CreateDelegate(typeof(Action<Rect, UnityEngine.Object, int>), DisplayObjectContextMenu) as Action<Rect, UnityEngine.Object, int>;
+            MethodInfo DisplayObjectContextMenu = typeof(EditorUtility)
+                .GetMethods(BindingFlags.Static | BindingFlags.NonPublic).Single
+                (
+                    method => method.Name == nameof(DisplayObjectContextMenu) &&
+                              method.GetParameters()[1].ParameterType == typeof(UnityEngine.Object)
+                );
+            DisplayObjectContextMenuDelegate =
+                Delegate.CreateDelegate(typeof(Action<Rect, UnityEngine.Object, int>), DisplayObjectContextMenu) as
+                    Action<Rect, UnityEngine.Object, int>;
 
 
-            Type IconSelector = typeof(EditorWindow).Assembly.GetTypes().Single(type => type.BaseType == typeof(EditorWindow) && type.Name == nameof(IconSelector)) as Type;
+            Type IconSelector = typeof(EditorWindow).Assembly.GetTypes().Single(type =>
+                type.BaseType == typeof(EditorWindow) && type.Name == nameof(IconSelector)) as Type;
             MethodInfo ShowAtPosition = IconSelector.GetMethods(BindingFlags.Static | BindingFlags.NonPublic).Single
             (
-                method => method.Name == nameof(ShowAtPosition) && method.GetParameters()[0].ParameterType == typeof(UnityEngine.Object)
+                method => method.Name == nameof(ShowAtPosition) &&
+                          method.GetParameters()[0].ParameterType == typeof(UnityEngine.Object)
             );
-            IconSelectorShowAtPositionDelegate = Delegate.CreateDelegate(typeof(Func<GameObject, Rect, bool, bool>), ShowAtPosition) as Func<GameObject, Rect, bool, bool>;
+            IconSelectorShowAtPositionDelegate =
+                Delegate.CreateDelegate(typeof(Func<GameObject, Rect, bool, bool>), ShowAtPosition) as
+                    Func<GameObject, Rect, bool, bool>;
         }
 
         public static IEnumerable GetAllSceneHierarchyWindows() => GetAllSceneHierarchyWindowsDelegate();
 
-        public static void DisplayObjectContextMenu(Rect rect, UnityEngine.Object unityObject, int value) => DisplayObjectContextMenuDelegate(rect, unityObject, value);
+        public static void DisplayObjectContextMenu(Rect rect, UnityEngine.Object unityObject, int value) =>
+            DisplayObjectContextMenuDelegate(rect, unityObject, value);
 
-        public static bool IconSelectorShowAtPosition(GameObject gameObject, Rect rect, bool value) => IconSelectorShowAtPositionDelegate(gameObject, rect, value);
+        public static bool IconSelectorShowAtPosition(GameObject gameObject, Rect rect, bool value) =>
+            IconSelectorShowAtPositionDelegate(gameObject, rect, value);
 
         static void OnRepaintHierarchyWindow()
         {
@@ -174,7 +206,8 @@ namespace Hierarchy2
         {
             foreach (EditorWindow window in GetAllSceneHierarchyWindowsDelegate())
             {
-                object gameObjectTreeViewGUIObject = gui.GetValue(m_TreeView.GetValue(m_SceneHierarchy.GetValue(window)));
+                object gameObjectTreeViewGUIObject =
+                    gui.GetValue(m_TreeView.GetValue(m_SceneHierarchy.GetValue(window)));
                 k_IconWidth.SetValue(gameObjectTreeViewGUIObject, value);
             }
         }
@@ -187,7 +220,8 @@ namespace Hierarchy2
             if (selectionStyle == null)
             {
                 Type Styles = null;
-                dicInternalEditorType.TryGetValue(typeof(TreeView).FullName + nameof(GUI) + "+" + nameof(Styles), out Styles);
+                dicInternalEditorType.TryGetValue(typeof(TreeView).FullName + nameof(GUI) + "+" + nameof(Styles),
+                    out Styles);
                 FieldInfo selectionStyleField = Styles.GetField(nameof(selectionStyle));
                 selectionStyle = selectionStyleField.GetValue(null) as GUIStyle;
             }
@@ -220,7 +254,6 @@ namespace Hierarchy2
 
         void ImportPackageCompleted(string packageName)
         {
-
         }
 
         void OnSettingsChanged(string param)
@@ -242,8 +275,10 @@ namespace Hierarchy2
                         if (!dicComponents.ContainsKey(componentType))
                             dicComponents.Add(componentType, componentType);
                     }
+
                     break;
             }
+
             EditorApplication.RepaintHierarchyWindow();
         }
 
@@ -302,6 +337,7 @@ namespace Hierarchy2
         }
 
         double lastTimeSinceStartup = EditorApplication.timeSinceStartup;
+
         void OnEditorUpdate()
         {
             if (EditorApplication.timeSinceStartup - lastTimeSinceStartup >= 1)
@@ -323,6 +359,7 @@ namespace Hierarchy2
                         window.titleContent.text = "Hierarchy 2";
                     }
                 }
+
                 checkingAllHierarchy = false;
             }
 
@@ -335,48 +372,39 @@ namespace Hierarchy2
 
         void OnModifierKeysChanged()
         {
-
         }
 
         [DidReloadScripts]
         static void OnEditorCompiled()
         {
-
         }
 
         void OnNewSceneCreated(Scene scene, NewSceneSetup setup, NewSceneMode mode)
         {
-
         }
 
         void OnSceneOpened(Scene scene, OpenSceneMode mode)
         {
-
         }
 
         void OnSceneClosed(Scene scene)
         {
-
         }
 
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-
         }
 
         void OnSceneUnloaded(Scene scene)
         {
-
         }
 
         void OnSceneSaved(Scene scene)
         {
-
         }
 
         void OnSceneDirtied(Scene scene)
         {
-
         }
 
         bool hierarchyChangedRequireUpdating = false;
@@ -391,7 +419,6 @@ namespace Hierarchy2
 
         void OnPrefabUpdated(GameObject prefab)
         {
-
         }
 
         bool prefabStageChanged = false;
@@ -415,10 +442,13 @@ namespace Hierarchy2
                 if (lastInteractedHierarchyWindowDelegate().rootVisualElement.childCount == 0)
                     CreateCanvas(lastInteractedHierarchyWindowDelegate());
 
-                HierarchyCanvas canvas = lastInteractedHierarchyWindowDelegate().rootVisualElement.FindChildren<HierarchyCanvas>(nameof(HierarchyCanvas));
-                canvas = lastInteractedHierarchyWindowDelegate().rootVisualElement.FindChildren<HierarchyCanvas>(nameof(HierarchyCanvas));
+                HierarchyCanvas canvas = lastInteractedHierarchyWindowDelegate().rootVisualElement
+                    .FindChildren<HierarchyCanvas>(nameof(HierarchyCanvas));
+                canvas = lastInteractedHierarchyWindowDelegate().rootVisualElement
+                    .FindChildren<HierarchyCanvas>(nameof(HierarchyCanvas));
                 return canvas;
             }
+
             return null;
         }
 
@@ -486,6 +516,7 @@ namespace Hierarchy2
                     SetObjectIconWidth(settings.displayObjectIcon ? 16 : 0);
                     prefabStageChanged = false;
                 }
+
                 return;
             }
 
@@ -521,6 +552,7 @@ namespace Hierarchy2
                         rowItem.isPrefabMissing = PrefabUtility.IsPrefabAssetMissing(rowItem.gameObject);
                 }
             }
+
             rowItem.isRootObject = rowItem.isNull || rowItem.gameObject.transform.parent == null ? true : false;
             rowItem.isMouseHovering = selectionRect.Contains(currentEvent.mousePosition);
 
@@ -590,7 +622,6 @@ namespace Hierarchy2
 
                 if (IsMultiScene)
                 {
-
                 }
 
                 rowItem.nameRect = rowItem.rect;
@@ -624,7 +655,8 @@ namespace Hierarchy2
 
 
                 HierarchyLocalData hld = null;
-                bool hasHierarchyLocalData = HierarchyLocalData.instances.TryGetValue(rowItem.gameObject.scene, out hld);
+                bool hasHierarchyLocalData =
+                    HierarchyLocalData.instances.TryGetValue(rowItem.gameObject.scene, out hld);
                 if (hasHierarchyLocalData)
                 {
                     rowItem.hasCustom = hld.TryGetCustomRowData(rowItem.gameObject, out rowItem.customRowItem);
@@ -658,8 +690,10 @@ namespace Hierarchy2
                 if (settings.displayTag && !rowItem.gameObject.CompareTag("Untagged"))
                 {
                     if (!settings.onlyDisplayWhileMouseEnter ||
-                    (settings.contentDisplay & HierarchySettings.ContentDisplay.Tag) != HierarchySettings.ContentDisplay.Tag ||
-                    ((settings.contentDisplay & HierarchySettings.ContentDisplay.Tag) == HierarchySettings.ContentDisplay.Tag && rowItem.isMouseHovering))
+                        (settings.contentDisplay & HierarchySettings.ContentDisplay.Tag) !=
+                        HierarchySettings.ContentDisplay.Tag ||
+                        ((settings.contentDisplay & HierarchySettings.ContentDisplay.Tag) ==
+                            HierarchySettings.ContentDisplay.Tag && rowItem.isMouseHovering))
                     {
                         DisplayTag();
                     }
@@ -668,8 +702,10 @@ namespace Hierarchy2
                 if (settings.displayLayer && rowItem.gameObject.layer != 0)
                 {
                     if (!settings.onlyDisplayWhileMouseEnter ||
-                    (settings.contentDisplay & HierarchySettings.ContentDisplay.Layer) != HierarchySettings.ContentDisplay.Layer ||
-                    ((settings.contentDisplay & HierarchySettings.ContentDisplay.Layer) == HierarchySettings.ContentDisplay.Layer && rowItem.isMouseHovering))
+                        (settings.contentDisplay & HierarchySettings.ContentDisplay.Layer) !=
+                        HierarchySettings.ContentDisplay.Layer ||
+                        ((settings.contentDisplay & HierarchySettings.ContentDisplay.Layer) ==
+                            HierarchySettings.ContentDisplay.Layer && rowItem.isMouseHovering))
                     {
                         DisplayLayer();
                     }
@@ -678,8 +714,10 @@ namespace Hierarchy2
                 if (settings.displayComponents)
                 {
                     if (!settings.onlyDisplayWhileMouseEnter ||
-                    (settings.contentDisplay & HierarchySettings.ContentDisplay.Component) != HierarchySettings.ContentDisplay.Component ||
-                    ((settings.contentDisplay & HierarchySettings.ContentDisplay.Component) == HierarchySettings.ContentDisplay.Component && rowItem.isMouseHovering))
+                        (settings.contentDisplay & HierarchySettings.ContentDisplay.Component) !=
+                        HierarchySettings.ContentDisplay.Component ||
+                        ((settings.contentDisplay & HierarchySettings.ContentDisplay.Component) ==
+                            HierarchySettings.ContentDisplay.Component && rowItem.isMouseHovering))
                     {
                         DisplayComponents();
                     }
@@ -687,7 +725,7 @@ namespace Hierarchy2
 
                 ElementEvent(rowItem);
 
-            FINISH:
+                FINISH:
                 if (settings.displayGrid)
                     DisplayGrid();
 
@@ -736,7 +774,9 @@ namespace Hierarchy2
             {
                 Color guiColor = GUI.color;
                 GUI.color = rowItem.customRowItem.backgroundColor;
-                Texture2D texture = rowItem.customRowItem.backgroundStyle == CustomRowItem.BackgroundStyle.Ramp ? Resources.Ramp8x8White : Resources.PixelWhite;
+                Texture2D texture = rowItem.customRowItem.backgroundStyle == CustomRowItem.BackgroundStyle.Ramp
+                    ? Resources.Ramp8x8White
+                    : Resources.PixelWhite;
                 Rect rect;
 
                 if (rowItem.customRowItem.backgroundMode == CustomRowItem.BackgroundMode.Name)
@@ -781,7 +821,8 @@ namespace Hierarchy2
         {
             if (currentEvent.type == EventType.KeyDown)
             {
-                if (currentEvent.control && currentEvent.shift && currentEvent.alt && currentEvent.keyCode == KeyCode.C && lastInteractedHierarchyWindowDelegate() != null)
+                if (currentEvent.control && currentEvent.shift && currentEvent.alt &&
+                    currentEvent.keyCode == KeyCode.C && lastInteractedHierarchyWindowDelegate() != null)
                     CollapseAll();
             }
 
@@ -794,9 +835,11 @@ namespace Hierarchy2
                 return;
             }
 
-            if (element.rect.Contains(currentEvent.mousePosition) && currentEvent.type == EventType.MouseUp && currentEvent.button == 2)
+            if (element.rect.Contains(currentEvent.mousePosition) && currentEvent.type == EventType.MouseUp &&
+                currentEvent.button == 2)
             {
-                Undo.RegisterCompleteObjectUndo(element.gameObject, element.gameObject.activeSelf ? "Inactive object" : "Active object");
+                Undo.RegisterCompleteObjectUndo(element.gameObject,
+                    element.gameObject.activeSelf ? "Inactive object" : "Active object");
                 element.gameObject.SetActive(!element.gameObject.activeSelf);
                 DirtyScene(element.gameObject.scene);
                 currentEvent.Use();
@@ -816,19 +859,13 @@ namespace Hierarchy2
                 rect.Contains(currentEvent.mousePosition))
             {
                 GenericMenu staticMenu = new GenericMenu();
-                staticMenu.AddItem(new GUIContent("Apply All Children"), settings.applyStaticTargetAndChild, () =>
-                {
-                    settings.applyStaticTargetAndChild = !settings.applyStaticTargetAndChild;
-                });
+                staticMenu.AddItem(new GUIContent("Apply All Children"), settings.applyStaticTargetAndChild,
+                    () => { settings.applyStaticTargetAndChild = !settings.applyStaticTargetAndChild; });
                 staticMenu.AddSeparator("");
-                staticMenu.AddItem(new GUIContent("True"), element.gameObject.isStatic ? true : false, () =>
-                {
-                    element.gameObject.isStatic = !element.gameObject.isStatic;
-                });
-                staticMenu.AddItem(new GUIContent("False"), !element.gameObject.isStatic ? true : false, () =>
-                {
-                    element.gameObject.isStatic = !element.gameObject.isStatic;
-                });
+                staticMenu.AddItem(new GUIContent("True"), element.gameObject.isStatic ? true : false,
+                    () => { element.gameObject.isStatic = !element.gameObject.isStatic; });
+                staticMenu.AddItem(new GUIContent("False"), !element.gameObject.isStatic ? true : false,
+                    () => { element.gameObject.isStatic = !element.gameObject.isStatic; });
                 staticMenu.ShowAsContext();
                 currentEvent.Use();
             }
@@ -849,7 +886,8 @@ namespace Hierarchy2
             var rect = RectFromRight(rowItem.nameRect, 16, rowItem.nameRect.width + 1);
             rect.height = 16;
 
-            if (currentEvent.type == EventType.MouseUp && currentEvent.button == 1 && rect.Contains(currentEvent.mousePosition))
+            if (currentEvent.type == EventType.MouseUp && currentEvent.button == 1 &&
+                rect.Contains(currentEvent.mousePosition))
             {
                 IconSelectorShowAtPositionDelegate(rowItem.gameObject, rect, true);
                 currentEvent.Use();
@@ -864,7 +902,9 @@ namespace Hierarchy2
 
                 Texture2D icon = AssetPreview.GetMiniThumbnail(rowItem.gameObject);
 
-                if (icon.name == "GameObject Icon" || icon.name == "d_GameObject Icon" || icon.name == "Prefab Icon" || icon.name == "d_Prefab Icon" || icon.name == "PrefabModel Icon" || icon.name == "d_PrefabModel Icon")
+                if (icon.name == "GameObject Icon" || icon.name == "d_GameObject Icon" || icon.name == "Prefab Icon" ||
+                    icon.name == "d_Prefab Icon" || icon.name == "PrefabModel Icon" ||
+                    icon.name == "d_PrefabModel Icon")
                     return;
 
                 Color guiColor = GUI.color;
@@ -894,7 +934,9 @@ namespace Hierarchy2
                 else
                 {
                     if (rowItem.isPrefab)
-                        style = rowItem.isPrefabMissing ? Styles.PR_DisabledBrokenPrefabLabel : Styles.PR_DisabledPrefabLabel;
+                        style = rowItem.isPrefabMissing
+                            ? Styles.PR_DisabledBrokenPrefabLabel
+                            : Styles.PR_DisabledPrefabLabel;
                     else
                         style = Styles.PR_DisabledLabel;
                 }
@@ -1033,7 +1075,8 @@ namespace Hierarchy2
                             rect = RectFromRight(rowItem.rect, settings.componentSize, ref widthUse.right);
 
 
-                        if (hasMaterial && i == length - rendererComponent.sharedMaterials.Length && settings.componentDisplayMode != HierarchySettings.ComponentDisplayMode.ScriptOnly)
+                        if (hasMaterial && i == length - rendererComponent.sharedMaterials.Length &&
+                            settings.componentDisplayMode != HierarchySettings.ComponentDisplayMode.ScriptOnly)
                         {
                             for (int m = 0; m < rendererComponent.sharedMaterials.Length; ++m)
                             {
@@ -1043,10 +1086,12 @@ namespace Hierarchy2
                                 ComponentIcon(sharedMaterial, comType, rect, true);
 
                                 if (settings.componentAlignment == HierarchySettings.ElementAlignment.AfterName)
-                                    rect = RectFromLeft(rowItem.nameRect, settings.componentSize, ref widthUse.afterName);
+                                    rect = RectFromLeft(rowItem.nameRect, settings.componentSize,
+                                        ref widthUse.afterName);
                                 else
                                     rect = RectFromRight(rowItem.rect, settings.componentSize, ref widthUse.right);
                             }
+
                             separator = true;
                             break;
                         }
@@ -1148,6 +1193,7 @@ namespace Hierarchy2
                                     selectedComponents.Remove(selectedComponent.Key);
                                     Undo.DestroyObjectImmediate(selectedComponent.Value);
                                 }
+
                                 selectedComponents.Clear();
                             });
                             componentGenericMenu.ShowAsContext();
@@ -1175,7 +1221,8 @@ namespace Hierarchy2
                             inspectorComponents.Add(component);
 
                         var window = InstantInspector.OpenEditor();
-                        window.Fill(inspectorComponents, currentEvent.alt ? InstantInspector.FillMode.Add : InstantInspector.FillMode.Default);
+                        window.Fill(inspectorComponents,
+                            currentEvent.alt ? InstantInspector.FillMode.Add : InstantInspector.FillMode.Default);
                         window.Focus();
 
                         currentEvent.Use();
@@ -1185,10 +1232,10 @@ namespace Hierarchy2
             }
 
             if (selectedComponents.Count > 0 &&
-            currentEvent.type == EventType.MouseDown &&
-            currentEvent.button == 0 &&
-            !currentEvent.control &&
-            !rect.Contains(currentEvent.mousePosition))
+                currentEvent.type == EventType.MouseDown &&
+                currentEvent.button == 0 &&
+                !currentEvent.control &&
+                !rect.Contains(currentEvent.mousePosition))
             {
                 selectedComponents.Clear();
                 activeComponent = null;
@@ -1244,28 +1291,27 @@ namespace Hierarchy2
                 }
             }
 
-            if (currentEvent.type == EventType.MouseUp && currentEvent.button == 1 && rect.Contains(currentEvent.mousePosition))
+            if (currentEvent.type == EventType.MouseUp && currentEvent.button == 1 &&
+                rect.Contains(currentEvent.mousePosition))
             {
                 GenericMenu menuTags = new GenericMenu();
                 GameObject gameObject = rowItem.gameObject;
 
-                menuTags.AddItem(new GUIContent("Apply All Children"), settings.applyTagTargetAndChild, () =>
-                {
-                    settings.applyTagTargetAndChild = !settings.applyTagTargetAndChild;
-                });
+                menuTags.AddItem(new GUIContent("Apply All Children"), settings.applyTagTargetAndChild,
+                    () => { settings.applyTagTargetAndChild = !settings.applyTagTargetAndChild; });
                 menuTags.AddSeparator("");
 
                 foreach (var tag in InternalEditorUtility.tags)
                 {
                     menuTags.AddItem(new GUIContent(tag), gameObject.tag == tag ? true : false, () =>
-                      {
-                          if (settings.applyTagTargetAndChild)
-                              ApplyTagTargetAndChild(gameObject.transform, tag);
-                          else
-                              gameObject.tag = tag;
+                    {
+                        if (settings.applyTagTargetAndChild)
+                            ApplyTagTargetAndChild(gameObject.transform, tag);
+                        else
+                            gameObject.tag = tag;
 
-                          DirtyScene(gameObject.scene);
-                      });
+                        DirtyScene(gameObject.scene);
+                    });
                 }
 
                 menuTags.ShowAsContext();
@@ -1309,29 +1355,30 @@ namespace Hierarchy2
                 }
             }
 
-            if (currentEvent.type == EventType.MouseUp && currentEvent.button == 1 && rect.Contains(currentEvent.mousePosition))
+            if (currentEvent.type == EventType.MouseUp && currentEvent.button == 1 &&
+                rect.Contains(currentEvent.mousePosition))
             {
                 GenericMenu menuLayers = new GenericMenu();
                 GameObject gameObject = rowItem.gameObject;
 
-                menuLayers.AddItem(new GUIContent("Apply All Children"), settings.applyLayerTargetAndChild, () =>
-                {
-                    settings.applyLayerTargetAndChild = !settings.applyLayerTargetAndChild;
-                });
+                menuLayers.AddItem(new GUIContent("Apply All Children"), settings.applyLayerTargetAndChild,
+                    () => { settings.applyLayerTargetAndChild = !settings.applyLayerTargetAndChild; });
                 menuLayers.AddSeparator("");
 
                 foreach (string layer in InternalEditorUtility.layers)
                 {
-                    menuLayers.AddItem(new GUIContent(layer), LayerMask.NameToLayer(layer) == gameObject.layer ? true : false, () =>
-                    {
-                        if (settings.applyLayerTargetAndChild)
-                            ApplyLayerTargetAndChild(gameObject.transform, LayerMask.NameToLayer(layer));
-                        else
-                            gameObject.layer = LayerMask.NameToLayer(layer);
+                    menuLayers.AddItem(new GUIContent(layer),
+                        LayerMask.NameToLayer(layer) == gameObject.layer ? true : false, () =>
+                        {
+                            if (settings.applyLayerTargetAndChild)
+                                ApplyLayerTargetAndChild(gameObject.transform, LayerMask.NameToLayer(layer));
+                            else
+                                gameObject.layer = LayerMask.NameToLayer(layer);
 
-                        DirtyScene(gameObject.scene);
-                    });
+                            DirtyScene(gameObject.scene);
+                        });
                 }
+
                 menuLayers.ShowAsContext();
                 currentEvent.Use();
             }
@@ -1427,6 +1474,7 @@ namespace Hierarchy2
         }
 
         GUIContent tmpSceneContent = new GUIContent();
+
         void RenameSceneInHierarchy()
         {
             string name = currentScene.name;
@@ -1456,7 +1504,6 @@ namespace Hierarchy2
 
         void CollapseAll()
         {
-
         }
 
         void DirtyScene(Scene scene)
@@ -1471,7 +1518,7 @@ namespace Hierarchy2
 
         bool IsFirstRow(Rect rect) => rect.y / rect.height == 0;
 
-        int GetRowIndex(Rect rect) => (int)(rect.y / rect.height);
+        int GetRowIndex(Rect rect) => (int) (rect.y / rect.height);
 
         bool InSelection(int ID) => Selection.Contains(ID) ? true : false;
 
@@ -1554,7 +1601,10 @@ namespace Hierarchy2
                 this.afterName = afterName;
             }
 
-            public static WidthUse zero { get { return new WidthUse(0, 0, 0); } }
+            public static WidthUse zero
+            {
+                get { return new WidthUse(0, 0, 0); }
+            }
         }
 
         sealed class RowItem
@@ -1577,12 +1627,29 @@ namespace Hierarchy2
             public bool hasCustom = false;
             public CustomRowItem customRowItem;
 
-            public string name { get { return isNull ? "Null" : gameObject.name; } }
-            public int childCount { get { return gameObject.transform.childCount; } }
-            public Scene Scene { get { return gameObject.scene; } }
-            public bool isStatic { get { return isNull ? false : gameObject.isStatic; } }
+            public string name
+            {
+                get { return isNull ? "Null" : gameObject.name; }
+            }
 
-            public RowItem() { }
+            public int childCount
+            {
+                get { return gameObject.transform.childCount; }
+            }
+
+            public Scene Scene
+            {
+                get { return gameObject.scene; }
+            }
+
+            public bool isStatic
+            {
+                get { return isNull ? false : gameObject.isStatic; }
+            }
+
+            public RowItem()
+            {
+            }
 
             public void Dispose()
             {
@@ -1607,6 +1674,7 @@ namespace Hierarchy2
         internal sealed class Resources
         {
             private static Texture2D pixelWhite;
+
             public static Texture2D PixelWhite
             {
                 get
@@ -1617,72 +1685,109 @@ namespace Hierarchy2
                         pixelWhite.SetPixel(0, 0, Color.white);
                         pixelWhite.Apply();
                     }
+
                     return pixelWhite;
                 }
             }
 
             private static Texture2D ramp8x8White;
+
             public static Texture2D Ramp8x8White
             {
                 get
                 {
                     if (ramp8x8White == null)
                     {
-                        ramp8x8White = new byte[] { 137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 16,
-                         0, 0, 0, 16, 8, 6, 0, 0, 0, 31, 243, 255, 97, 0, 0, 0, 40, 73, 68, 65, 84, 56, 17, 99, 252, 15, 4, 12, 12,
-                          12, 31, 8, 224, 143, 184, 228, 153, 128, 18, 20, 129, 81, 3, 24, 24, 70, 195, 96, 52, 12, 64, 153, 104, 224,
-                           211, 1, 0, 153, 171, 18, 45, 165, 62, 165, 211, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130 }.PNGImageDecode();
+                        ramp8x8White = new byte[]
+                        {
+                            137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 16,
+                            0, 0, 0, 16, 8, 6, 0, 0, 0, 31, 243, 255, 97, 0, 0, 0, 40, 73, 68, 65, 84, 56, 17, 99, 252,
+                            15, 4, 12, 12,
+                            12, 31, 8, 224, 143, 184, 228, 153, 128, 18, 20, 129, 81, 3, 24, 24, 70, 195, 96, 52, 12,
+                            64, 153, 104, 224,
+                            211, 1, 0, 153, 171, 18, 45, 165, 62, 165, 211, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130
+                        }.PNGImageDecode();
                     }
+
                     return ramp8x8White;
                 }
             }
 
             private static Texture2D treeTRDIcon;
+
             public static Texture2D TreeTRDIcon
             {
                 get
                 {
                     if (treeTRDIcon == null)
-                        treeTRDIcon = new byte[] { 137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
-                         35, 0, 0, 0, 35, 8, 6, 0, 0, 0, 30, 217, 179, 89, 0, 0, 0, 116, 73, 68, 65, 84, 88, 9, 237, 214, 177,
-                          14, 128, 32, 12, 69, 81, 49, 254, 255, 47, 171, 65, 72, 238, 192, 91, 165, 195, 101, 225, 165, 11, 205,
-                           105, 7, 218, 253, 158, 227, 59, 109, 220, 219, 174, 115, 219, 203, 139, 135, 109, 102, 129, 210, 75, 202, 40,
-                            147, 4, 82, 221, 157, 81, 38, 9, 164, 186, 59, 163, 76, 18, 72, 245, 82, 59, 115, 161, 203, 249, 201, 66, 233, 223,
-                             88, 86, 198, 111, 39, 23, 161, 212, 152, 108, 134, 163, 97, 86, 134, 26, 204, 202, 80, 131, 89, 25, 106, 48, 43, 67, 13,
-                              102, 101, 168, 193, 92, 74, 230, 1, 149, 182, 5, 71, 91, 165, 185, 13, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130 }.PNGImageDecode();
+                        treeTRDIcon = new byte[]
+                        {
+                            137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+                            35, 0, 0, 0, 35, 8, 6, 0, 0, 0, 30, 217, 179, 89, 0, 0, 0, 116, 73, 68, 65, 84, 88, 9, 237,
+                            214, 177,
+                            14, 128, 32, 12, 69, 81, 49, 254, 255, 47, 171, 65, 72, 238, 192, 91, 165, 195, 101, 225,
+                            165, 11, 205,
+                            105, 7, 218, 253, 158, 227, 59, 109, 220, 219, 174, 115, 219, 203, 139, 135, 109, 102, 129,
+                            210, 75, 202, 40,
+                            147, 4, 82, 221, 157, 81, 38, 9, 164, 186, 59, 163, 76, 18, 72, 245, 82, 59, 115, 161, 203,
+                            249, 201, 66, 233, 223,
+                            88, 86, 198, 111, 39, 23, 161, 212, 152, 108, 134, 163, 97, 86, 134, 26, 204, 202, 80, 131,
+                            89, 25, 106, 48, 43, 67, 13,
+                            102, 101, 168, 193, 92, 74, 230, 1, 149, 182, 5, 71, 91, 165, 185, 13, 0, 0, 0, 0, 73, 69,
+                            78, 68, 174, 66, 96, 130
+                        }.PNGImageDecode();
                     return treeTRDIcon;
                 }
             }
 
             private static Texture2D treeTRIcon;
+
             public static Texture2D TreeTRIcon
             {
                 get
                 {
                     if (treeTRIcon == null)
-                        treeTRIcon = new byte[] { 137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 35,
-                         0, 0, 0, 35, 8, 6, 0, 0, 0, 30, 217, 179, 89, 0, 0, 0, 119, 73, 68, 65, 84, 88, 9, 237, 214, 49, 14, 128,
-                          48, 12, 67, 81, 138, 184, 255, 149, 1, 1, 150, 42, 171, 94, 73, 134, 223, 197, 36, 75, 163, 71, 134, 142, 243,
-                           62, 219, 123, 198, 151, 101, 177, 151, 221, 188, 184, 152, 97, 22, 40, 79, 11, 25, 100, 146, 64, 234, 179, 51, 200,
-                            36, 129, 212, 103, 103, 144, 73, 2, 169, 223, 106, 103, 142, 105, 74, 61, 178, 166, 214, 191, 159, 237, 100, 202, 159,
-                             155, 242, 111, 37, 195, 48, 250, 45, 158, 200, 184, 136, 106, 100, 36, 225, 137, 140, 139, 168, 70, 70, 18, 158, 200, 184,
-                              136, 106, 100, 36, 225, 121, 1, 149, 190, 5, 71, 8, 114, 89, 2, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130 }.PNGImageDecode();
+                        treeTRIcon = new byte[]
+                        {
+                            137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 35,
+                            0, 0, 0, 35, 8, 6, 0, 0, 0, 30, 217, 179, 89, 0, 0, 0, 119, 73, 68, 65, 84, 88, 9, 237, 214,
+                            49, 14, 128,
+                            48, 12, 67, 81, 138, 184, 255, 149, 1, 1, 150, 42, 171, 94, 73, 134, 223, 197, 36, 75, 163,
+                            71, 134, 142, 243,
+                            62, 219, 123, 198, 151, 101, 177, 151, 221, 188, 184, 152, 97, 22, 40, 79, 11, 25, 100, 146,
+                            64, 234, 179, 51, 200,
+                            36, 129, 212, 103, 103, 144, 73, 2, 169, 223, 106, 103, 142, 105, 74, 61, 178, 166, 214,
+                            191, 159, 237, 100, 202, 159,
+                            155, 242, 111, 37, 195, 48, 250, 45, 158, 200, 184, 136, 106, 100, 36, 225, 137, 140, 139,
+                            168, 70, 70, 18, 158, 200, 184,
+                            136, 106, 100, 36, 225, 121, 1, 149, 190, 5, 71, 8, 114, 89, 2, 0, 0, 0, 0, 73, 69, 78, 68,
+                            174, 66, 96, 130
+                        }.PNGImageDecode();
                     return treeTRIcon;
                 }
             }
 
             private static Texture2D treeTDIcon;
+
             public static Texture2D TreeTDIcon
             {
                 get
                 {
                     if (treeTDIcon == null)
-                        treeTDIcon = new byte[] { 137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 35, 0,
-                         0, 0, 35, 8, 6, 0, 0, 0, 30, 217, 179, 89, 0, 0, 0, 90, 73, 68, 65, 84, 88, 9, 237, 210, 65, 10, 128, 32,
-                          0, 69, 193, 236, 254, 119, 174, 200, 150, 190, 181, 4, 227, 70, 120, 27, 101, 248, 227, 122, 206, 49, 207,
-                           248, 238, 109, 215, 185, 237, 229, 197, 195, 62, 179, 64, 121, 19, 25, 50, 37, 80, 221, 102, 200, 148, 64, 117,
-                            155, 33, 83, 2, 213, 109, 134, 76, 9, 84, 183, 25, 50, 37, 80, 221, 102, 200, 148, 64, 117, 155, 33, 83, 2, 213,
-                             109, 230, 23, 50, 55, 146, 198, 4, 67, 142, 224, 65, 199, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130 }.PNGImageDecode();
+                        treeTDIcon = new byte[]
+                        {
+                            137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 35, 0,
+                            0, 0, 35, 8, 6, 0, 0, 0, 30, 217, 179, 89, 0, 0, 0, 90, 73, 68, 65, 84, 88, 9, 237, 210, 65,
+                            10, 128, 32,
+                            0, 69, 193, 236, 254, 119, 174, 200, 150, 190, 181, 4, 227, 70, 120, 27, 101, 248, 227, 122,
+                            206, 49, 207,
+                            248, 238, 109, 215, 185, 237, 229, 197, 195, 62, 179, 64, 121, 19, 25, 50, 37, 80, 221, 102,
+                            200, 148, 64, 117,
+                            155, 33, 83, 2, 213, 109, 134, 76, 9, 84, 183, 25, 50, 37, 80, 221, 102, 200, 148, 64, 117,
+                            155, 33, 83, 2, 213,
+                            109, 230, 23, 50, 55, 146, 198, 4, 67, 142, 224, 65, 199, 0, 0, 0, 0, 73, 69, 78, 68, 174,
+                            66, 96, 130
+                        }.PNGImageDecode();
                     return treeTDIcon;
                 }
             }
@@ -1724,8 +1829,7 @@ namespace Hierarchy2
                 border = new RectOffset(12, 12, 8, 8),
             };
 
-            [System.Obsolete]
-            internal static GUIStyle DirtyLabel = new GUIStyle(EditorStyles.label)
+            [System.Obsolete] internal static GUIStyle DirtyLabel = new GUIStyle(EditorStyles.label)
             {
                 padding = new RectOffset(-1, 0, 0, 0),
                 margin = new RectOffset(0, 0, 0, 0),
@@ -1736,12 +1840,18 @@ namespace Hierarchy2
             internal static GUIStyle Header = new GUIStyle(TreeBoldLabel)
             {
                 richText = true,
-                normal = new GUIStyleState() { textColor = Color.white }
+                normal = new GUIStyleState() {textColor = Color.white}
             };
 
-            internal static GUIStyle TreeBoldLabel { get { return TreeView.DefaultStyles.boldLabel; } }
+            internal static GUIStyle TreeBoldLabel
+            {
+                get { return TreeView.DefaultStyles.boldLabel; }
+            }
 
-            internal static GUIStyle TreeLabel { get { return TreeView.DefaultStyles.label; } }
+            internal static GUIStyle TreeLabel
+            {
+                get { return TreeView.DefaultStyles.label; }
+            }
         }
 
         internal sealed class MenuCommand

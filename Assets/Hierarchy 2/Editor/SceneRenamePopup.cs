@@ -1,11 +1,7 @@
 ﻿using UnityEngine;
-
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using UnityEditor;
-
-using DlfU.UIElements;
-using DlfU.UIElements.Editor;
 
 namespace Hierarchy2
 {
@@ -46,13 +42,13 @@ namespace Hierarchy2
             rootVisualElement.StyleJustifyContent(Justify.Center);
 
             nameField = new TextField();
-            nameField.RegisterCallback<KeyUpEvent>((evt) => { if (evt.keyCode == KeyCode.Return) Apply(); });
+            nameField.RegisterCallback<KeyUpEvent>((evt) =>
+            {
+                if (evt.keyCode == KeyCode.Return) Apply();
+            });
             rootVisualElement.Add(nameField);
 
-            Button apply = new Button(() =>
-            {
-                Apply();
-            });
+            Button apply = new Button(() => { Apply(); });
 
             apply.text = "Apply";
             rootVisualElement.Add(apply);

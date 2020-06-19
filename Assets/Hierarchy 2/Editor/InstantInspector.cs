@@ -1,17 +1,18 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
-
 using UnityEditor;
-
-using DlfU.UIElements;
-using Foldout = DlfU.UIElements.Editor.Foldout;
+using Foldout = Hierarchy2.Foldout;
 
 namespace Hierarchy2
 {
     public class InstantInspector : EditorWindow
     {
-        public enum FillMode { Default, Add }
+        public enum FillMode
+        {
+            Default,
+            Add
+        }
 
         ScrollView scrollView;
         List<Editor> editors = new List<Editor>();
@@ -185,7 +186,8 @@ namespace Hierarchy2
                 {
                     var preview = new IMGUIContainer(() =>
                     {
-                        editor.DrawPreview(new Rect(0, 0, inspector.layout.size.x, Mathf.Clamp(inspector.layout.width / 2, 64, 200)));
+                        editor.DrawPreview(new Rect(0, 0, inspector.layout.size.x,
+                            Mathf.Clamp(inspector.layout.width / 2, 64, 200)));
                     });
                     preview.StyleMarginTop(4);
                     preview.StretchToParentWidth();

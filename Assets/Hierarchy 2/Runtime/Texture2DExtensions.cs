@@ -1,9 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
-namespace DlfU.Textures
+namespace Hierarchy2
 {
-    public static class Extensions
+    public static class Texture2DExtensions
     {
         public static string PNGImageEncodeBase64(this Texture2D texture2D)
         {

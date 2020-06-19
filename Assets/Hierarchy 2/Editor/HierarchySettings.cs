@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
-
-using DlfU.UIElements;
-using DlfU.UIElements.Editor;
 
 namespace Hierarchy2
 {
@@ -60,16 +56,32 @@ namespace Hierarchy2
             }
         }
 
-        public enum ComponentSize { Small, Normal, Large }
+        public enum ComponentSize
+        {
+            Small,
+            Normal,
+            Large
+        }
 
-        public enum ElementAlignment { AfterName, Right }
+        public enum ElementAlignment
+        {
+            AfterName,
+            Right
+        }
 
-        [Flags] public enum ContentDisplay { Component = (1 << 0), Tag = (1 << 1), Layer = (1 << 2) }
+        [Flags]
+        public enum ContentDisplay
+        {
+            Component = (1 << 0),
+            Tag = (1 << 1),
+            Layer = (1 << 2)
+        }
 
         public ThemeData personalTheme;
         public ThemeData professionalTheme;
         public ThemeData playmodeTheme;
         private bool useThemePlaymode = false;
+
         public ThemeData usedTheme
         {
             get
@@ -82,6 +94,7 @@ namespace Hierarchy2
                         playmodeTheme.BlendMultiply(GUI.color);
                         useThemePlaymode = true;
                     }
+
                     return playmodeTheme;
                 }
                 else
@@ -105,9 +118,17 @@ namespace Hierarchy2
         public int offSetIconAfterName = 8;
         public bool displayComponents = true;
         public ElementAlignment componentAlignment = ElementAlignment.AfterName;
-        public enum ComponentDisplayMode { All = 0, ScriptOnly = 1, Below = 2, Other = 3 }
+
+        public enum ComponentDisplayMode
+        {
+            All = 0,
+            ScriptOnly = 1,
+            Below = 2,
+            Other = 3
+        }
+
         public ComponentDisplayMode componentDisplayMode = ComponentDisplayMode.Other;
-        public string[] components = new string[] { "Transform", "RectTransform" };
+        public string[] components = new string[] {"Transform", "RectTransform"};
         [HideInInspector] public int componentLimited = 0;
         [Range(12, 16)] public int componentSize = 16;
         public int componentSpacing = 0;
@@ -125,6 +146,7 @@ namespace Hierarchy2
 
 
         public delegate void OnSettingsChangedCallback(string param);
+
         public OnSettingsChangedCallback onSettingsChanged;
 
         public void OnSettingsChanged(string param = "")
@@ -181,38 +203,41 @@ namespace Hierarchy2
                     Object.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
                     verticalLayout.Add(Object);
 
-                    DlfU.UIElements.Toggle displayObjectIcon = new DlfU.UIElements.Toggle("Display Object Icon",
-                     settings.displayObjectIcon,
-                      Justify.FlexStart,
-                       (evt) =>
-                       {
-                           settings.displayObjectIcon = evt.newValue;
-                           settings.OnSettingsChanged(nameof(settings.displayObjectIcon));
-                       });
+                    Hierarchy2.Toggle displayObjectIcon = new Hierarchy2.Toggle("Display Object Icon",
+                        settings.displayObjectIcon,
+                        Justify.FlexStart,
+                        (evt) =>
+                        {
+                            settings.displayObjectIcon = evt.newValue;
+                            settings.OnSettingsChanged(nameof(settings.displayObjectIcon));
+                        });
                     displayObjectIcon.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayObjectIcon);
 
-                    DlfU.UIElements.Toggle displayCustomObjectIcon = new DlfU.UIElements.Toggle("Display Custom Icon",
-                     settings.displayCustomObjectIcon,
-                      Justify.FlexStart,
-                       (evt) =>
-                       {
-                           settings.displayCustomObjectIcon = evt.newValue;
-                           settings.OnSettingsChanged(nameof(settings.displayCustomObjectIcon));
-                       });
+                    Hierarchy2.Toggle displayCustomObjectIcon = new Hierarchy2.Toggle("Display Custom Icon",
+                        settings.displayCustomObjectIcon,
+                        Justify.FlexStart,
+                        (evt) =>
+                        {
+                            settings.displayCustomObjectIcon = evt.newValue;
+                            settings.OnSettingsChanged(nameof(settings.displayCustomObjectIcon));
+                        });
                     displayCustomObjectIcon.StyleMarginLeft(CONTENT_MARGIN_LEFT * 2);
                     verticalLayout.Add(displayCustomObjectIcon);
                     displayCustomObjectIcon.StyleDisplay(settings.displayObjectIcon);
-                    displayObjectIcon.RegisterValueChangedCallback((evt) => { displayCustomObjectIcon.StyleDisplay(evt.newValue); });
+                    displayObjectIcon.RegisterValueChangedCallback((evt) =>
+                    {
+                        displayCustomObjectIcon.StyleDisplay(evt.newValue);
+                    });
 
-                    DlfU.UIElements.Toggle displayDirtyTrack = new DlfU.UIElements.Toggle("Display Dirty Track [EXPERIMENTAL]",
-                     settings.displayDirtyTrack,
-                      Justify.FlexStart,
-                       (evt) =>
-                       {
-                           settings.displayDirtyTrack = evt.newValue;
-                           settings.OnSettingsChanged(nameof(settings.displayDirtyTrack));
-                       });
+                    Hierarchy2.Toggle displayDirtyTrack = new Hierarchy2.Toggle("Display Dirty Track [EXPERIMENTAL]",
+                        settings.displayDirtyTrack,
+                        Justify.FlexStart,
+                        (evt) =>
+                        {
+                            settings.displayDirtyTrack = evt.newValue;
+                            settings.OnSettingsChanged(nameof(settings.displayDirtyTrack));
+                        });
                     displayDirtyTrack.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayDirtyTrack);
 
@@ -221,36 +246,36 @@ namespace Hierarchy2
                     View.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
                     verticalLayout.Add(View);
 
-                    DlfU.UIElements.Toggle displayRowBackground = new DlfU.UIElements.Toggle("Display RowBackground",
-                     settings.displayRowBackground,
-                      Justify.FlexStart,
-                       (evt) =>
-                       {
-                           settings.displayRowBackground = evt.newValue;
-                           settings.OnSettingsChanged(nameof(settings.displayRowBackground));
-                       });
+                    Hierarchy2.Toggle displayRowBackground = new Hierarchy2.Toggle("Display RowBackground",
+                        settings.displayRowBackground,
+                        Justify.FlexStart,
+                        (evt) =>
+                        {
+                            settings.displayRowBackground = evt.newValue;
+                            settings.OnSettingsChanged(nameof(settings.displayRowBackground));
+                        });
                     displayRowBackground.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayRowBackground);
 
-                    DlfU.UIElements.Toggle displayTreeView = new DlfU.UIElements.Toggle("Display TreeView",
-                     settings.displayTreeView,
-                      Justify.FlexStart,
-                       (evt) =>
-                       {
-                           settings.displayTreeView = evt.newValue;
-                           settings.OnSettingsChanged(nameof(settings.displayTreeView));
-                       });
+                    Hierarchy2.Toggle displayTreeView = new Hierarchy2.Toggle("Display TreeView",
+                        settings.displayTreeView,
+                        Justify.FlexStart,
+                        (evt) =>
+                        {
+                            settings.displayTreeView = evt.newValue;
+                            settings.OnSettingsChanged(nameof(settings.displayTreeView));
+                        });
                     displayTreeView.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayTreeView);
 
-                    DlfU.UIElements.Toggle displayGrid = new DlfU.UIElements.Toggle("Display Grid",
-                     settings.displayGrid,
-                      Justify.FlexStart,
-                       (evt) =>
-                       {
-                           settings.displayGrid = evt.newValue;
-                           settings.OnSettingsChanged(nameof(settings.displayGrid));
-                       });
+                    Hierarchy2.Toggle displayGrid = new Hierarchy2.Toggle("Display Grid",
+                        settings.displayGrid,
+                        Justify.FlexStart,
+                        (evt) =>
+                        {
+                            settings.displayGrid = evt.newValue;
+                            settings.OnSettingsChanged(nameof(settings.displayGrid));
+                        });
                     displayGrid.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayGrid);
 
@@ -259,14 +284,14 @@ namespace Hierarchy2
                     Components.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
                     verticalLayout.Add(Components);
 
-                    DlfU.UIElements.Toggle displayComponents = new DlfU.UIElements.Toggle("Display Components Icon",
-                     settings.displayComponents,
-                      Justify.FlexStart,
-                       (evt) =>
-                       {
-                           settings.displayComponents = evt.newValue;
-                           settings.OnSettingsChanged(nameof(settings.displayComponents));
-                       });
+                    Hierarchy2.Toggle displayComponents = new Hierarchy2.Toggle("Display Components Icon",
+                        settings.displayComponents,
+                        Justify.FlexStart,
+                        (evt) =>
+                        {
+                            settings.displayComponents = evt.newValue;
+                            settings.OnSettingsChanged(nameof(settings.displayComponents));
+                        });
                     displayComponents.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayComponents);
 
@@ -274,7 +299,7 @@ namespace Hierarchy2
                     componentAlignment.label = "Component Alignment";
                     componentAlignment.RegisterValueChangedCallback((evt) =>
                     {
-                        settings.componentAlignment = (ElementAlignment)evt.newValue;
+                        settings.componentAlignment = (ElementAlignment) evt.newValue;
                         settings.OnSettingsChanged(nameof(settings.componentAlignment));
                     });
                     componentAlignment.StyleMarginLeft(CONTENT_MARGIN_LEFT);
@@ -296,7 +321,7 @@ namespace Hierarchy2
                     });
                     componentDisplayMode.RegisterValueChangedCallback((evt) =>
                     {
-                        settings.componentDisplayMode = (ComponentDisplayMode)evt.newValue;
+                        settings.componentDisplayMode = (ComponentDisplayMode) evt.newValue;
                         switch (settings.componentDisplayMode)
                         {
                             case ComponentDisplayMode.Below:
@@ -315,6 +340,7 @@ namespace Hierarchy2
                                 componentListInput.StyleDisplay(false);
                                 break;
                         }
+
                         settings.OnSettingsChanged(nameof(settings.componentDisplayMode));
                     });
 
@@ -353,6 +379,7 @@ namespace Hierarchy2
                                 settings.componentSize = 16;
                                 break;
                         }
+
                         settings.OnSettingsChanged(nameof(settings.componentSize));
                     });
                     verticalLayout.Add(componentSize);
@@ -373,25 +400,26 @@ namespace Hierarchy2
                     TagAndLayer.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
                     verticalLayout.Add(TagAndLayer);
 
-                    DlfU.UIElements.Toggle displayTag = new DlfU.UIElements.Toggle("Display Tag",
-                     settings.displayTag,
-                      Justify.FlexStart,
-                       (evt) =>
-                       {
-                           settings.displayTag = evt.newValue;
-                           settings.OnSettingsChanged(nameof(settings.displayTag));
-                       });
+                    Hierarchy2.Toggle displayTag = new Hierarchy2.Toggle("Display Tag",
+                        settings.displayTag,
+                        Justify.FlexStart,
+                        (evt) =>
+                        {
+                            settings.displayTag = evt.newValue;
+                            settings.OnSettingsChanged(nameof(settings.displayTag));
+                        });
                     displayTag.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayTag);
 
-                    DlfU.UIElements.Toggle applyTagTargetAndChild = new DlfU.UIElements.Toggle("Apply Child Tag When Parent Tag Change",
-                     settings.applyTagTargetAndChild,
-                      Justify.FlexStart,
-                       (evt) =>
-                       {
-                           settings.applyTagTargetAndChild = evt.newValue;
-                           settings.OnSettingsChanged(nameof(settings.applyTagTargetAndChild));
-                       });
+                    Hierarchy2.Toggle applyTagTargetAndChild = new Hierarchy2.Toggle(
+                        "Apply Child Tag When Parent Tag Change",
+                        settings.applyTagTargetAndChild,
+                        Justify.FlexStart,
+                        (evt) =>
+                        {
+                            settings.applyTagTargetAndChild = evt.newValue;
+                            settings.OnSettingsChanged(nameof(settings.applyTagTargetAndChild));
+                        });
                     applyTagTargetAndChild.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(applyTagTargetAndChild);
 
@@ -399,31 +427,32 @@ namespace Hierarchy2
                     tagAlignment.label = "Tag Alignment";
                     tagAlignment.RegisterValueChangedCallback((evt) =>
                     {
-                        settings.tagAlignment = (ElementAlignment)evt.newValue;
+                        settings.tagAlignment = (ElementAlignment) evt.newValue;
                         settings.OnSettingsChanged(nameof(settings.tagAlignment));
                     });
                     tagAlignment.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(tagAlignment);
 
-                    DlfU.UIElements.Toggle displayLayer = new DlfU.UIElements.Toggle("Display Layer",
-                     settings.displayLayer,
-                      Justify.FlexStart,
-                       (evt) =>
-                       {
-                           settings.displayLayer = evt.newValue;
-                           settings.OnSettingsChanged(nameof(settings.displayLayer));
-                       });
+                    Hierarchy2.Toggle displayLayer = new Hierarchy2.Toggle("Display Layer",
+                        settings.displayLayer,
+                        Justify.FlexStart,
+                        (evt) =>
+                        {
+                            settings.displayLayer = evt.newValue;
+                            settings.OnSettingsChanged(nameof(settings.displayLayer));
+                        });
                     displayLayer.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayLayer);
 
-                    DlfU.UIElements.Toggle applyLayerTargetAndChild = new DlfU.UIElements.Toggle("Apply Child Layer When Parent Layer Change",
-                     settings.applyLayerTargetAndChild,
-                      Justify.FlexStart,
-                       (evt) =>
-                       {
-                           settings.applyLayerTargetAndChild = evt.newValue;
-                           settings.OnSettingsChanged(nameof(settings.applyLayerTargetAndChild));
-                       });
+                    Hierarchy2.Toggle applyLayerTargetAndChild = new Hierarchy2.Toggle(
+                        "Apply Child Layer When Parent Layer Change",
+                        settings.applyLayerTargetAndChild,
+                        Justify.FlexStart,
+                        (evt) =>
+                        {
+                            settings.applyLayerTargetAndChild = evt.newValue;
+                            settings.OnSettingsChanged(nameof(settings.applyLayerTargetAndChild));
+                        });
                     applyLayerTargetAndChild.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(applyLayerTargetAndChild);
 
@@ -431,7 +460,7 @@ namespace Hierarchy2
                     layerAlignment.label = "Layer Alignment";
                     layerAlignment.RegisterValueChangedCallback((evt) =>
                     {
-                        settings.layerAlignment = (ElementAlignment)evt.newValue;
+                        settings.layerAlignment = (ElementAlignment) evt.newValue;
                         settings.OnSettingsChanged(nameof(settings.layerAlignment));
                     });
                     layerAlignment.StyleMarginLeft(CONTENT_MARGIN_LEFT);
@@ -442,14 +471,15 @@ namespace Hierarchy2
                     advanced.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
                     verticalLayout.Add(advanced);
 
-                    DlfU.UIElements.Toggle onlyDisplayWhileMouseHovering = new DlfU.UIElements.Toggle("Only Display While Mouse Hovering",
-                     settings.onlyDisplayWhileMouseEnter,
-                      Justify.FlexStart,
-                       (evt) =>
-                       {
-                           settings.onlyDisplayWhileMouseEnter = evt.newValue;
-                           settings.OnSettingsChanged(nameof(settings.onlyDisplayWhileMouseEnter));
-                       });
+                    Hierarchy2.Toggle onlyDisplayWhileMouseHovering = new Hierarchy2.Toggle(
+                        "Only Display While Mouse Hovering",
+                        settings.onlyDisplayWhileMouseEnter,
+                        Justify.FlexStart,
+                        (evt) =>
+                        {
+                            settings.onlyDisplayWhileMouseEnter = evt.newValue;
+                            settings.OnSettingsChanged(nameof(settings.onlyDisplayWhileMouseEnter));
+                        });
                     onlyDisplayWhileMouseHovering.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(onlyDisplayWhileMouseHovering);
 
@@ -462,7 +492,7 @@ namespace Hierarchy2
                     });
                     contentMaskEnumFlags.RegisterValueChangedCallback((evt) =>
                     {
-                        settings.contentDisplay = (ContentDisplay)evt.newValue;
+                        settings.contentDisplay = (ContentDisplay) evt.newValue;
                         settings.OnSettingsChanged(nameof(settings.contentDisplay));
                     });
                     verticalLayout.Add(contentMaskEnumFlags);
@@ -474,12 +504,15 @@ namespace Hierarchy2
 
                     if (EditorApplication.isPlayingOrWillChangePlaymode)
                     {
-                        EditorHelpBox themeWarningPlaymode = new EditorHelpBox("This setting only available on edit mode.", MessageType.Info);
+                        EditorHelpBox themeWarningPlaymode =
+                            new EditorHelpBox("This setting only available on edit mode.", MessageType.Info);
                         verticalLayout.Add(themeWarningPlaymode);
                     }
                     else
                     {
-                        EditorHelpBox selectionColorHelpBox = new EditorHelpBox("Theme selection color require editor assembly recompile to take affect.\nBy selecting any script, right click -> Reimport. it will force the editor to recompile.", MessageType.Info);
+                        EditorHelpBox selectionColorHelpBox = new EditorHelpBox(
+                            "Theme selection color require editor assembly recompile to take affect.\nBy selecting any script, right click -> Reimport. it will force the editor to recompile.",
+                            MessageType.Info);
                         selectionColorHelpBox.StyleDisplay(false);
                         verticalLayout.Add(selectionColorHelpBox);
 
@@ -638,10 +671,9 @@ namespace Hierarchy2
                         });
                         verticalLayout.Add(selectionColor);
                     }
-
                 },
 
-                keywords = new HashSet<string>(new[] { "Hierarchy" })
+                keywords = new HashSet<string>(new[] {"Hierarchy"})
             };
 
             return provider;
@@ -674,6 +706,7 @@ namespace Hierarchy2
                 Selection.activeObject = settings;
                 return settings;
             }
+
             return null;
         }
     }

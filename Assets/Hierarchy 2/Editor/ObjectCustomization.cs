@@ -1,11 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UIElements;
-
 using UnityEditor;
+using UnityEditor.Experimental.SceneManagement;
 using UnityEditor.UIElements;
-
-using DlfU.UIElements;
-using DlfU.UIElements.Editor;
 
 namespace Hierarchy2
 {
@@ -30,6 +27,21 @@ namespace Hierarchy2
 
             shelfButton.RegisterCallback<MouseDownEvent>((evt) =>
             {
+                var isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null ? true : false;
+                if (isPrefabMode)
+                {
+                    Debug.LogWarning("Cannot custom object in prefab.");
+                    evt.StopPropagation();
+                    return;
+                }
+
+                if (Application.isPlaying)
+                {
+                    Debug.LogWarning("Cannot custom object in play mode.");
+                    evt.StopPropagation();
+                    return;
+                }
+                
                 if (Selection.gameObjects.Length == 1 && Selection.activeGameObject != null)
                 {
                     ObjectCustomizationPopup.ShowPopup(Selection.activeGameObject);
@@ -52,10 +64,7 @@ namespace Hierarchy2
                 shelfButton.StyleBackgroundColor(new Color(.5f, .5f, .5f, .5f));
             });
 
-            shelfButton.RegisterCallback<MouseLeaveEvent>((evt) =>
-            {
-                shelfButton.StyleBackgroundColor(Color.clear);
-            });
+            shelfButton.RegisterCallback<MouseLeaveEvent>((evt) => { shelfButton.StyleBackgroundColor(Color.clear); });
 
             return shelfButton;
         }
@@ -114,21 +123,22 @@ namespace Hierarchy2
             {
                 customRowItem = hierarchyLocalData.CreateCustomRowItemFor(gameObject);
             }
-            DlfU.UIElements.Toggle useBackground = new DlfU.UIElements.Toggle("Use Background",
-            customRowItem.useBackground,
-            Justify.FlexStart,
-            (evt) =>
-            {
-                customRowItem.useBackground = evt.newValue;
-                EditorApplication.RepaintHierarchyWindow();
-            });
+
+            Hierarchy2.Toggle useBackground = new Hierarchy2.Toggle("Use Background",
+                customRowItem.useBackground,
+                Justify.FlexStart,
+                (evt) =>
+                {
+                    customRowItem.useBackground = evt.newValue;
+                    EditorApplication.RepaintHierarchyWindow();
+                });
             rootVisualElement.Add(useBackground);
 
             EnumField backgroundStyle = new EnumField(customRowItem.backgroundStyle);
             backgroundStyle.label = "Background Style";
             backgroundStyle.RegisterValueChangedCallback((evt) =>
             {
-                customRowItem.backgroundStyle = (CustomRowItem.BackgroundStyle)evt.newValue;
+                customRowItem.backgroundStyle = (CustomRowItem.BackgroundStyle) evt.newValue;
                 EditorApplication.RepaintHierarchyWindow();
             });
             rootVisualElement.Add(backgroundStyle);
@@ -137,7 +147,7 @@ namespace Hierarchy2
             backgroundMode.label = "Background Mode";
             backgroundMode.RegisterValueChangedCallback((evt) =>
             {
-                customRowItem.backgroundMode = (CustomRowItem.BackgroundMode)evt.newValue;
+                customRowItem.backgroundMode = (CustomRowItem.BackgroundMode) evt.newValue;
                 EditorApplication.RepaintHierarchyWindow();
             });
             rootVisualElement.Add(backgroundMode);
