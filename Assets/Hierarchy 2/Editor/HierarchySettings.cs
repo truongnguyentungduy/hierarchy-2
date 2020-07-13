@@ -124,10 +124,10 @@ namespace Hierarchy2
             All = 0,
             ScriptOnly = 1,
             Below = 2,
-            Other = 3
+            Ignore = 3
         }
 
-        public ComponentDisplayMode componentDisplayMode = ComponentDisplayMode.Other;
+        public ComponentDisplayMode componentDisplayMode = ComponentDisplayMode.Ignore;
         public string[] components = new string[] {"Transform", "RectTransform"};
         [HideInInspector] public int componentLimited = 0;
         [Range(12, 16)] public int componentSize = 16;
@@ -328,7 +328,7 @@ namespace Hierarchy2
                                 componentListInput.StyleDisplay(true);
                                 break;
 
-                            case ComponentDisplayMode.Other:
+                            case ComponentDisplayMode.Ignore:
                                 componentListInput.StyleDisplay(true);
                                 break;
 
@@ -656,20 +656,20 @@ namespace Hierarchy2
                         });
                         verticalLayout.Add(comSelBGColor);
 
-                        ColorField selectionColor = new ColorField("Selection");
-                        selectionColor.value = settings.usedTheme.selectionColor;
-                        selectionColor.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                        selectionColor.RegisterValueChangedCallback((evt) =>
-                        {
-                            if (EditorGUIUtility.isProSkin)
-                                settings.professionalTheme.selectionColor = evt.newValue;
-                            else
-                                settings.personalTheme.selectionColor = evt.newValue;
-
-                            selectionColorHelpBox.StyleDisplay(true);
-                            settings.OnSettingsChanged();
-                        });
-                        verticalLayout.Add(selectionColor);
+                        // ColorField selectionColor = new ColorField("Selection");
+                        // selectionColor.value = settings.usedTheme.selectionColor;
+                        // selectionColor.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                        // selectionColor.RegisterValueChangedCallback((evt) =>
+                        // {
+                        //     if (EditorGUIUtility.isProSkin)
+                        //         settings.professionalTheme.selectionColor = evt.newValue;
+                        //     else
+                        //         settings.personalTheme.selectionColor = evt.newValue;
+                        //
+                        //     selectionColorHelpBox.StyleDisplay(true);
+                        //     settings.OnSettingsChanged();
+                        // });
+                        // verticalLayout.Add(selectionColor);
                     }
                 },
 

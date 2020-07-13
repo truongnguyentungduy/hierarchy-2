@@ -261,7 +261,7 @@ namespace Hierarchy2
             switch (param)
             {
                 case nameof(ThemeData.selectionColor):
-                    OverrideSelectionColorStyle(ThemeData.selectionColor);
+                    // OverrideSelectionColorStyle(ThemeData.selectionColor);
                     break;
 
                 case nameof(settings.displayObjectIcon):
@@ -365,7 +365,7 @@ namespace Hierarchy2
 
             if (hierarchyChangedRequireUpdating == true)
             {
-                OverrideSelectionColorStyle(ThemeData.selectionColor);
+                // OverrideSelectionColorStyle(ThemeData.selectionColor);
                 hierarchyChangedRequireUpdating = false;
             }
         }
@@ -524,7 +524,7 @@ namespace Hierarchy2
 
             if (selectionStyleAfterInvoke == false && currentEvent.type == EventType.MouseDown)
             {
-                OverrideSelectionColorStyle(ThemeData.selectionColor);
+                // OverrideSelectionColorStyle(ThemeData.selectionColor);
                 selectionStyleAfterInvoke = true;
             }
 
@@ -1061,7 +1061,7 @@ namespace Hierarchy2
                                     continue;
                                 break;
 
-                            case HierarchySettings.ComponentDisplayMode.Other:
+                            case HierarchySettings.ComponentDisplayMode.Ignore:
                                 if (dicComponents.ContainsKey(comType.Name))
                                     continue;
                                 break;
