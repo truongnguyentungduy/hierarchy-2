@@ -798,13 +798,14 @@ namespace Hierarchy2
             if (currentEvent.type != EventType.Repaint)
                 return;
 
-            if (!rowItem.gameObject.CompareTag("Untagged"))
-                rowItem.gameObject.tag = "Untagged";
+            if (!rowItem.gameObject.CompareTag(settings.headerDefaultTag))
+                rowItem.gameObject.tag = settings.headerDefaultTag;
 
             var rect = EditorGUIUtility.PixelsToPoints(RectFromLeft(rowItem.rect, Screen.width, 0));
             rect.y = rowItem.rect.y;
             rect.height = rowItem.rect.height;
             rect.x += GLOBAL_SPACE_OFFSET_LEFT;
+            rect.width -= GLOBAL_SPACE_OFFSET_LEFT;
 
             Color guiColor = GUI.color;
             GUI.color = ThemeData.colorHeaderBackground;

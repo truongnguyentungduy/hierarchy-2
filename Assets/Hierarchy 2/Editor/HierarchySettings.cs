@@ -140,6 +140,7 @@ namespace Hierarchy2
         public bool applyTagTargetAndChild = false;
         public bool applyLayerTargetAndChild = true;
         public string headerPrefix = "$h";
+        public string headerDefaultTag = "Untagged";
         public bool displayDirtyTrack = false;
         public bool onlyDisplayWhileMouseEnter = false;
         public ContentDisplay contentDisplay = ContentDisplay.Component | ContentDisplay.Tag | ContentDisplay.Layer;
@@ -470,6 +471,30 @@ namespace Hierarchy2
                     advanced.StyleFont(FontStyle.Bold);
                     advanced.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
                     verticalLayout.Add(advanced);
+
+                    TextField headerPrefix = new TextField();
+                    headerPrefix.label = "Header Prefix";
+                    headerPrefix.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    headerPrefix.value = settings.headerPrefix;
+                    headerPrefix.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.headerPrefix = evt.newValue == String.Empty ? "$h" : evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.headerPrefix));
+                    });
+                    verticalLayout.Add(headerPrefix);
+                    
+                    
+                    TagField headerDefaultTag = new TagField();
+                    headerDefaultTag.label = "Header Default Tag";
+                    headerDefaultTag.value = settings.headerDefaultTag;
+                    headerDefaultTag.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.headerDefaultTag = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.headerDefaultTag));
+                    });
+                    headerDefaultTag.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    headerDefaultTag.StyleMarginBottom(4);
+                    verticalLayout.Add(headerDefaultTag);
 
                     Hierarchy2.Toggle onlyDisplayWhileMouseHovering = new Hierarchy2.Toggle(
                         "Only Display While Mouse Hovering",
