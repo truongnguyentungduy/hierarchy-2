@@ -52,8 +52,7 @@ MonoBehaviour:
   autoCreateHLD: 0
   pingHierarchyLocalDataObject: 0
   displayVersion: 1
-  displayObjectIcon: 0
-  displayCustomObjectIcon: 0
+  displayCustomObjectIcon: 1
   displayTreeView: 1
   displayRowBackground: 1
   displayGrid: 1
@@ -76,6 +75,6 @@ MonoBehaviour:
   applyTagTargetAndChild: 0
   applyLayerTargetAndChild: 1
   headerPrefix: $h
-  displayDirtyTrack: 0
+  headerDefaultTag: Untagged
   onlyDisplayWhileMouseEnter: 0
   contentDisplay: 1
