@@ -140,7 +140,6 @@ namespace Hierarchy2
         public bool applyLayerTargetAndChild = true;
         public string headerPrefix = "$h";
         public string headerDefaultTag = "Untagged";
-        public bool displayDirtyTrack = false;
         public bool onlyDisplayWhileMouseEnter = false;
         public ContentDisplay contentDisplay = ContentDisplay.Component | ContentDisplay.Tag | ContentDisplay.Layer;
 
@@ -213,17 +212,6 @@ namespace Hierarchy2
                         });
                     displayCustomObjectIcon.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayCustomObjectIcon);
-
-                    Hierarchy2.Toggle displayDirtyTrack = new Hierarchy2.Toggle("Display Dirty Track [EXPERIMENTAL]",
-                        settings.displayDirtyTrack,
-                        Justify.FlexStart,
-                        (evt) =>
-                        {
-                            settings.displayDirtyTrack = evt.newValue;
-                            settings.OnSettingsChanged(nameof(settings.displayDirtyTrack));
-                        });
-                    displayDirtyTrack.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    verticalLayout.Add(displayDirtyTrack);
 
                     Label View = new Label("View");
                     View.StyleFont(FontStyle.Bold);

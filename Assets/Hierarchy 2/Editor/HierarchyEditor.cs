@@ -629,9 +629,6 @@ namespace Hierarchy2
                 if (isPrefabMode) widthUse.left -= 2;
                 widthUse.afterName = rowItem.nameRect.x + rowItem.nameRect.width;
 
-                if (settings.displayDirtyTrack && rowItem.isDirty)
-                    DisplayDirtyTrack();
-
                 widthUse.afterName += settings.offSetIconAfterName;
 
                 DisplayEditableIcon();
@@ -866,36 +863,6 @@ namespace Hierarchy2
                 GUI.DrawTexture(rect, Resources.PixelWhite);
                 GUI.color = guiColor;
                 GUI.DrawTexture(rect, icon, ScaleMode.ScaleToFit);
-            }
-        }
-
-
-        void DisplayDirtyTrack()
-        {
-            var rect = RectFromLeft(rowItem.nameRect, 7, ref widthUse.afterName);
-
-            if (currentEvent.type == EventType.Repaint)
-            {
-                GUIStyle style;
-
-                if (rowItem.gameObject.activeSelf)
-                {
-                    if (rowItem.isPrefab)
-                        style = rowItem.isPrefabMissing ? Styles.PR_BrokenPrefabLabel : Styles.PR_PrefabLabel;
-                    else
-                        style = Styles.lineStyle;
-                }
-                else
-                {
-                    if (rowItem.isPrefab)
-                        style = rowItem.isPrefabMissing
-                            ? Styles.PR_DisabledBrokenPrefabLabel
-                            : Styles.PR_DisabledPrefabLabel;
-                    else
-                        style = Styles.PR_DisabledLabel;
-                }
-
-                style.Draw(rect, "*", false, false, rowItem.isSelected, true);
             }
         }
 
