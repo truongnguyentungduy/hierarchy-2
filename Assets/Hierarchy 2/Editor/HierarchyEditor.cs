@@ -496,6 +496,7 @@ namespace Hierarchy2
             if (!rowItem.isNull)
             {
                 rowItem.isHeader = rowItem.name.Contains(settings.headerPrefix);
+                rowItem.isFolder = rowItem.gameObject.GetComponent<HierarchyFolder>();
                 rowItem.isDirty = EditorUtility.IsDirty(selectionID);
 
                 if (true && !rowItem.isHeader && rowItem.isDirty)
@@ -1543,6 +1544,7 @@ namespace Hierarchy2
             public bool isFirstRow = false;
             public bool isFirstElement = false;
             public bool isHeader = false;
+            public bool isFolder = false;
             public bool isDirty = false;
             public bool isMouseHovering = false;
             public bool hasCustom = false;
@@ -1585,6 +1587,7 @@ namespace Hierarchy2
                 isFirstRow = false;
                 isFirstElement = false;
                 isHeader = false;
+                isFolder = false;
                 isDirty = false;
                 isMouseHovering = false;
                 hasCustom = false;
