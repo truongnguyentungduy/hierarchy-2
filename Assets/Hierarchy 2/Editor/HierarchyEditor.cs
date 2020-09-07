@@ -202,36 +202,6 @@ namespace Hierarchy2
             OnWindowsReorderedCallback?.Invoke();
         }
 
-        void SetObjectIconWidth(float value)
-        {
-            foreach (EditorWindow window in GetAllSceneHierarchyWindowsDelegate())
-            {
-                object gameObjectTreeViewGUIObject =
-                    gui.GetValue(m_TreeView.GetValue(m_SceneHierarchy.GetValue(window)));
-                k_IconWidth.SetValue(gameObjectTreeViewGUIObject, value);
-            }
-        }
-
-        GUIStyle selectionStyle;
-        Texture2D selectionImageOverride;
-
-        void OverrideSelectionColorStyle(Color color)
-        {
-            if (selectionStyle == null)
-            {
-                Type Styles = null;
-                dicInternalEditorType.TryGetValue(typeof(TreeView).FullName + nameof(GUI) + "+" + nameof(Styles),
-                    out Styles);
-                FieldInfo selectionStyleField = Styles.GetField(nameof(selectionStyle));
-                selectionStyle = selectionStyleField.GetValue(null) as GUIStyle;
-            }
-
-            selectionImageOverride = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            selectionImageOverride.SetPixel(0, 0, color);
-            selectionImageOverride.Apply();
-            selectionStyle.normal.background = selectionImageOverride;
-        }
-
         void EditorAwake()
         {
             settings = HierarchySettings.GetAssets();
@@ -239,7 +209,6 @@ namespace Hierarchy2
                 return;
 
             OnSettingsChanged(nameof(settings.components));
-            OnSettingsChanged(nameof(settings.displayObjectIcon));
 
             settings.onSettingsChanged += OnSettingsChanged;
             EditorApplication.hierarchyWindowItemOnGUI += HierarchyOnGUI;
@@ -260,14 +229,6 @@ namespace Hierarchy2
         {
             switch (param)
             {
-                case nameof(ThemeData.selectionColor):
-                    // OverrideSelectionColorStyle(ThemeData.selectionColor);
-                    break;
-
-                case nameof(settings.displayObjectIcon):
-                    SetObjectIconWidth(settings.displayObjectIcon ? 16 : 0);
-                    break;
-
                 case nameof(settings.components):
                     dicComponents.Clear();
                     foreach (string componentType in settings.components)
@@ -365,7 +326,6 @@ namespace Hierarchy2
 
             if (hierarchyChangedRequireUpdating == true)
             {
-                // OverrideSelectionColorStyle(ThemeData.selectionColor);
                 hierarchyChangedRequireUpdating = false;
             }
         }
@@ -411,10 +371,7 @@ namespace Hierarchy2
 
         void OnHierarchyChanged()
         {
-            if (selectionImageOverride == null)
-            {
-                hierarchyChangedRequireUpdating = true;
-            }
+            hierarchyChangedRequireUpdating = true;
         }
 
         void OnPrefabUpdated(GameObject prefab)
@@ -425,14 +382,12 @@ namespace Hierarchy2
 
         void OnPrefabStageOpened(PrefabStage stage)
         {
-            if (!settings.displayObjectIcon)
-                prefabStageChanged = true;
+            prefabStageChanged = true;
         }
 
         void OnPrefabStageClosing(PrefabStage stage)
         {
-            if (!settings.displayObjectIcon)
-                prefabStageChanged = true;
+            prefabStageChanged = true;
         }
 
         internal HierarchyCanvas GetHierarchyCanvas()
@@ -513,7 +468,6 @@ namespace Hierarchy2
             {
                 if (prefabStageChanged)
                 {
-                    SetObjectIconWidth(settings.displayObjectIcon ? 16 : 0);
                     prefabStageChanged = false;
                 }
 
@@ -524,7 +478,7 @@ namespace Hierarchy2
 
             if (selectionStyleAfterInvoke == false && currentEvent.type == EventType.MouseDown)
             {
-                // OverrideSelectionColorStyle(ThemeData.selectionColor);
+
                 selectionStyleAfterInvoke = true;
             }
 
@@ -628,8 +582,7 @@ namespace Hierarchy2
                 GUIStyle nameStyle = TreeStyleFromFont(FontStyle.Normal);
                 rowItem.nameRect.width = nameStyle.CalcSize(new GUIContent(rowItem.gameObject.name)).x;
 
-                if (settings.displayObjectIcon)
-                    rowItem.nameRect.x += 16;
+                rowItem.nameRect.x += 16;
 
                 var isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null ? true : false;
 
@@ -668,7 +621,7 @@ namespace Hierarchy2
                 if (settings.displayTreeView && !rowItem.isRootObject)
                     DisplayTreeView();
 
-                if (settings.displayObjectIcon && settings.displayCustomObjectIcon)
+                if (settings.displayCustomObjectIcon)
                     DisplayCustomObjectIcon();
 
                 widthUse = WidthUse.zero;

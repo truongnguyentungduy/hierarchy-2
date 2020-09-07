@@ -109,7 +109,6 @@ namespace Hierarchy2
         [HideInInspector] public bool autoCreateHLD = true;
         [HideInInspector] public bool pingHierarchyLocalDataObject = false;
         [HideInInspector] public bool displayVersion = true;
-        public bool displayObjectIcon = true;
         public bool displayCustomObjectIcon = true;
         public bool displayTreeView = true;
         public bool displayRowBackground = true;
@@ -204,17 +203,6 @@ namespace Hierarchy2
                     Object.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
                     verticalLayout.Add(Object);
 
-                    Hierarchy2.Toggle displayObjectIcon = new Hierarchy2.Toggle("Display Object Icon",
-                        settings.displayObjectIcon,
-                        Justify.FlexStart,
-                        (evt) =>
-                        {
-                            settings.displayObjectIcon = evt.newValue;
-                            settings.OnSettingsChanged(nameof(settings.displayObjectIcon));
-                        });
-                    displayObjectIcon.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    verticalLayout.Add(displayObjectIcon);
-
                     Hierarchy2.Toggle displayCustomObjectIcon = new Hierarchy2.Toggle("Display Custom Icon",
                         settings.displayCustomObjectIcon,
                         Justify.FlexStart,
@@ -223,13 +211,8 @@ namespace Hierarchy2
                             settings.displayCustomObjectIcon = evt.newValue;
                             settings.OnSettingsChanged(nameof(settings.displayCustomObjectIcon));
                         });
-                    displayCustomObjectIcon.StyleMarginLeft(CONTENT_MARGIN_LEFT * 2);
+                    displayCustomObjectIcon.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayCustomObjectIcon);
-                    displayCustomObjectIcon.StyleDisplay(settings.displayObjectIcon);
-                    displayObjectIcon.RegisterValueChangedCallback((evt) =>
-                    {
-                        displayCustomObjectIcon.StyleDisplay(evt.newValue);
-                    });
 
                     Hierarchy2.Toggle displayDirtyTrack = new Hierarchy2.Toggle("Display Dirty Track [EXPERIMENTAL]",
                         settings.displayDirtyTrack,
