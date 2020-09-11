@@ -30,7 +30,7 @@ namespace Hierarchy2
 
         public Texture customIcon;
 
-        public Color iconColor = Color.grey;
+        public Color iconColor = Color.clear;
 
         private void OnEnable()
         {

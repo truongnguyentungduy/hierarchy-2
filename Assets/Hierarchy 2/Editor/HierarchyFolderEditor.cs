@@ -11,13 +11,11 @@ namespace Hierarchy2
     [CustomEditor(typeof(HierarchyFolder))]
     internal class HierarchyFolderEditor : Editor
     {
-            private static Texture FolderIcon;
-        private static Texture EmptyFolderIcon;
-
+        private bool iconSettingsFoldout = false;
+        
         private void OnEnable()
         {
-            FolderIcon = EditorGUIUtility.IconContent("Folder Icon").image;
-            EmptyFolderIcon = EditorGUIUtility.IconContent("FolderEmpty Icon").image;
+
         }
 
         public override VisualElement CreateInspectorGUI()
@@ -34,23 +32,17 @@ namespace Hierarchy2
                     script.flattenMode = (HierarchyFolder.FlattenMode) EditorGUILayout.EnumPopup("Flatten Mode", script.flattenMode);
                     script.destroyAfterFlatten = EditorGUILayout.Toggle("Destroy After Flatten", script.destroyAfterFlatten);
                 }
+
+                this.iconSettingsFoldout = EditorGUILayout.Foldout(this.iconSettingsFoldout, "Icon Settings");
+                if (this.iconSettingsFoldout)
+                {
+                    script.customIcon = EditorGUILayout.ObjectField("Custom Folder Icon", script.customIcon, typeof(Texture), false) as Texture;
+                    script.iconColor = EditorGUILayout.ColorField("Custom Folder Color", script.iconColor);
+                }
+                
             });
             root.Add(imguiContainer);
-
-            UnityEngine.UIElements.Foldout iconSettingsFoldout = new UnityEngine.UIElements.Foldout();
-            iconSettingsFoldout.text = "Icon Settings";
-            iconSettingsFoldout.value = false;
-            root.Add(iconSettingsFoldout);
-
-            ObjectField customIconField = new ObjectField("Custom Folder Icon");
-            customIconField.objectType = typeof(Texture);
-            customIconField.RegisterValueChangedCallback(e => { script.customIcon = e.newValue as Texture; });
-            iconSettingsFoldout.Add(customIconField);
-
-            ColorField folderColorField = new ColorField("Custom Folder Color");
-            folderColorField.value = script.iconColor;
-            iconSettingsFoldout.Add(folderColorField);
-
+            
             return root;
         }
 
@@ -58,4 +50,3 @@ namespace Hierarchy2
         static void CreateInstance() => new GameObject("Folder", new Type[1] {typeof(HierarchyFolder)});
     }
 }
-

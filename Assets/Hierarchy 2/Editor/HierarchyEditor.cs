@@ -495,8 +495,10 @@ namespace Hierarchy2
 
             if (!rowItem.isNull)
             {
-                rowItem.isHeader = rowItem.name.Contains(settings.headerPrefix);
-                rowItem.isFolder = rowItem.gameObject.GetComponent<HierarchyFolder>();
+                rowItem.hierarchyFolder = rowItem.gameObject.GetComponent<HierarchyFolder>();
+                if (!(rowItem.isFolder = rowItem.hierarchyFolder))
+                    rowItem.isHeader = rowItem.name.Contains(settings.headerPrefix);
+                
                 rowItem.isDirty = EditorUtility.IsDirty(selectionID);
 
                 if (true && !rowItem.isHeader && rowItem.isDirty)
@@ -601,6 +603,13 @@ namespace Hierarchy2
                         DisplayRowBackground();
                 }
 
+                
+                if (rowItem.isFolder)
+                {
+                    var icon = rowItem.hierarchyFolder.customIcon != null ? rowItem.hierarchyFolder.customIcon : rowItem.childCount > 0 ? Resources.FolderIcon : Resources.EmptyFolderIcon;
+                    DisplayCustomObjectIcon(icon, rowItem.hierarchyFolder.iconColor);
+                }
+                
                 if (rowItem.isHeader && rowItem.isRootObject)
                 {
                     ElementAsHeader();
@@ -623,7 +632,7 @@ namespace Hierarchy2
                     DisplayTreeView();
 
                 if (settings.displayCustomObjectIcon)
-                    DisplayCustomObjectIcon();
+                    DisplayCustomObjectIcon(null, Color.clear);
 
                 widthUse = WidthUse.zero;
                 widthUse.left += GLOBAL_SPACE_OFFSET_LEFT;
@@ -833,7 +842,7 @@ namespace Hierarchy2
                 ApplyStaticTargetAndChild(target.GetChild(i), value);
         }
 
-        void DisplayCustomObjectIcon()
+        void DisplayCustomObjectIcon(Texture icon, Color iconColor)
         {
             var rect = RectFromRight(rowItem.nameRect, 16, rowItem.nameRect.width + 1);
             rect.height = 16;
@@ -852,18 +861,24 @@ namespace Hierarchy2
                     GUI.Box(rect, new GUIContent("", customIconDefaultTooltip), GUIStyle.none);
                 }
 
-                Texture2D icon = AssetPreview.GetMiniThumbnail(rowItem.gameObject);
-
-                if (icon.name == "GameObject Icon" || icon.name == "d_GameObject Icon" || icon.name == "Prefab Icon" ||
-                    icon.name == "d_Prefab Icon" || icon.name == "PrefabModel Icon" ||
-                    icon.name == "d_PrefabModel Icon")
-                    return;
+                if (icon == null)
+                {
+                    icon = AssetPreview.GetMiniThumbnail(rowItem.gameObject);
+                    if (icon.name == "GameObject Icon" || icon.name == "d_GameObject Icon" || icon.name == "Prefab Icon" ||
+                        icon.name == "d_Prefab Icon" || icon.name == "PrefabModel Icon" ||
+                        icon.name == "d_PrefabModel Icon")
+                        return;
+                }
 
                 Color guiColor = GUI.color;
                 GUI.color = rowItem.rowIndex % 2 != 0 ? ThemeData.colorRowEven : ThemeData.colorRowOdd;
+                if (rowItem.isSelected)
+                    GUI.color = ThemeData.selectionColor;
                 GUI.DrawTexture(rect, Resources.PixelWhite);
-                GUI.color = guiColor;
+                
+                GUI.color = iconColor.a != 0 ? iconColor : guiColor;
                 GUI.DrawTexture(rect, icon, ScaleMode.ScaleToFit);
+                GUI.color = guiColor;
             }
         }
 
@@ -1549,6 +1564,7 @@ namespace Hierarchy2
             public bool isMouseHovering = false;
             public bool hasCustom = false;
             public CustomRowItem customRowItem;
+            public HierarchyFolder hierarchyFolder;
 
             public string name
             {
@@ -1717,6 +1733,30 @@ namespace Hierarchy2
             }
 
             internal static readonly Texture lockIconOn = EditorGUIUtility.IconContent("LockIcon-On").image;
+
+            private static Texture folderIcon;
+            
+            public static Texture FolderIcon
+            {
+                get
+                {
+                    if (folderIcon == null)
+                        folderIcon = EditorGUIUtility.IconContent("Folder Icon").image;
+                    return folderIcon;
+                }
+            }
+
+            private static Texture emptyFolderIcon;
+            
+            public static Texture EmptyFolderIcon
+            {
+                get
+                {
+                    if (emptyFolderIcon == null)
+                        emptyFolderIcon = EditorGUIUtility.IconContent("FolderEmpty Icon").image;
+                    return emptyFolderIcon;
+                }
+            }
         }
 
         internal static class Styles
