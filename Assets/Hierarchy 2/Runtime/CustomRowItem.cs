@@ -14,6 +14,10 @@ namespace Hierarchy2
         public enum BackgroundMode { Full = 0, Name = 1 }
         public BackgroundMode backgroundMode = BackgroundMode.Full;
 
+        public bool customLabel = false;
+        public Vector2 labelOffset = Vector2.zero;
+        public Color labelColor = Color.white;
+        
         public CustomRowItem() { }
 
         public CustomRowItem(GameObject gameObject)

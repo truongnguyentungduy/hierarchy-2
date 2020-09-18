@@ -651,21 +651,6 @@ namespace Hierarchy2
                             settings.OnSettingsChanged();
                         });
                         verticalLayout.Add(comSelBGColor);
-
-                        // ColorField selectionColor = new ColorField("Selection");
-                        // selectionColor.value = settings.usedTheme.selectionColor;
-                        // selectionColor.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                        // selectionColor.RegisterValueChangedCallback((evt) =>
-                        // {
-                        //     if (EditorGUIUtility.isProSkin)
-                        //         settings.professionalTheme.selectionColor = evt.newValue;
-                        //     else
-                        //         settings.personalTheme.selectionColor = evt.newValue;
-                        //
-                        //     selectionColorHelpBox.StyleDisplay(true);
-                        //     settings.OnSettingsChanged();
-                        // });
-                        // verticalLayout.Add(selectionColor);
                     }
                 },
 

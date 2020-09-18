@@ -87,15 +87,15 @@ namespace Hierarchy2
                 return null;
 
             if (window == null)
-                window = ObjectCustomizationPopup.GetWindow<ObjectCustomizationPopup>(true, gameObject.name);
+                window = ObjectCustomizationPopup.GetWindow<ObjectCustomizationPopup>(gameObject.name);
             else
             {
                 window.Close();
-                window = ObjectCustomizationPopup.GetWindow<ObjectCustomizationPopup>(true, gameObject.name);
+                window = ObjectCustomizationPopup.GetWindow<ObjectCustomizationPopup>(gameObject.name);
             }
 
             Vector2 v2 = GUIUtility.GUIToScreenPoint(Event.current.mousePosition);
-            Vector2 size = new Vector2(256, 100);
+            Vector2 size = new Vector2(256, 164);
             window.position = new Rect(v2.x, v2.y, size.x, size.y);
             window.maxSize = window.minSize = size;
             window.ShowPopup();
@@ -107,12 +107,7 @@ namespace Hierarchy2
 
         void OnEnable()
         {
-            rootVisualElement.StyleBorderWidth(1);
-            Color c = new Color32(58, 121, 187, 255);
-            rootVisualElement.StyleBorderColor(c);
-
-            // EditorHelpBox helpBox = new EditorHelpBox("This feature currently in preview state", MessageType.Info);
-            // rootVisualElement.Add(helpBox);
+            rootVisualElement.StyleMargin(2, 2, 2, 0);
 
             hierarchyLocalData = HierarchyEditor.Instance.GetHierarchyLocalData(Selection.activeGameObject.scene);
             gameObject = Selection.activeGameObject;
@@ -124,42 +119,27 @@ namespace Hierarchy2
                 customRowItem = hierarchyLocalData.CreateCustomRowItemFor(gameObject);
             }
 
-            Hierarchy2.Toggle useBackground = new Hierarchy2.Toggle("Use Background",
-                customRowItem.useBackground,
-                Justify.FlexStart,
-                (evt) =>
-                {
-                    customRowItem.useBackground = evt.newValue;
+
+            IMGUIContainer iMGUIContainer = new IMGUIContainer(() =>
+            {
+                customRowItem.useBackground = EditorGUILayout.Toggle("Background", customRowItem.useBackground);
+
+                customRowItem.backgroundStyle = (CustomRowItem.BackgroundStyle)EditorGUILayout.EnumPopup("Background Style", customRowItem.backgroundStyle);
+                customRowItem.backgroundMode = (CustomRowItem.BackgroundMode)EditorGUILayout.EnumPopup("Background Mode", customRowItem.backgroundMode);
+                customRowItem.backgroundColor = EditorGUILayout.ColorField("Background Color", customRowItem.backgroundColor);
+                
+                customRowItem.customLabel = EditorGUILayout.Toggle("Label", customRowItem.customLabel);
+
+                var wideMode = EditorGUIUtility.wideMode;
+                EditorGUIUtility.wideMode = true;
+                customRowItem.labelOffset = EditorGUILayout.Vector2Field("Label Offset", customRowItem.labelOffset);
+                EditorGUIUtility.wideMode = wideMode;
+                customRowItem.labelColor = EditorGUILayout.ColorField("Label Color", customRowItem.labelColor);
+
+                if (GUI.changed)
                     EditorApplication.RepaintHierarchyWindow();
-                });
-            rootVisualElement.Add(useBackground);
-
-            EnumField backgroundStyle = new EnumField(customRowItem.backgroundStyle);
-            backgroundStyle.label = "Background Style";
-            backgroundStyle.RegisterValueChangedCallback((evt) =>
-            {
-                customRowItem.backgroundStyle = (CustomRowItem.BackgroundStyle) evt.newValue;
-                EditorApplication.RepaintHierarchyWindow();
             });
-            rootVisualElement.Add(backgroundStyle);
-
-            EnumField backgroundMode = new EnumField(customRowItem.backgroundMode);
-            backgroundMode.label = "Background Mode";
-            backgroundMode.RegisterValueChangedCallback((evt) =>
-            {
-                customRowItem.backgroundMode = (CustomRowItem.BackgroundMode) evt.newValue;
-                EditorApplication.RepaintHierarchyWindow();
-            });
-            rootVisualElement.Add(backgroundMode);
-
-            ColorField backgroundColor = new ColorField("Background Color");
-            backgroundColor.value = customRowItem.backgroundColor;
-            backgroundColor.RegisterValueChangedCallback((evt) =>
-            {
-                customRowItem.backgroundColor = evt.newValue;
-                EditorApplication.RepaintHierarchyWindow();
-            });
-            rootVisualElement.Add(backgroundColor);
+            rootVisualElement.Add(iMGUIContainer);
         }
     }
 }

@@ -28,10 +28,6 @@ namespace Hierarchy2
 
         public bool destroyAfterFlatten = true;
 
-        public Texture customIcon;
-
-        public Color iconColor = Color.clear;
-
         private void OnEnable()
         {
             Flatten();

@@ -32,14 +32,6 @@ namespace Hierarchy2
                     script.flattenMode = (HierarchyFolder.FlattenMode) EditorGUILayout.EnumPopup("Flatten Mode", script.flattenMode);
                     script.destroyAfterFlatten = EditorGUILayout.Toggle("Destroy After Flatten", script.destroyAfterFlatten);
                 }
-
-                this.iconSettingsFoldout = EditorGUILayout.Foldout(this.iconSettingsFoldout, "Icon Settings");
-                if (this.iconSettingsFoldout)
-                {
-                    script.customIcon = EditorGUILayout.ObjectField("Custom Folder Icon", script.customIcon, typeof(Texture), false) as Texture;
-                    script.iconColor = EditorGUILayout.ColorField("Custom Folder Color", script.iconColor);
-                }
-                
             });
             root.Add(imguiContainer);
             
