@@ -212,29 +212,29 @@ namespace Hierarchy2
         
         internal static void ReplaceObjectIcon(int id, Texture icon)
         {
-            var row = -1;
-            for (int i = 0; i < HierarchyWindow.windows.Count; ++i)
-            {
-                var window = HierarchyWindow.windows[i];
-                if (window.editorWindow == null) continue;
-                var item = window.GetItemAndRowIndex(id, out row);
-                if (item == null) return;
-                item.icon = icon as Texture2D;
-            }
+            // var row = -1;
+            // for (int i = 0; i < HierarchyWindow.windows.Count; ++i)
+            // {
+            //     var window = HierarchyWindow.windows[i];
+            //     if (window.editorWindow == null) continue;
+            //     var item = window.GetItemAndRowIndex(id, out row);
+            //     if (item == null) return;
+            //     item.icon = icon as Texture2D;
+            // }
         }
 
         [Obsolete]
         internal static void HideNameObject(int id)
         {
-            var row = -1;
-            for (int i = 0; i < HierarchyWindow.windows.Count; ++i)
-            {
-                var window = HierarchyWindow.windows[i];
-                if (window.editorWindow == null) continue;
-                var item = window.GetItemAndRowIndex(id, out row);
-                if (item == null) return;
-                item.displayName = "";
-            }
+            // var row = -1;
+            // for (int i = 0; i < HierarchyWindow.windows.Count; ++i)
+            // {
+            //     var window = HierarchyWindow.windows[i];
+            //     if (window.editorWindow == null) continue;
+            //     var item = window.GetItemAndRowIndex(id, out row);
+            //     if (item == null) return;
+            //     item.displayName = "";
+            // }
         }
 
         static void OnRepaintHierarchyWindow()
@@ -945,7 +945,12 @@ namespace Hierarchy2
                         return;
                 }
                 
-                ReplaceObjectIcon(rowItem.ID, icon);
+                Color guiColor = GUI.color;
+                GUI.color = rowItem.rowIndex % 2 != 0 ? ThemeData.colorRowEven : ThemeData.colorRowOdd;
+                GUI.DrawTexture(rect, Resources.PixelWhite);
+                GUI.color = guiColor;
+                GUI.DrawTexture(rect, icon, ScaleMode.ScaleToFit);
+                //ReplaceObjectIcon(rowItem.ID, icon);
             }
         }
 
@@ -1636,7 +1641,7 @@ namespace Hierarchy2
 
             public void Reflection()
             {
-                treeview = m_TreeView.GetValue(m_SceneHierarchy.GetValue(editorWindow));
+                // treeview = m_TreeView.GetValue(m_SceneHierarchy.GetValue(editorWindow));
             }
             
             public void Dispose()
@@ -1652,9 +1657,10 @@ namespace Hierarchy2
             public TreeViewItem GetItemAndRowIndex(int id, out int row)
             {
                 row = -1;
-                if (treeview == null) return null;
-                var item = GetItemAndRowIndexMethod.Invoke(treeview, new object[] {id, row}) as TreeViewItem;
-                return item;
+                // if (treeview == null) return null;
+                // var item = GetItemAndRowIndexMethod.Invoke(treeview, new object[] {id, row}) as TreeViewItem;
+                // return item;
+                return null;
             }
 
             public void SetWindowTitle(string value)
