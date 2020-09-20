@@ -95,7 +95,7 @@ namespace Hierarchy2
             }
 
             Vector2 v2 = GUIUtility.GUIToScreenPoint(Event.current.mousePosition);
-            Vector2 size = new Vector2(256, 164);
+            Vector2 size = new Vector2(256, 138);
             window.position = new Rect(v2.x, v2.y, size.x, size.y);
             window.maxSize = window.minSize = size;
             window.ShowPopup();
@@ -107,7 +107,7 @@ namespace Hierarchy2
 
         void OnEnable()
         {
-            rootVisualElement.StyleMargin(2, 2, 2, 0);
+            rootVisualElement.StyleMargin(4, 4, 2, 0);
 
             hierarchyLocalData = HierarchyEditor.Instance.GetHierarchyLocalData(Selection.activeGameObject.scene);
             gameObject = Selection.activeGameObject;
@@ -128,7 +128,7 @@ namespace Hierarchy2
                 customRowItem.backgroundMode = (CustomRowItem.BackgroundMode)EditorGUILayout.EnumPopup("Background Mode", customRowItem.backgroundMode);
                 customRowItem.backgroundColor = EditorGUILayout.ColorField("Background Color", customRowItem.backgroundColor);
                 
-                customRowItem.customLabel = EditorGUILayout.Toggle("Label", customRowItem.customLabel);
+                customRowItem.overrideLabel = EditorGUILayout.Toggle("Override Label", customRowItem.overrideLabel);
 
                 var wideMode = EditorGUIUtility.wideMode;
                 EditorGUIUtility.wideMode = true;

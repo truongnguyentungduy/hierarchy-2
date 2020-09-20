@@ -5,10 +5,10 @@ using UnityEngine;
 
 namespace Hierarchy2
 {
-    [AddComponentMenu("Hierarchy 2/Hierarchy Folder (Experimental)", 0)]
+    [AddComponentMenu("Hierarchy 2/Hierarchy Folder", 0)]
     public class HierarchyFolder : MonoBehaviour
     {
-        public enum DoFlatten
+        public enum FlattenMode
         {
             None = 0,
             Editor = 1,
@@ -16,15 +16,15 @@ namespace Hierarchy2
             All = 3
         }
 
-        public enum FlattenMode
+        public enum FlattenSpace
         {
             Parent = 0,
             World = 1
         }
 
-        public DoFlatten doFlatten = DoFlatten.None;
+        public FlattenMode flattenMode = FlattenMode.None;
 
-        public FlattenMode flattenMode = FlattenMode.Parent;
+        public FlattenSpace flattenSpace = FlattenSpace.Parent;
 
         public bool destroyAfterFlatten = true;
 
@@ -35,19 +35,19 @@ namespace Hierarchy2
 
         public void Flatten()
         {
-            if (doFlatten == DoFlatten.None)
+            if (flattenMode == FlattenMode.None)
                 return;
 
-            if (doFlatten != DoFlatten.All)
+            if (flattenMode != FlattenMode.All)
             {
-                if (doFlatten == DoFlatten.Editor && !Application.isEditor)
+                if (flattenMode == FlattenMode.Editor && !Application.isEditor)
                     return;
 
-                if (doFlatten == DoFlatten.Runtime && Application.isEditor)
+                if (flattenMode == FlattenMode.Runtime && Application.isEditor)
                     return;
             }
 
-            var parent = flattenMode == FlattenMode.World ? null : transform.parent;
+            var parent = flattenSpace == FlattenSpace.World ? null : transform.parent;
             var childCount = transform.childCount;
             while (childCount-- > 0)
                 transform.GetChild(0).SetParent(parent);

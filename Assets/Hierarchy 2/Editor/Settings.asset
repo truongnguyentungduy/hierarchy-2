@@ -55,7 +55,7 @@ MonoBehaviour:
   displayCustomObjectIcon: 1
   displayTreeView: 1
   displayRowBackground: 1
-  displayGrid: 0
+  displayGrid: 1
   displayStaticButton: 1
   offSetIconAfterName: 8
   displayComponents: 1

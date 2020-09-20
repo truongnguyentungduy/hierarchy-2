@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 namespace Hierarchy2
 {
-    [ExecuteInEditMode]
+    [ExecuteInEditMode, AddComponentMenu("Hierarchy 2/Hierarchy Local Data", 100)]
     public class HierarchyLocalData : MonoBehaviour
     {
         public static Dictionary<Scene, HierarchyLocalData> instances = new Dictionary<Scene, HierarchyLocalData>();
@@ -20,12 +20,8 @@ namespace Hierarchy2
 
             if (!gameObject.CompareTag("EditorOnly"))
                 gameObject.tag = "EditorOnly";
-
-#if HIERARCHY2_DEBUG
+            
             gameObject.hideFlags = HideFlags.DontSaveInBuild;
-#else
-            gameObject.hideFlags = HideFlags.DontSaveInBuild | HideFlags.HideInHierarchy;
-#endif
 
             ClearNullRef();
             ConvertToDic();
@@ -69,6 +65,6 @@ namespace Hierarchy2
 
         void ConvertToDic() => dCustomRowItems = lCustomRowItems.ToDictionary(item => item.gameObject);
 
-        void ClearNullRef() => lCustomRowItems.RemoveAll(item => item.gameObject == null);
+        public void ClearNullRef() => lCustomRowItems.RemoveAll(item => item.gameObject == null);
     }
 }

@@ -11,8 +11,6 @@ namespace Hierarchy2
     [CustomEditor(typeof(HierarchyFolder))]
     internal class HierarchyFolderEditor : Editor
     {
-        private bool iconSettingsFoldout = false;
-        
         private void OnEnable()
         {
 
@@ -26,10 +24,10 @@ namespace Hierarchy2
 
             IMGUIContainer imguiContainer = new IMGUIContainer(() =>
             {
-                script.doFlatten = (HierarchyFolder.DoFlatten) EditorGUILayout.EnumPopup("Do Flatten", script.doFlatten);
-                if (script.doFlatten != HierarchyFolder.DoFlatten.None)
+                script.flattenMode = (HierarchyFolder.FlattenMode) EditorGUILayout.EnumPopup("Flatten Mode", script.flattenMode);
+                if (script.flattenMode != HierarchyFolder.FlattenMode.None)
                 {
-                    script.flattenMode = (HierarchyFolder.FlattenMode) EditorGUILayout.EnumPopup("Flatten Mode", script.flattenMode);
+                    script.flattenSpace = (HierarchyFolder.FlattenSpace) EditorGUILayout.EnumPopup("Flatten Space", script.flattenSpace);
                     script.destroyAfterFlatten = EditorGUILayout.Toggle("Destroy After Flatten", script.destroyAfterFlatten);
                 }
             });

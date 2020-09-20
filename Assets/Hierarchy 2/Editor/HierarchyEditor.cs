@@ -816,7 +816,7 @@ namespace Hierarchy2
                 GUI.color = guiColor;
             }
 
-            if (rowItem.customRowItem.customLabel)
+            if (rowItem.customRowItem.overrideLabel)
             {
                 var rect = rowItem.nameRect;
                 rect.center += rowItem.customRowItem.labelOffset;
