@@ -822,7 +822,13 @@ namespace Hierarchy2
                 rect.center += rowItem.customRowItem.labelOffset;
                 
                 Color guiColor = GUI.color;
-                GUI.color = rowItem.customRowItem.labelColor;
+                var color = rowItem.customRowItem.labelColor;
+                if (!rowItem.gameObject.activeInHierarchy)
+                {
+                    rect.y += 1;
+                    color = Color.Lerp(color, Color.gray, .5f);
+                }
+                GUI.color = color;
                 GUI.Label(rect, rowItem.name, Styles.TreeLabel);
                 GUI.color = guiColor;
             }
