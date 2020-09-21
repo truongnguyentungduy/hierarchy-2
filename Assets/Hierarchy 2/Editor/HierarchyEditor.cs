@@ -1880,10 +1880,11 @@ namespace Hierarchy2
                 get { return TreeView.DefaultStyles.boldLabel; }
             }
 
-            internal static GUIStyle TreeLabel
+            internal static GUIStyle TreeLabel = new GUIStyle(TreeView.DefaultStyles.label)
             {
-                get { return TreeView.DefaultStyles.label; }
-            }
+                richText = true,
+                normal = new GUIStyleState() {textColor = Color.white}
+            };
         }
 
         internal sealed class MenuCommand
