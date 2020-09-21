@@ -18,6 +18,9 @@ namespace Hierarchy2
 
         public override void OnInspectorGUI()
         {
+            if (!hld.gameObject.CompareTag("EditorOnly"))
+                hld.gameObject.tag = "EditorOnly";
+            
             EditorGUILayout.HelpBox("Holding reference custom data of row item on hierarchy\nExclude in build.", MessageType.Info);
             EditorGUILayout.BeginVertical("box");
             base.OnInspectorGUI();
