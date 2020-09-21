@@ -1640,7 +1640,7 @@ namespace Hierarchy2
                 instances.Add(instanceID, this.editorWindow);
                 windows.Add(this);
                 
-                Debug.Log(string.Format("HierarchyWindow {0} Instanced.", instanceID));
+                // Debug.Log(string.Format("HierarchyWindow {0} Instanced.", instanceID));
 
                 Reflection();
             }
@@ -1657,7 +1657,7 @@ namespace Hierarchy2
                 instances.Remove(instanceID);
                 windows.Remove(this);
                 
-                Debug.Log(string.Format("HierarchyWindow {0} Disposed.", instanceID));
+                // Debug.Log(string.Format("HierarchyWindow {0} Disposed.", instanceID));
             }
 
             public TreeViewItem GetItemAndRowIndex(int id, out int row)
