@@ -74,7 +74,8 @@ namespace Hierarchy2
         {
             Component = (1 << 0),
             Tag = (1 << 1),
-            Layer = (1 << 2)
+            Layer = (1 << 2),
+            Toggle = (1 << 3)
         }
 
         public ThemeData personalTheme;
@@ -141,7 +142,9 @@ namespace Hierarchy2
         public string headerPrefix = "$h";
         public string headerDefaultTag = "Untagged";
         public bool onlyDisplayWhileMouseEnter = false;
-        public ContentDisplay contentDisplay = ContentDisplay.Component | ContentDisplay.Tag | ContentDisplay.Layer;
+        public ContentDisplay contentDisplay = ContentDisplay.Component | ContentDisplay.Tag | ContentDisplay.Layer | ContentDisplay.Toggle;
+        public bool displayToggle = true;
+        public ElementAlignment toggleAlignment = ElementAlignment.AfterName;
 
 
         public delegate void OnSettingsChangedCallback(string param);
@@ -428,6 +431,29 @@ namespace Hierarchy2
                     layerAlignment.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(layerAlignment);
 
+                    var toggles = new Label("Toggles");
+                    toggles.StyleFont(FontStyle.Bold);
+                    toggles.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
+                    verticalLayout.Add(toggles);
+
+                    var displayToggles = new Toggle("Display Toggle") {value = settings.displayToggle};
+                    displayToggles.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.displayToggle = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.displayToggle));
+                    });
+                    displayToggles.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    verticalLayout.Add(displayToggles);
+                    
+                    var toggleAlignment = new EnumField(settings.toggleAlignment) {label = "Toggle Alignment"};
+                    toggleAlignment.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.toggleAlignment = (ElementAlignment) evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.toggleAlignment));
+                    });
+                    toggleAlignment.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    verticalLayout.Add(toggleAlignment);
+                    
                     var advanced = new Label("Advanced");
                     advanced.StyleFont(FontStyle.Bold);
                     advanced.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);

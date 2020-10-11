@@ -747,6 +747,18 @@ namespace Hierarchy2
                     }
                 }
 
+                if (settings.displayToggle)
+                {
+                    if (!settings.onlyDisplayWhileMouseEnter ||
+                        (settings.contentDisplay & HierarchySettings.ContentDisplay.Toggle) !=
+                        HierarchySettings.ContentDisplay.Toggle ||
+                        ((settings.contentDisplay & HierarchySettings.ContentDisplay.Toggle) ==
+                         HierarchySettings.ContentDisplay.Toggle && rowItem.isMouseHovering))
+                    {
+                        DisplayToggle(rowItem.gameObject);
+                    }
+                }
+                
                 ElementEvent(rowItem);
 
                 FINISH:
@@ -1133,6 +1145,47 @@ namespace Hierarchy2
                     GUISeparator(RectFromLeft(rowItem.nameRect, 2, widthUsedCached), ThemeData.colorGrid);
                 // else
                 //     GUISeparator(RectFromRight(element.rect, 2, widthUsedCached), ThemeData.colorGrid);
+            }
+        }
+        
+        private void DisplayToggle(GameObject gameObject)
+        {
+            float widthUsedCached;
+            if (settings.toggleAlignment == HierarchySettings.ElementAlignment.AfterName)
+            {
+                widthUsedCached = widthUse.afterName;
+                widthUse.afterName += 4;
+            }
+            else
+            {
+                widthUsedCached = widthUse.right;
+                widthUse.right += 2;
+            }
+
+            Rect rect;
+
+            if (settings.toggleAlignment == HierarchySettings.ElementAlignment.AfterName)
+                rect = RectFromLeft(rowItem.nameRect, settings.componentSize, ref widthUse.afterName);
+            else
+                rect = RectFromRight(rowItem.rect, settings.componentSize, ref widthUse.right);
+
+            if (currentEvent.type == EventType.Repaint)
+            {
+                if (settings.toggleAlignment == HierarchySettings.ElementAlignment.AfterName)
+                    GUISeparator(RectFromLeft(rowItem.nameRect, 2, widthUsedCached), ThemeData.colorGrid);
+                // else
+                //     GUISeparator(RectFromRight(element.rect, 2, widthUsedCached), ThemeData.colorGrid);
+            }
+
+            var content = new GUIContent(string.Empty, "Enable/Disable GameObject");
+            var result = GUI.Toggle(new Rect(rect.x + 2, rect.y, rect.width, rect.height), gameObject.activeSelf, content);
+            if (rect.Contains(Event.current.mousePosition))
+            {
+                if (result != gameObject.activeSelf)
+                {
+                    Undo.RecordObject(gameObject, "SetActive");
+                    gameObject.SetActive(result);
+                }
             }
         }
 
