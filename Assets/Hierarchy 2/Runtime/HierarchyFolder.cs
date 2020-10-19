@@ -49,8 +49,14 @@ namespace Hierarchy2
 
             var parent = flattenSpace == FlattenSpace.World ? null : transform.parent;
             var childCount = transform.childCount;
+            var parentOrderIndex = transform.GetSiblingIndex();
+
             while (childCount-- > 0)
-                transform.GetChild(0).SetParent(parent);
+            {
+                var child = transform.GetChild(0);
+                child.SetParent(parent);
+                child.SetSiblingIndex(++parentOrderIndex);
+            }
 
             if (destroyAfterFlatten)
                 Destroy(gameObject);
