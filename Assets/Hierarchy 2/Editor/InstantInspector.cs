@@ -23,6 +23,7 @@ namespace Hierarchy2
         public static InstantInspector OpenEditor()
         {
             InstantInspector window = GetWindow<InstantInspector>("Instant Inspector");
+            window.titleContent.image = EditorGUIUtility.IconContent("UnityEditor.InspectorWindow").image;
             return window;
         }
 
@@ -177,6 +178,10 @@ namespace Hierarchy2
                         EditorGUIUtility.labelWidth = tempWidth;
                     });
                 }
+
+                inspector.style.marginLeft = 16;
+                inspector.style.marginRight = 2;
+                inspector.style.marginTop = 4;
 
                 folout.Add(inspector);
                 editors.Add(editor);
