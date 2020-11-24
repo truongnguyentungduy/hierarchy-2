@@ -26,6 +26,12 @@ namespace Hierarchy2
             base.OnInspectorGUI();
             EditorGUILayout.EndVertical();
 
+            if (GUILayout.Button("Refresh Manually"))
+            {
+                hld.ClearNullRef();
+                hld.ConvertToDic();
+            }
+            
             if (GUILayout.Button("ClearNullRef"))
             {
                 hld.ClearNullRef();

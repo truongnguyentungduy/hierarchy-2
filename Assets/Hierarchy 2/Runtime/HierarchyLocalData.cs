@@ -63,7 +63,7 @@ namespace Hierarchy2
             return dCustomRowItems.TryGetValue(go, out customRowItem);
         }
 
-        void ConvertToDic() => dCustomRowItems = lCustomRowItems.ToDictionary(item => item.gameObject);
+        public void ConvertToDic() => dCustomRowItems = lCustomRowItems.ToDictionary(item => item.gameObject);
 
         public void ClearNullRef() => lCustomRowItems.RemoveAll(item => item.gameObject == null);
     }
