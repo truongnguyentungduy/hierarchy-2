@@ -49,7 +49,7 @@ namespace Hierarchy2
 
             var parent = flattenSpace == FlattenSpace.World ? null : transform.parent;
             var childCount = transform.childCount;
-            var parentOrderIndex = transform.GetSiblingIndex();
+            var parentOrderIndex = flattenSpace == FlattenSpace.World ? transform.root.GetSiblingIndex() : transform.GetSiblingIndex();
 
             while (childCount-- > 0)
             {
