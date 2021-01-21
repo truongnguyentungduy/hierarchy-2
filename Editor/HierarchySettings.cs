@@ -661,7 +661,18 @@ namespace Hierarchy2
                     return asset;
             }
 
-            return null;
+            return CreateAssetsAuto();
+        }
+        
+        internal static HierarchySettings CreateAssetsAuto()
+        {
+            HierarchySettings settings = ScriptableObject.CreateInstance<HierarchySettings>();
+            AssetDatabase.CreateAsset(settings, "Assets/Hierarchy Settings.asset");
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            EditorUtility.FocusProjectWindow();
+            Selection.activeObject = settings;
+            return settings;
         }
 
         internal static HierarchySettings CreateAssets()
