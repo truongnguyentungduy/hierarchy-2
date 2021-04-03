@@ -122,7 +122,7 @@ namespace Hierarchy2
         {
             All = 0,
             ScriptOnly = 1,
-            Below = 2,
+            Specified = 2,
             Ignore = 3
         }
 
@@ -291,7 +291,7 @@ namespace Hierarchy2
                         settings.componentDisplayMode = (ComponentDisplayMode) evt.newValue;
                         switch (settings.componentDisplayMode)
                         {
-                            case ComponentDisplayMode.Below:
+                            case ComponentDisplayMode.Specified:
                                 componentListInput.StyleDisplay(true);
                                 break;
 

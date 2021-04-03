@@ -1071,7 +1071,7 @@ namespace Hierarchy2
                                     continue;
                                 break;
 
-                            case HierarchySettings.ComponentDisplayMode.Below:
+                            case HierarchySettings.ComponentDisplayMode.Specified:
                                 if (!dicComponents.ContainsKey(comType.Name))
                                     continue;
                                 break;
