@@ -128,6 +128,7 @@ namespace Hierarchy2
 
         public ComponentDisplayMode componentDisplayMode = ComponentDisplayMode.Ignore;
         public string[] components = new string[] {"Transform", "RectTransform"};
+        public bool onlyDisplayScriptWithAttribute = false;
         [HideInInspector] public int componentLimited = 0;
         [Range(12, 16)] public int componentSize = 16;
         public int componentSpacing = 0;
@@ -261,6 +262,17 @@ namespace Hierarchy2
                     });
                     displayComponents.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayComponents);
+
+                    var onlyDisplayScriptWithAttribute = new Toggle("Script With Attribute");
+                    onlyDisplayScriptWithAttribute.tooltip = "Only display MonoBehaviour script With DisplayOnHierarchyAttribute";
+                    onlyDisplayScriptWithAttribute.value = settings.onlyDisplayScriptWithAttribute;
+                    onlyDisplayScriptWithAttribute.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.onlyDisplayScriptWithAttribute = evt.newValue;
+                        settings.onSettingsChanged(nameof(settings.onlyDisplayScriptWithAttribute));
+                    });
+                    onlyDisplayScriptWithAttribute.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    verticalLayout.Add(onlyDisplayScriptWithAttribute);
 
                     var componentAlignment = new EnumField(settings.componentAlignment);
                     componentAlignment.label = "Component Alignment";
@@ -443,8 +455,8 @@ namespace Hierarchy2
                         settings.OnSettingsChanged(nameof(settings.headerPrefix));
                     });
                     verticalLayout.Add(headerPrefix);
-                    
-                    
+
+
                     var headerDefaultTag = new TagField();
                     headerDefaultTag.label = "Header Default Tag";
                     headerDefaultTag.value = settings.headerDefaultTag;
@@ -471,10 +483,7 @@ namespace Hierarchy2
                     var contentMaskEnumFlags = new EnumFlagsField(settings.contentDisplay);
                     contentMaskEnumFlags.StyleDisplay(onlyDisplayWhileMouseHovering.value);
                     contentMaskEnumFlags.label = "Content Mask";
-                    onlyDisplayWhileMouseHovering.RegisterValueChangedCallback((evt) =>
-                    {
-                        contentMaskEnumFlags.StyleDisplay(evt.newValue);
-                    });
+                    onlyDisplayWhileMouseHovering.RegisterValueChangedCallback((evt) => { contentMaskEnumFlags.StyleDisplay(evt.newValue); });
                     contentMaskEnumFlags.RegisterValueChangedCallback((evt) =>
                     {
                         settings.contentDisplay = (ContentDisplay) evt.newValue;

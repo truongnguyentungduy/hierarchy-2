@@ -88,6 +88,8 @@ namespace Hierarchy2
 
         static List<Type> InternalEditorType = new List<Type>();
         static Dictionary<string, Type> dicInternalEditorType = new Dictionary<string, Type>();
+        static List<Type> DisplayOnHierarchyScriptType = new List<Type>();
+        static Dictionary<string, Type> dicDisplayOnHierarchyScriptType = new Dictionary<string, Type>();
 
         static Type SceneHierarchyWindow;
         static Type SceneHierarchy;
@@ -189,7 +191,7 @@ namespace Hierarchy2
 
             GetItemAndRowIndexMethod = m_TreeView.FieldType.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
                 .Single(method => method.Name == "GetItemAndRowIndex");
-            
+
             m_TreeView_IData = m_TreeView.FieldType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Single(property => property.Name == "data");
 
@@ -209,7 +211,7 @@ namespace Hierarchy2
         private static MethodInfo GetItemAndRowIndexMethod;
         private static PropertyInfo m_TreeView_IData;
         private static FieldInfo m_Rows;
-        
+
         internal static void ReplaceObjectIcon(int id, Texture icon)
         {
             // var row = -1;
@@ -367,7 +369,7 @@ namespace Hierarchy2
                         --i;
                     }
                 }
-                
+
                 foreach (EditorWindow window in GetAllSceneHierarchyWindowsDelegate())
                 {
                     if (!HierarchyWindow.instances.ContainsKey(window.GetInstanceID()))
@@ -447,7 +449,7 @@ namespace Hierarchy2
         void OnPrefabStageClosing(PrefabStage stage)
         {
             prefabStageChanged = true;
-            
+
             for (int i = 0; i < HierarchyWindow.windows.Count; ++i)
             {
                 HierarchyWindow.windows[i].Reflection();
@@ -542,7 +544,6 @@ namespace Hierarchy2
 
             if (selectionStyleAfterInvoke == false && currentEvent.type == EventType.MouseDown)
             {
-
                 selectionStyleAfterInvoke = true;
             }
 
@@ -562,7 +563,7 @@ namespace Hierarchy2
                 rowItem.hierarchyFolder = rowItem.gameObject.GetComponent<HierarchyFolder>();
                 if (!(rowItem.isFolder = rowItem.hierarchyFolder))
                     rowItem.isHeader = rowItem.name.Contains(settings.headerPrefix);
-                
+
                 rowItem.isDirty = EditorUtility.IsDirty(selectionID);
 
                 if (true && !rowItem.isHeader && rowItem.isDirty)
@@ -667,13 +668,13 @@ namespace Hierarchy2
                         DisplayRowBackground();
                 }
 
-                
+
                 if (rowItem.isFolder)
                 {
                     var icon = rowItem.childCount > 0 ? Resources.FolderIcon : Resources.EmptyFolderIcon;
                     DisplayCustomObjectIcon(icon);
                 }
-                
+
                 if (rowItem.isHeader && rowItem.isRootObject)
                 {
                     ElementAsHeader();
@@ -820,7 +821,7 @@ namespace Hierarchy2
             {
                 var rect = rowItem.nameRect;
                 rect.center += rowItem.customRowItem.labelOffset;
-                
+
                 Color guiColor = GUI.color;
                 var color = rowItem.customRowItem.labelColor;
                 if (!rowItem.gameObject.activeInHierarchy)
@@ -828,6 +829,7 @@ namespace Hierarchy2
                     rect.y += 1;
                     color = Color.Lerp(color, Color.gray, .5f);
                 }
+
                 GUI.color = color;
                 GUI.Label(rect, rowItem.name, Styles.TreeLabel);
                 GUI.color = guiColor;
@@ -950,7 +952,7 @@ namespace Hierarchy2
                         icon.name == "d_PrefabModel Icon")
                         return;
                 }
-                
+
                 Color guiColor = GUI.color;
                 GUI.color = rowItem.rowIndex % 2 != 0 ? ThemeData.colorRowEven : ThemeData.colorRowOdd;
                 GUI.DrawTexture(rect, Resources.PixelWhite);
@@ -1063,6 +1065,11 @@ namespace Hierarchy2
                     {
                         bool isMono = false;
                         if (comType.BaseType == typeof(MonoBehaviour)) isMono = true;
+                        if (settings.onlyDisplayScriptWithAttribute && isMono)
+                        {
+                            bool shouldIgnoreThisMono = comType.GetCustomAttribute(typeof(DisplayOnHierarchyAttribute), true) != null ? false : true;
+                            if (shouldIgnoreThisMono) continue;
+                        }
 
                         switch (settings.componentDisplayMode)
                         {
@@ -1634,12 +1641,12 @@ namespace Hierarchy2
             public HierarchyWindow(EditorWindow editorWindow)
             {
                 this.editorWindow = editorWindow;
-                
+
                 instanceID = this.editorWindow.GetInstanceID();
-                
+
                 instances.Add(instanceID, this.editorWindow);
                 windows.Add(this);
-                
+
                 // Debug.Log(string.Format("HierarchyWindow {0} Instanced.", instanceID));
 
                 Reflection();
@@ -1649,14 +1656,14 @@ namespace Hierarchy2
             {
                 // treeview = m_TreeView.GetValue(m_SceneHierarchy.GetValue(editorWindow));
             }
-            
+
             public void Dispose()
             {
                 editorWindow = null;
                 treeview = null;
                 instances.Remove(instanceID);
                 windows.Remove(this);
-                
+
                 // Debug.Log(string.Format("HierarchyWindow {0} Disposed.", instanceID));
             }
 
@@ -1677,7 +1684,7 @@ namespace Hierarchy2
                 editorWindow.titleContent.text = value;
             }
         }
-        
+
         sealed class RowItem
         {
             public int ID = int.MinValue;
@@ -1809,7 +1816,7 @@ namespace Hierarchy2
             internal static readonly Texture lockIconOn = EditorGUIUtility.IconContent("LockIcon-On").image;
 
             private static Texture folderIcon;
-            
+
             public static Texture FolderIcon
             {
                 get
@@ -1821,7 +1828,7 @@ namespace Hierarchy2
             }
 
             private static Texture emptyFolderIcon;
-            
+
             public static Texture EmptyFolderIcon
             {
                 get
@@ -1964,7 +1971,7 @@ namespace Hierarchy2
 
             [MenuItem("GameObject/Move Selection Down #s", true, priority)]
             static bool ValidateQuickSiblingDown() => Selection.activeTransform != null;
-            
+
             [MenuItem("GameObject/Header (Separator)", priority = 0)]
             static void CreateHeaderInstance() => new GameObject(string.Format("{0}Header", HierarchyEditor.instance.settings.headerPrefix));
         }
