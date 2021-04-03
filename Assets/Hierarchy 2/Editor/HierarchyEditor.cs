@@ -693,6 +693,9 @@ namespace Hierarchy2
                 if (rowItem.hasCustom)
                     CustomRow();
 
+                if (settings.useCustomBGElementPrefix && (!rowItem.hasCustom || !rowItem.customRowItem.useBackground))
+                    CustomRowBGPrefix();
+
                 if (settings.displayTreeView && !rowItem.isRootObject)
                     DisplayTreeView();
 
@@ -834,6 +837,24 @@ namespace Hierarchy2
                 GUI.Label(rect, rowItem.name, Styles.TreeLabel);
                 GUI.color = guiColor;
             }
+        }
+
+        void CustomRowBGPrefix()
+        {
+            if (currentEvent.type != EventType.Repaint)
+                return;
+            if (!rowItem.name.Contains(settings.customBGElementPrefix))
+                return;
+            Color guiColor = GUI.color;
+            GUI.color = settings.customBGelementPrefixColor;
+            Rect rect;
+            var texture = Resources.PixelWhite;
+            rect = RectFromRight(rowItem.rect, rowItem.rect.width + 16, 0);
+            rect.x += 16;
+            rect.xMin = 32;
+
+            GUI.DrawTexture(rect, texture, ScaleMode.StretchToFill);
+            GUI.color = guiColor;
         }
 
         void ElementAsHeader()

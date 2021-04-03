@@ -141,6 +141,9 @@ namespace Hierarchy2
         public bool applyLayerTargetAndChild = true;
         public string headerPrefix = "$h";
         public string headerDefaultTag = "Untagged";
+        public bool useCustomBGElementPrefix = false;
+        public string customBGElementPrefix = "__";
+        public Color customBGelementPrefixColor = new Color(0.23f, 0.34f, 0.47f, 0.41f);
         public bool onlyDisplayWhileMouseEnter = false;
         public ContentDisplay contentDisplay = ContentDisplay.Component | ContentDisplay.Tag | ContentDisplay.Layer;
 
@@ -264,7 +267,7 @@ namespace Hierarchy2
                     verticalLayout.Add(displayComponents);
 
                     var onlyDisplayScriptWithAttribute = new Toggle("Script With Attribute");
-                    onlyDisplayScriptWithAttribute.tooltip = "Only display MonoBehaviour script With DisplayOnHierarchyAttribute";
+                    onlyDisplayScriptWithAttribute.tooltip = "Only display MonoBehaviour script with DisplayOnHierarchyAttribute";
                     onlyDisplayScriptWithAttribute.value = settings.onlyDisplayScriptWithAttribute;
                     onlyDisplayScriptWithAttribute.RegisterValueChangedCallback((evt) =>
                     {
@@ -456,7 +459,6 @@ namespace Hierarchy2
                     });
                     verticalLayout.Add(headerPrefix);
 
-
                     var headerDefaultTag = new TagField();
                     headerDefaultTag.label = "Header Default Tag";
                     headerDefaultTag.value = settings.headerDefaultTag;
@@ -469,8 +471,40 @@ namespace Hierarchy2
                     headerDefaultTag.StyleMarginBottom(4);
                     verticalLayout.Add(headerDefaultTag);
 
+                    var useCustomBGElementPrefix = new Toggle("CustomRowBGPrefix");
+                    useCustomBGElementPrefix.StyleMarginTop(7);
+                    useCustomBGElementPrefix.value = settings.useCustomBGElementPrefix;
+                    useCustomBGElementPrefix.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.useCustomBGElementPrefix = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.useCustomBGElementPrefix));
+                    });
+                    useCustomBGElementPrefix.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    verticalLayout.Add(useCustomBGElementPrefix);
+
+                    var customBGElementPrefix = new TextField("    ");
+                    customBGElementPrefix.value = settings.customBGElementPrefix;
+                    customBGElementPrefix.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    customBGElementPrefix.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.customBGElementPrefix = evt.newValue == string.Empty ? "_" : evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.customBGElementPrefix));
+                    });
+                    verticalLayout.Add(customBGElementPrefix);
+
+                    ColorField customBGElementPrefixColor = new ColorField("    ");
+                    customBGElementPrefixColor.value = settings.customBGelementPrefixColor;
+                    customBGElementPrefixColor.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    customBGElementPrefixColor.RegisterValueChangedCallback((evt) =>
+                    {
+                        settings.customBGelementPrefixColor = evt.newValue;
+                        settings.OnSettingsChanged();
+                    });
+                    verticalLayout.Add(customBGElementPrefixColor);
+
                     var onlyDisplayWhileMouseHovering = new Toggle("Display Hovering");
                     onlyDisplayWhileMouseHovering.tooltip = "Only display while mouse hovering";
+                    onlyDisplayWhileMouseHovering.StyleMarginTop(7);
                     onlyDisplayWhileMouseHovering.value = settings.onlyDisplayWhileMouseEnter;
                     onlyDisplayWhileMouseHovering.RegisterValueChangedCallback((evt) =>
                     {
