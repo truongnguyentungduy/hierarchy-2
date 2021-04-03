@@ -487,7 +487,7 @@ namespace Hierarchy2
                     customBGElementPrefix.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     customBGElementPrefix.RegisterValueChangedCallback((evt) =>
                     {
-                        settings.customBGElementPrefix = evt.newValue == string.Empty ? "_" : evt.newValue;
+                        settings.customBGElementPrefix = evt.newValue == string.Empty ? "__" : evt.newValue;
                         settings.OnSettingsChanged(nameof(settings.customBGElementPrefix));
                     });
                     verticalLayout.Add(customBGElementPrefix);
