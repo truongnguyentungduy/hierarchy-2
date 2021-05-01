@@ -2005,7 +2005,17 @@ namespace Hierarchy2
             static bool ValidateQuickSiblingDown() => Selection.activeTransform != null;
 
             [MenuItem("GameObject/Header (Separator)", priority = 0)]
-            static void CreateHeaderInstance() => new GameObject(string.Format("{0}Header", HierarchyEditor.instance.settings.headerPrefix));
+            static void CreateHeaderInstance(UnityEditor.MenuCommand command)
+            {
+                GameObject gameObject = new GameObject(string.Format("{0}Header", HierarchyEditor.instance.settings.headerPrefix));
+                
+                Undo.RegisterCreatedObjectUndo(gameObject, "Create Header");
+                // Don't create headers as children of the selected objects because only root headers are drawn with background
+                //if(command.context)
+                //    Undo.SetTransformParent(gameObject.transform, ( (GameObject) command.context ).transform, "Create Header");
+
+                Selection.activeTransform = gameObject.transform;
+            }
         }
     }
 }
