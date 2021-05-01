@@ -3,6 +3,7 @@ using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.Experimental.SceneManagement;
 using UnityEditor.UIElements;
+using System.Collections.Generic;
 
 namespace Hierarchy2
 {
@@ -31,6 +32,7 @@ namespace Hierarchy2
                 if (isPrefabMode)
                 {
                     Debug.LogWarning("Cannot custom object in prefab.");
+                    shelfButton.parent.StyleDisplay(false);
                     evt.StopPropagation();
                     return;
                 }
@@ -38,24 +40,15 @@ namespace Hierarchy2
                 if (Application.isPlaying)
                 {
                     Debug.LogWarning("Cannot custom object in play mode.");
+                    shelfButton.parent.StyleDisplay(false);
                     evt.StopPropagation();
                     return;
                 }
                 
-                if (Selection.gameObjects.Length == 1 && Selection.activeGameObject != null)
-                {
-                    ObjectCustomizationPopup.ShowPopup(Selection.activeGameObject);
-                }
-                else
-                {
-                    if (Selection.gameObjects.Length > 1)
-                    {
-                        Debug.LogWarning("Only one object is allowed.");
-                    }
-                    else
-                        Debug.LogWarning("No object has been selected.");
-                }
+                ObjectCustomizationPopup.ShowPopup(Selection.GetFiltered<GameObject>(SelectionMode.ExcludePrefab));
+                Selection.activeGameObject = null;
 
+                shelfButton.parent.StyleDisplay(false);
                 evt.StopPropagation();
             });
 
@@ -77,69 +70,145 @@ namespace Hierarchy2
 
     public class ObjectCustomizationPopup : EditorWindow
     {
-        static EditorWindow window;
-        GameObject gameObject;
+        public class CustomRowItemHolder : ScriptableObject
+		{
+            public CustomRowItem customRowItem;
+        }
+
+        static ObjectCustomizationPopup window;
+        static GameObject[] gameObjects;
         HierarchyLocalData hierarchyLocalData;
+        CustomRowItemHolder[] customRowItemHolders;
 
-        public static ObjectCustomizationPopup ShowPopup(GameObject gameObject)
+        public static ObjectCustomizationPopup ShowPopup(GameObject[] gameObjects)
         {
-            if (Selection.gameObjects.Length > 1 || Selection.activeGameObject == null)
-                return null;
-
-            if (window == null)
-                window = ObjectCustomizationPopup.GetWindow<ObjectCustomizationPopup>(gameObject.name);
-            else
-            {
+            if (window != null)
                 window.Close();
-                window = ObjectCustomizationPopup.GetWindow<ObjectCustomizationPopup>(gameObject.name);
+
+            if (gameObjects == null || gameObjects.Length == 0)
+            { 
+                Debug.LogWarning("No object has been selected.");
+                return null;
             }
+
+			ObjectCustomizationPopup.gameObjects = gameObjects;
 
             Vector2 v2 = GUIUtility.GUIToScreenPoint(Event.current.mousePosition);
             Vector2 size = new Vector2(256, 138);
-            window.position = new Rect(v2.x, v2.y, size.x, size.y);
+            window = GetWindow<ObjectCustomizationPopup>(gameObjects[0].name);
+            window.position = new Rect(v2.x - size.x - 30f, v2.y - size.y * 0.5f, size.x, size.y);
             window.maxSize = window.minSize = size;
             window.ShowPopup();
             window.Focus();
 
-            ObjectCustomizationPopup objectCustomizationPopup = window as ObjectCustomizationPopup;
-            return objectCustomizationPopup;
+            return window;
         }
 
         void OnEnable()
         {
-            rootVisualElement.StyleMargin(4, 4, 2, 0);
+            if (gameObjects == null)
+                return;
 
-            hierarchyLocalData = HierarchyEditor.Instance.GetHierarchyLocalData(Selection.activeGameObject.scene);
-            gameObject = Selection.activeGameObject;
-            Selection.activeGameObject = null;
-
-            CustomRowItem customRowItem = null;
-            if (hierarchyLocalData.TryGetCustomRowData(gameObject, out customRowItem) == false)
-            {
-                customRowItem = hierarchyLocalData.CreateCustomRowItemFor(gameObject);
+            List<GameObject> _gameObjects = new List<GameObject>(gameObjects);
+            _gameObjects.RemoveAll((gameObject) => gameObject == null);
+            if (_gameObjects.Count == 0) // All GameObjects are destroyed
+            { 
+                Close();
+                return;
             }
 
+            rootVisualElement.StyleMargin(4, 4, 2, 0);
+
+            customRowItemHolders = new CustomRowItemHolder[_gameObjects.Count];
+
+            for (int i = 0; i < _gameObjects.Count; i++)
+            {
+                if (_gameObjects[i] == null)
+                    continue;
+
+                hierarchyLocalData = HierarchyEditor.Instance.GetHierarchyLocalData(_gameObjects[i].scene);
+
+                CustomRowItem customRowItem;
+                if (hierarchyLocalData.TryGetCustomRowData(_gameObjects[i], out customRowItem) == false)
+                    customRowItem = hierarchyLocalData.CreateCustomRowItemFor(_gameObjects[i]);
+
+                customRowItemHolders[i] = CreateInstance<CustomRowItemHolder>();
+                customRowItemHolders[i].customRowItem = customRowItem;
+            }
+            
+            SerializedProperty customRowItemsSerialized = new SerializedObject(customRowItemHolders).FindProperty("customRowItem");
+            SerializedProperty useBackground = customRowItemsSerialized.FindPropertyRelative("useBackground");
+            SerializedProperty backgroundStyle = customRowItemsSerialized.FindPropertyRelative("backgroundStyle");
+            SerializedProperty backgroundMode = customRowItemsSerialized.FindPropertyRelative("backgroundMode");
+            SerializedProperty backgroundColor = customRowItemsSerialized.FindPropertyRelative("backgroundColor");
+            SerializedProperty overrideLabel = customRowItemsSerialized.FindPropertyRelative("overrideLabel");
+            SerializedProperty labelOffset = customRowItemsSerialized.FindPropertyRelative("labelOffset");
+            SerializedProperty labelColor = customRowItemsSerialized.FindPropertyRelative("labelColor");
 
             IMGUIContainer iMGUIContainer = new IMGUIContainer(() =>
             {
-                customRowItem.useBackground = EditorGUILayout.Toggle("Background", customRowItem.useBackground);
-
-                customRowItem.backgroundStyle = (CustomRowItem.BackgroundStyle)EditorGUILayout.EnumPopup("Background Style", customRowItem.backgroundStyle);
-                customRowItem.backgroundMode = (CustomRowItem.BackgroundMode)EditorGUILayout.EnumPopup("Background Mode", customRowItem.backgroundMode);
-                customRowItem.backgroundColor = EditorGUILayout.ColorField("Background Color", customRowItem.backgroundColor);
-                
-                customRowItem.overrideLabel = EditorGUILayout.Toggle("Override Label", customRowItem.overrideLabel);
+                if (hierarchyLocalData == null || EditorApplication.isCompiling)
+				{
+                    Close();
+                    return;
+                }
 
                 var wideMode = EditorGUIUtility.wideMode;
+                var labelWidth = EditorGUIUtility.labelWidth;
                 EditorGUIUtility.wideMode = true;
-                customRowItem.labelOffset = EditorGUILayout.Vector2Field("Label Offset", customRowItem.labelOffset);
-                EditorGUIUtility.wideMode = wideMode;
-                customRowItem.labelColor = EditorGUILayout.ColorField("Label Color", customRowItem.labelColor);
+                EditorGUIUtility.labelWidth = 140f;
 
-                if (GUI.changed)
+                EditorGUI.BeginChangeCheck();
+
+                customRowItemsSerialized.serializedObject.Update();
+
+                EditorGUILayout.PropertyField(useBackground, new GUIContent("Background"));
+
+                GUI.enabled = useBackground.boolValue || useBackground.hasMultipleDifferentValues;
+                EditorGUI.indentLevel++;
+
+                EditorGUILayout.PropertyField(backgroundStyle);
+                EditorGUILayout.PropertyField(backgroundMode);
+                EditorGUILayout.PropertyField(backgroundColor);
+
+                EditorGUI.indentLevel--;
+                GUI.enabled = true;
+
+                EditorGUILayout.PropertyField(overrideLabel);
+
+                GUI.enabled = overrideLabel.boolValue || overrideLabel.hasMultipleDifferentValues;
+                EditorGUI.indentLevel++;
+
+                EditorGUILayout.PropertyField(labelOffset);
+                EditorGUILayout.PropertyField(labelColor);
+
+                EditorGUI.indentLevel--;
+                GUI.enabled = true;
+
+                customRowItemsSerialized.serializedObject.ApplyModifiedProperties();
+                
+                if (EditorGUI.EndChangeCheck())
                     EditorApplication.RepaintHierarchyWindow();
-            });
+
+                EditorGUIUtility.wideMode = wideMode;
+                EditorGUIUtility.labelWidth = labelWidth;
+            } );
             rootVisualElement.Add(iMGUIContainer);
-        }
+
+            Undo.undoRedoPerformed -= Repaint;
+            Undo.undoRedoPerformed += Repaint;
+
+		}
+
+        void OnDisable()
+		{
+            Undo.undoRedoPerformed -= Repaint;
+
+            if (customRowItemHolders != null)
+			{
+                foreach (CustomRowItemHolder customRowItemHolder in customRowItemHolders)
+                    DestroyImmediate(customRowItemHolder);
+			}
+		}
     }
 }
