@@ -562,7 +562,7 @@ namespace Hierarchy2
             {
                 rowItem.hierarchyFolder = rowItem.gameObject.GetComponent<HierarchyFolder>();
                 if (!(rowItem.isFolder = rowItem.hierarchyFolder))
-                    rowItem.isHeader = rowItem.name.Contains(settings.headerPrefix);
+                    rowItem.isHeader = rowItem.name.StartsWith(settings.headerPrefix);
 
                 rowItem.isDirty = EditorUtility.IsDirty(selectionID);
 
