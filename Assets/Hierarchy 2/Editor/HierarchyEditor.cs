@@ -1042,8 +1042,18 @@ namespace Hierarchy2
                     lockMenu.AddItem(new GUIContent("Unlock"), false, () =>
                     {
                         Undo.RegisterCompleteObjectUndo(gameObject, "Unlock...");
+                        foreach (Component component in gameObject.GetComponents<Component>())
+                        { 
+                            if (component)
+                            {
+                                Undo.RegisterCompleteObjectUndo (component, "Unlock..." );
+                                component.hideFlags = HideFlags.None;
+                            }
+                        }
+
                         gameObject.hideFlags = HideFlags.None;
-                        EditorUtility.SetDirty(gameObject);
+
+                        InternalEditorUtility.RepaintAllViews();
                     });
                     lockMenu.ShowAsContext();
                     currentEvent.Use();
@@ -1968,11 +1978,22 @@ namespace Hierarchy2
             static void SetNotEditableObject()
             {
                 Undo.RegisterCompleteObjectUndo(Selection.gameObjects, "Set Selections Flag NotEditable");
-                for (int i = 0; i < Selection.gameObjects.Length; ++i)
-                {
-                    Selection.gameObjects[i].hideFlags = HideFlags.NotEditable;
-                    EditorUtility.SetDirty(Selection.gameObjects[i]);
+                foreach (GameObject gameObject in Selection.gameObjects)
+                { 
+                    foreach (Component component in gameObject.GetComponents<Component>())
+                    { 
+                        if (component)
+                        {
+                            Undo.RegisterCompleteObjectUndo (component, "Set Selections Flag NotEditable");
+                            component.hideFlags = HideFlags.NotEditable;
+                        }
+                    }
                 }
+
+                foreach (GameObject gameObject in Selection.gameObjects)
+                    gameObject.hideFlags = HideFlags.NotEditable;
+                
+                InternalEditorUtility.RepaintAllViews();
             }
 
             [MenuItem("GameObject/Lock Selection %l", true, priority)]
@@ -1982,11 +2003,22 @@ namespace Hierarchy2
             static void SetEditableObject()
             {
                 Undo.RegisterCompleteObjectUndo(Selection.gameObjects, "Set Selections Flag Editable");
-                for (int i = 0; i < Selection.gameObjects.Length; ++i)
-                {
-                    Selection.gameObjects[i].hideFlags = HideFlags.None;
-                    EditorUtility.SetDirty(Selection.gameObjects[i]);
+                foreach (GameObject gameObject in Selection.gameObjects)
+                { 
+                    foreach (Component component in gameObject.GetComponents<Component>())
+                    { 
+                        if (component)
+                        {
+                            Undo.RegisterCompleteObjectUndo (component, "Set Selections Flag Editable");
+                            component.hideFlags = HideFlags.None;
+                        }
+                    }
                 }
+
+                foreach (GameObject gameObject in Selection.gameObjects)
+                    gameObject.hideFlags = HideFlags.None;
+
+                InternalEditorUtility.RepaintAllViews();
             }
 
             [MenuItem("GameObject/Unlock Selection %&l", true, priority)]
