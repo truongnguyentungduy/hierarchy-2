@@ -2003,11 +2003,9 @@ namespace Hierarchy2
                 var index = gameObject.transform.GetSiblingIndex();
                 if (index > 0)
                 {
-                    Undo.RegisterCompleteObjectUndo(gameObject, string.Format("{0} Parenting", gameObject.name));
+                    Undo.SetTransformParent(gameObject.transform, gameObject.transform.parent, string.Format("{0} Parenting", gameObject.name));
 
                     gameObject.transform.SetSiblingIndex(--index);
-                    if (!EditorApplication.isPlaying)
-                        EditorSceneManager.MarkSceneDirty(gameObject.scene);
                 }
             }
 
@@ -2021,12 +2019,10 @@ namespace Hierarchy2
                 if (gameObject == null)
                     return;
 
-                Undo.RegisterCompleteObjectUndo(gameObject, string.Format("{0} Parenting", gameObject.name));
+                Undo.SetTransformParent(gameObject.transform, gameObject.transform.parent, string.Format("{0} Parenting", gameObject.name));
 
                 var index = gameObject.transform.GetSiblingIndex();
                 gameObject.transform.SetSiblingIndex(++index);
-                if (!EditorApplication.isPlaying)
-                    EditorSceneManager.MarkSceneDirty(gameObject.scene);
             }
 
             [MenuItem("GameObject/Move Selection Down #s", true, priority)]
