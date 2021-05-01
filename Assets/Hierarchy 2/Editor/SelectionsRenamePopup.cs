@@ -149,9 +149,6 @@ namespace Hierarchy2
 
             rootVisualElement.StyleDisplay(DisplayStyle.None);
 
-            if (!EditorApplication.isPlaying)
-                EditorSceneManager.MarkSceneDirty(Selection.activeGameObject.scene);
-
             Close();
         }
     }
