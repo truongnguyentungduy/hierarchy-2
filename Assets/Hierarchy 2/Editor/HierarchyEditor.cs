@@ -287,6 +287,21 @@ namespace Hierarchy2
                     }
 
                     break;
+                case nameof(settings.hideHierarchyLocalDatas):
+                    foreach (HierarchyLocalData hierarchyLocalData in HierarchyLocalData.instances.Values)
+					{
+                        if (hierarchyLocalData != null)
+			            {
+                            if (settings.hideHierarchyLocalDatas)
+                                hierarchyLocalData.gameObject.hideFlags |= HideFlags.HideInHierarchy;
+                            else
+                                hierarchyLocalData.gameObject.hideFlags &= ~HideFlags.HideInHierarchy;
+
+                            DirtyScene(hierarchyLocalData.gameObject.scene);
+			            }
+					}
+
+                    break;
             }
 
             EditorApplication.RepaintHierarchyWindow();
@@ -406,6 +421,16 @@ namespace Hierarchy2
 
         void OnSceneOpened(Scene scene, OpenSceneMode mode)
         {
+            if (settings is null) return;
+
+            HierarchyLocalData hierarchyLocalData;
+            if (HierarchyLocalData.GetInstance(scene, out hierarchyLocalData))
+			{
+                if (settings.hideHierarchyLocalDatas)
+                    hierarchyLocalData.gameObject.hideFlags |= HideFlags.HideInHierarchy;
+                else
+                    hierarchyLocalData.gameObject.hideFlags &= ~HideFlags.HideInHierarchy;
+			}
         }
 
         void OnSceneClosed(Scene scene)

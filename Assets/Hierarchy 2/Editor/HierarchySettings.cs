@@ -160,6 +160,7 @@ namespace Hierarchy2
         public bool onlyDisplayWhileMouseEnter = false;
         public ContentDisplay contentDisplay = ContentDisplay.Component | ContentDisplay.Tag | ContentDisplay.Layer;
 
+        public bool hideHierarchyLocalDatas = false;
 
         public delegate void OnSettingsChangedCallback(string param);
 
@@ -542,6 +543,20 @@ namespace Hierarchy2
                     });
                     onlyDisplayWhileMouseHovering.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(onlyDisplayWhileMouseHovering);
+
+                    var hideHierarchyLocalDatas = new Toggle("Hide HierarchyLocalData(s)");
+                    hideHierarchyLocalDatas.tooltip = "Hide HierarhcyLocalData object(s) in Hierarchy";
+                    hideHierarchyLocalDatas.StyleMarginTop(7);
+                    hideHierarchyLocalDatas.value = settings.hideHierarchyLocalDatas;
+                    hideHierarchyLocalDatas.RegisterValueChangedCallback((evt) =>
+                    {
+                        Undo.RecordObject( settings, "Change Settings" );
+
+                        settings.hideHierarchyLocalDatas = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.hideHierarchyLocalDatas));
+                    });
+                    hideHierarchyLocalDatas.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    verticalLayout.Add( hideHierarchyLocalDatas );
 
                     var contentMaskEnumFlags = new EnumFlagsField(settings.contentDisplay);
                     contentMaskEnumFlags.StyleDisplay(onlyDisplayWhileMouseHovering.value);
