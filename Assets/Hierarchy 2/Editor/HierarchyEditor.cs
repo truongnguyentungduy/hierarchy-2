@@ -942,7 +942,6 @@ namespace Hierarchy2
                 Undo.RegisterCompleteObjectUndo(element.gameObject,
                     element.gameObject.activeSelf ? "Inactive object" : "Active object");
                 element.gameObject.SetActive(!element.gameObject.activeSelf);
-                DirtyScene(element.gameObject.scene);
                 currentEvent.Use();
                 return;
             }
