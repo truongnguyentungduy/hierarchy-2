@@ -94,7 +94,7 @@ namespace Hierarchy2
                             var scene = Selection.activeGameObject.scene;
                             GameObject group = new GameObject();
                             group.name = "New Group";
-                            Undo.RegisterCreatedObjectUndo(group, group.name);
+                            Undo.RegisterCreatedObjectUndo(group, "Group Selection");
                             EditorSceneManager.MoveGameObjectToScene(group, scene);
 
                             Vector3 offset = Vector3.zero;
@@ -108,10 +108,9 @@ namespace Hierarchy2
                             group.transform.SetParent(Selection.activeTransform.parent);
 
                             foreach (var go in Selection.gameObjects)
-                                Undo.SetTransformParent(go.transform, group.transform, option1.text);
+                                Undo.SetTransformParent(go.transform, group.transform, "Group Selection");
 
                             Selection.activeGameObject = group;
-                            EditorSceneManager.MarkSceneDirty(scene);
                         }
                         else
                         {
@@ -147,7 +146,7 @@ namespace Hierarchy2
                         var scene = Selection.activeGameObject.scene;
                         GameObject group = new GameObject();
                         group.name = "New Group";
-                        Undo.RegisterCreatedObjectUndo(group, group.name);
+                        Undo.RegisterCreatedObjectUndo(group, "Group Selection");
                         EditorSceneManager.MoveGameObjectToScene(group, scene);
 
                         Vector3 offset = Vector3.zero;
@@ -159,10 +158,9 @@ namespace Hierarchy2
                         group.transform.localScale = Vector3.one;
 
                         foreach (var go in Selection.gameObjects)
-                            Undo.SetTransformParent(go.transform, group.transform, option2.text);
+                            Undo.SetTransformParent(go.transform, group.transform, "Group Selection");
 
                         Selection.activeGameObject = group;
-                        EditorSceneManager.MarkSceneDirty(scene);
                     }
                     else
                     {
@@ -194,7 +192,7 @@ namespace Hierarchy2
                         var scene = Selection.activeGameObject.scene;
                         GameObject group = new GameObject();
                         group.name = "New Group";
-                        Undo.RegisterCreatedObjectUndo(group, group.name);
+                        Undo.RegisterCreatedObjectUndo(group, "Group Selection");
                         EditorSceneManager.MoveGameObjectToScene(group, scene);
 
                         group.transform.position = Vector3.zero;
@@ -202,10 +200,9 @@ namespace Hierarchy2
                         group.transform.localScale = Vector3.one;
 
                         foreach (var go in Selection.gameObjects)
-                            Undo.SetTransformParent(go.transform, group.transform, option3.text);
+                            Undo.SetTransformParent(go.transform, group.transform, "Group Selection");
 
                         Selection.activeGameObject = group;
-                        EditorSceneManager.MarkSceneDirty(scene);
                     }
                     else
                     {
