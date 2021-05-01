@@ -33,6 +33,7 @@ namespace Hierarchy2
             shelfButton.RegisterCallback<MouseDownEvent>((evt) =>
             {
                 SettingsService.OpenProjectSettings("Project/Hierarchy");
+                shelfButton.parent.StyleDisplay(false);
                 evt.StopPropagation();
             });
 
