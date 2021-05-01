@@ -1386,9 +1386,10 @@ namespace Hierarchy2
                         if (settings.applyTagTargetAndChild)
                             ApplyTagTargetAndChild(gameObject.transform, tag);
                         else
+                        { 
+                            Undo.RegisterCompleteObjectUndo(gameObject, "Change Tag");
                             gameObject.tag = tag;
-
-                        DirtyScene(gameObject.scene);
+                        }
                     });
                 }
 
@@ -1399,6 +1400,7 @@ namespace Hierarchy2
 
         void ApplyTagTargetAndChild(Transform target, string tag)
         {
+            Undo.RegisterCompleteObjectUndo(target.gameObject, "Change Tag");
             target.gameObject.tag = tag;
 
             for (int i = 0; i < target.childCount; ++i)
@@ -1451,9 +1453,10 @@ namespace Hierarchy2
                             if (settings.applyLayerTargetAndChild)
                                 ApplyLayerTargetAndChild(gameObject.transform, LayerMask.NameToLayer(layer));
                             else
+                            { 
+                                Undo.RegisterCompleteObjectUndo(gameObject, "Change Layer");
                                 gameObject.layer = LayerMask.NameToLayer(layer);
-
-                            DirtyScene(gameObject.scene);
+                            }
                         });
                 }
 
@@ -1464,6 +1467,7 @@ namespace Hierarchy2
 
         void ApplyLayerTargetAndChild(Transform target, int layer)
         {
+            Undo.RegisterCompleteObjectUndo(target.gameObject, "Change Layer");
             target.gameObject.layer = layer;
 
             for (int i = 0; i < target.childCount; ++i)
