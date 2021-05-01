@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
+using UnityEngine.Serialization;
 
 namespace Hierarchy2
 {
@@ -54,6 +55,14 @@ namespace Hierarchy2
                 colorHeaderTitle = colorHeaderTitle * blend;
                 colorHeaderBackground = colorHeaderBackground * blend;
             }
+        }
+
+        ///<summary>Define background color using prefix.</summary>
+        [Serializable]
+        public struct InstantBackgroundColor
+        {
+            public string text;
+            public Color color;
         }
 
         public enum ComponentSize
@@ -141,9 +150,13 @@ namespace Hierarchy2
         public bool applyLayerTargetAndChild = true;
         public string headerPrefix = "$h";
         public string headerDefaultTag = "Untagged";
-        public bool useCustomBGElementPrefix = false;
-        public string customBGElementPrefix = "__";
-        public Color customBGelementPrefixColor = new Color(0.23f, 0.34f, 0.47f, 0.41f);
+        public bool useInstantBackground = false;
+
+        public List<InstantBackgroundColor> instantBackgroundColors = new List<InstantBackgroundColor>()
+        {
+            new InstantBackgroundColor() {text = "__", color = new Color(0.23f, 0.34f, 0.47f, 0.41f)}
+        };
+
         public bool onlyDisplayWhileMouseEnter = false;
         public ContentDisplay contentDisplay = ContentDisplay.Component | ContentDisplay.Tag | ContentDisplay.Layer;
 
@@ -471,36 +484,15 @@ namespace Hierarchy2
                     headerDefaultTag.StyleMarginBottom(4);
                     verticalLayout.Add(headerDefaultTag);
 
-                    var useCustomBGElementPrefix = new Toggle("CustomRowBGPrefix");
-                    useCustomBGElementPrefix.StyleMarginTop(7);
-                    useCustomBGElementPrefix.value = settings.useCustomBGElementPrefix;
-                    useCustomBGElementPrefix.RegisterValueChangedCallback((evt) =>
+                    IMGUIContainer instantBackgroundIMGUI = new IMGUIContainer(() =>
                     {
-                        settings.useCustomBGElementPrefix = evt.newValue;
-                        settings.OnSettingsChanged(nameof(settings.useCustomBGElementPrefix));
+                        EditorGUILayout.BeginHorizontal();
+                        settings.useInstantBackground = EditorGUILayout.Toggle("Use Instant Background", settings.useInstantBackground);
+                        EditorGUILayout.PropertyField(new SerializedObject(settings).FindProperty(nameof(instantBackgroundColors)), GUIContent.none);
+                        EditorGUILayout.EndHorizontal();
                     });
-                    useCustomBGElementPrefix.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    verticalLayout.Add(useCustomBGElementPrefix);
-
-                    var customBGElementPrefix = new TextField("    ");
-                    customBGElementPrefix.value = settings.customBGElementPrefix;
-                    customBGElementPrefix.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    customBGElementPrefix.RegisterValueChangedCallback((evt) =>
-                    {
-                        settings.customBGElementPrefix = evt.newValue == string.Empty ? "__" : evt.newValue;
-                        settings.OnSettingsChanged(nameof(settings.customBGElementPrefix));
-                    });
-                    verticalLayout.Add(customBGElementPrefix);
-
-                    ColorField customBGElementPrefixColor = new ColorField("    ");
-                    customBGElementPrefixColor.value = settings.customBGelementPrefixColor;
-                    customBGElementPrefixColor.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    customBGElementPrefixColor.RegisterValueChangedCallback((evt) =>
-                    {
-                        settings.customBGelementPrefixColor = evt.newValue;
-                        settings.OnSettingsChanged();
-                    });
-                    verticalLayout.Add(customBGElementPrefixColor);
+                    instantBackgroundIMGUI.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    verticalLayout.Add(instantBackgroundIMGUI);
 
                     var onlyDisplayWhileMouseHovering = new Toggle("Display Hovering");
                     onlyDisplayWhileMouseHovering.tooltip = "Only display while mouse hovering";

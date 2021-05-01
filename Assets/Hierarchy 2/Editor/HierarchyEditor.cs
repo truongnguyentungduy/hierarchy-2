@@ -693,7 +693,7 @@ namespace Hierarchy2
                 if (rowItem.hasCustom)
                     CustomRow();
 
-                if (settings.useCustomBGElementPrefix && (!rowItem.hasCustom || !rowItem.customRowItem.useBackground))
+                if (settings.useInstantBackground && (!rowItem.hasCustom || !rowItem.customRowItem.useBackground))
                     CustomRowBGPrefix();
 
                 if (settings.displayTreeView && !rowItem.isRootObject)
@@ -843,10 +843,21 @@ namespace Hierarchy2
         {
             if (currentEvent.type != EventType.Repaint)
                 return;
-            if (!rowItem.name.Contains(settings.customBGElementPrefix))
-                return;
+
+            HierarchySettings.InstantBackgroundColor instantBackgroundColor = new HierarchySettings.InstantBackgroundColor();
+            bool contain = false;
+            for (int i = 0; i < settings.instantBackgroundColors.Count; ++i)
+            {
+                if (rowItem.name.StartsWith(settings.instantBackgroundColors[i].text))
+                {
+                    contain = true;
+                    instantBackgroundColor = settings.instantBackgroundColors[i];
+                }
+            }
+
+            if (!contain) return;
             Color guiColor = GUI.color;
-            GUI.color = settings.customBGelementPrefixColor;
+            GUI.color = instantBackgroundColor.color;
             Rect rect;
             var texture = Resources.PixelWhite;
             rect = RectFromRight(rowItem.rect, rowItem.rect.width + 16, 0);
