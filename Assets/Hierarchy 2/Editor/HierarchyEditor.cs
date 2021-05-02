@@ -287,6 +287,21 @@ namespace Hierarchy2
                     }
 
                     break;
+                case nameof(settings.hideHierarchyLocalDatas):
+                    foreach (HierarchyLocalData hierarchyLocalData in HierarchyLocalData.instances.Values)
+					{
+                        if (hierarchyLocalData != null)
+			            {
+                            if (settings.hideHierarchyLocalDatas)
+                                hierarchyLocalData.gameObject.hideFlags |= HideFlags.HideInHierarchy;
+                            else
+                                hierarchyLocalData.gameObject.hideFlags &= ~HideFlags.HideInHierarchy;
+
+                            DirtyScene(hierarchyLocalData.gameObject.scene);
+			            }
+					}
+
+                    break;
             }
 
             EditorApplication.RepaintHierarchyWindow();
@@ -406,6 +421,16 @@ namespace Hierarchy2
 
         void OnSceneOpened(Scene scene, OpenSceneMode mode)
         {
+            if (settings is null) return;
+
+            HierarchyLocalData hierarchyLocalData;
+            if (HierarchyLocalData.GetInstance(scene, out hierarchyLocalData))
+			{
+                if (settings.hideHierarchyLocalDatas)
+                    hierarchyLocalData.gameObject.hideFlags |= HideFlags.HideInHierarchy;
+                else
+                    hierarchyLocalData.gameObject.hideFlags &= ~HideFlags.HideInHierarchy;
+			}
         }
 
         void OnSceneClosed(Scene scene)
@@ -917,7 +942,6 @@ namespace Hierarchy2
                 Undo.RegisterCompleteObjectUndo(element.gameObject,
                     element.gameObject.activeSelf ? "Inactive object" : "Active object");
                 element.gameObject.SetActive(!element.gameObject.activeSelf);
-                DirtyScene(element.gameObject.scene);
                 currentEvent.Use();
                 return;
             }
@@ -1018,8 +1042,18 @@ namespace Hierarchy2
                     lockMenu.AddItem(new GUIContent("Unlock"), false, () =>
                     {
                         Undo.RegisterCompleteObjectUndo(gameObject, "Unlock...");
+                        foreach (Component component in gameObject.GetComponents<Component>())
+                        { 
+                            if (component)
+                            {
+                                Undo.RegisterCompleteObjectUndo (component, "Unlock..." );
+                                component.hideFlags = HideFlags.None;
+                            }
+                        }
+
                         gameObject.hideFlags = HideFlags.None;
-                        EditorUtility.SetDirty(gameObject);
+
+                        InternalEditorUtility.RepaintAllViews();
                     });
                     lockMenu.ShowAsContext();
                     currentEvent.Use();
@@ -1362,9 +1396,10 @@ namespace Hierarchy2
                         if (settings.applyTagTargetAndChild)
                             ApplyTagTargetAndChild(gameObject.transform, tag);
                         else
+                        { 
+                            Undo.RegisterCompleteObjectUndo(gameObject, "Change Tag");
                             gameObject.tag = tag;
-
-                        DirtyScene(gameObject.scene);
+                        }
                     });
                 }
 
@@ -1375,6 +1410,7 @@ namespace Hierarchy2
 
         void ApplyTagTargetAndChild(Transform target, string tag)
         {
+            Undo.RegisterCompleteObjectUndo(target.gameObject, "Change Tag");
             target.gameObject.tag = tag;
 
             for (int i = 0; i < target.childCount; ++i)
@@ -1427,9 +1463,10 @@ namespace Hierarchy2
                             if (settings.applyLayerTargetAndChild)
                                 ApplyLayerTargetAndChild(gameObject.transform, LayerMask.NameToLayer(layer));
                             else
+                            { 
+                                Undo.RegisterCompleteObjectUndo(gameObject, "Change Layer");
                                 gameObject.layer = LayerMask.NameToLayer(layer);
-
-                            DirtyScene(gameObject.scene);
+                            }
                         });
                 }
 
@@ -1440,6 +1477,7 @@ namespace Hierarchy2
 
         void ApplyLayerTargetAndChild(Transform target, int layer)
         {
+            Undo.RegisterCompleteObjectUndo(target.gameObject, "Change Layer");
             target.gameObject.layer = layer;
 
             for (int i = 0; i < target.childCount; ++i)
@@ -1940,11 +1978,22 @@ namespace Hierarchy2
             static void SetNotEditableObject()
             {
                 Undo.RegisterCompleteObjectUndo(Selection.gameObjects, "Set Selections Flag NotEditable");
-                for (int i = 0; i < Selection.gameObjects.Length; ++i)
-                {
-                    Selection.gameObjects[i].hideFlags = HideFlags.NotEditable;
-                    EditorUtility.SetDirty(Selection.gameObjects[i]);
+                foreach (GameObject gameObject in Selection.gameObjects)
+                { 
+                    foreach (Component component in gameObject.GetComponents<Component>())
+                    { 
+                        if (component)
+                        {
+                            Undo.RegisterCompleteObjectUndo (component, "Set Selections Flag NotEditable");
+                            component.hideFlags = HideFlags.NotEditable;
+                        }
+                    }
                 }
+
+                foreach (GameObject gameObject in Selection.gameObjects)
+                    gameObject.hideFlags = HideFlags.NotEditable;
+                
+                InternalEditorUtility.RepaintAllViews();
             }
 
             [MenuItem("GameObject/Lock Selection %l", true, priority)]
@@ -1954,11 +2003,22 @@ namespace Hierarchy2
             static void SetEditableObject()
             {
                 Undo.RegisterCompleteObjectUndo(Selection.gameObjects, "Set Selections Flag Editable");
-                for (int i = 0; i < Selection.gameObjects.Length; ++i)
-                {
-                    Selection.gameObjects[i].hideFlags = HideFlags.None;
-                    EditorUtility.SetDirty(Selection.gameObjects[i]);
+                foreach (GameObject gameObject in Selection.gameObjects)
+                { 
+                    foreach (Component component in gameObject.GetComponents<Component>())
+                    { 
+                        if (component)
+                        {
+                            Undo.RegisterCompleteObjectUndo (component, "Set Selections Flag Editable");
+                            component.hideFlags = HideFlags.None;
+                        }
+                    }
                 }
+
+                foreach (GameObject gameObject in Selection.gameObjects)
+                    gameObject.hideFlags = HideFlags.None;
+
+                InternalEditorUtility.RepaintAllViews();
             }
 
             [MenuItem("GameObject/Unlock Selection %&l", true, priority)]
@@ -1975,11 +2035,9 @@ namespace Hierarchy2
                 var index = gameObject.transform.GetSiblingIndex();
                 if (index > 0)
                 {
-                    Undo.RegisterCompleteObjectUndo(gameObject, string.Format("{0} Parenting", gameObject.name));
+                    Undo.SetTransformParent(gameObject.transform, gameObject.transform.parent, string.Format("{0} Parenting", gameObject.name));
 
                     gameObject.transform.SetSiblingIndex(--index);
-                    if (!EditorApplication.isPlaying)
-                        EditorSceneManager.MarkSceneDirty(gameObject.scene);
                 }
             }
 
@@ -1993,19 +2051,27 @@ namespace Hierarchy2
                 if (gameObject == null)
                     return;
 
-                Undo.RegisterCompleteObjectUndo(gameObject, string.Format("{0} Parenting", gameObject.name));
+                Undo.SetTransformParent(gameObject.transform, gameObject.transform.parent, string.Format("{0} Parenting", gameObject.name));
 
                 var index = gameObject.transform.GetSiblingIndex();
                 gameObject.transform.SetSiblingIndex(++index);
-                if (!EditorApplication.isPlaying)
-                    EditorSceneManager.MarkSceneDirty(gameObject.scene);
             }
 
             [MenuItem("GameObject/Move Selection Down #s", true, priority)]
             static bool ValidateQuickSiblingDown() => Selection.activeTransform != null;
 
             [MenuItem("GameObject/Header (Separator)", priority = 0)]
-            static void CreateHeaderInstance() => new GameObject(string.Format("{0}Header", HierarchyEditor.instance.settings.headerPrefix));
+            static void CreateHeaderInstance(UnityEditor.MenuCommand command)
+            {
+                GameObject gameObject = new GameObject(string.Format("{0}Header", HierarchyEditor.instance.settings.headerPrefix));
+                
+                Undo.RegisterCreatedObjectUndo(gameObject, "Create Header");
+                // Don't create headers as children of the selected objects because only root headers are drawn with background
+                //if(command.context)
+                //    Undo.SetTransformParent(gameObject.transform, ( (GameObject) command.context ).transform, "Create Header");
+
+                Selection.activeTransform = gameObject.transform;
+            }
         }
     }
 }

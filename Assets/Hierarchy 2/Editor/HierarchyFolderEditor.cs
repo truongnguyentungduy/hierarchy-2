@@ -37,6 +37,15 @@ namespace Hierarchy2
         }
 
         [MenuItem("GameObject/Hierarchy Folder", priority = 0)]
-        static void CreateInstance() => new GameObject("Folder", new Type[1] {typeof(HierarchyFolder)});
+        static void CreateInstance(UnityEditor.MenuCommand command)
+        {
+            GameObject gameObject = new GameObject("Folder", new Type[1] {typeof(HierarchyFolder)});
+
+            Undo.RegisterCreatedObjectUndo(gameObject, "Create Hierarchy Folder");
+            if(command.context)
+                Undo.SetTransformParent(gameObject.transform, ( (GameObject) command.context ).transform, "Create Hierarchy Folder");
+
+            Selection.activeTransform = gameObject.transform;
+        }
     }
 }
