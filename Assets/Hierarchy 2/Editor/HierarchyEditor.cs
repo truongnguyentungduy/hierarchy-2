@@ -531,6 +531,10 @@ namespace Hierarchy2
             GameObject hierarchyLocalDataObject = new GameObject("HierarchyLocalData", typeof(HierarchyLocalData));
             EditorSceneManager.MoveGameObjectToScene(hierarchyLocalDataObject, scene);
             DirtyScene(scene);
+
+            if (!(settings is null) && settings.hideHierarchyLocalDatas)
+                hierarchyLocalDataObject.hideFlags |= HideFlags.HideInHierarchy;
+
             return hierarchyLocalDataObject.GetComponent<HierarchyLocalData>();
         }
 
