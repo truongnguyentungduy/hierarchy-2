@@ -71,7 +71,7 @@ namespace Hierarchy2
     public class ObjectCustomizationPopup : EditorWindow
     {
         public class CustomRowItemHolder : ScriptableObject
-		{
+        {
             public CustomRowItem customRowItem;
         }
 
@@ -91,7 +91,7 @@ namespace Hierarchy2
                 return null;
             }
 
-			ObjectCustomizationPopup.gameObjects = gameObjects;
+            ObjectCustomizationPopup.gameObjects = gameObjects;
 
             Vector2 v2 = GUIUtility.GUIToScreenPoint(Event.current.mousePosition);
             Vector2 size = new Vector2(256, 138);
@@ -148,7 +148,7 @@ namespace Hierarchy2
             IMGUIContainer iMGUIContainer = new IMGUIContainer(() =>
             {
                 if (hierarchyLocalData == null || EditorApplication.isCompiling)
-				{
+                {
                     Close();
                     return;
                 }
@@ -198,17 +198,17 @@ namespace Hierarchy2
             Undo.undoRedoPerformed -= Repaint;
             Undo.undoRedoPerformed += Repaint;
 
-		}
+        }
 
         void OnDisable()
-		{
+        {
             Undo.undoRedoPerformed -= Repaint;
 
             if (customRowItemHolders != null)
-			{
+            {
                 foreach (CustomRowItemHolder customRowItemHolder in customRowItemHolders)
                     DestroyImmediate(customRowItemHolder);
-			}
-		}
+            }
+        }
     }
 }
