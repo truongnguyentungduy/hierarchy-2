@@ -768,14 +768,14 @@ namespace Hierarchy2
         }
 
         private static void OnUndoRedoPerformed()
-		{
+        {
             SettingsService.NotifySettingsProviderChanged();
 
             if (instance != null)
             { 
                 instance.onSettingsChanged?.Invoke(nameof(instance.components)); // Refresh components on undo&redo
             }
-		}
+        }
 
         internal static HierarchySettings GetAssets()
         {
