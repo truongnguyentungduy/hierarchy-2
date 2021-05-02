@@ -292,12 +292,11 @@ namespace Hierarchy2
                     {
                         if (hierarchyLocalData != null)
                         {
+                            Undo.RegisterCompleteObjectUndo(hierarchyLocalData.gameObject, "Change Settings");
                             if (settings.hideHierarchyLocalDatas)
                                 hierarchyLocalData.gameObject.hideFlags |= HideFlags.HideInHierarchy;
                             else
                                 hierarchyLocalData.gameObject.hideFlags &= ~HideFlags.HideInHierarchy;
-
-                            DirtyScene(hierarchyLocalData.gameObject.scene);
                         }
                     }
 
