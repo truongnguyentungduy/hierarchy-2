@@ -86,6 +86,8 @@ namespace Hierarchy2
             Layer = (1 << 2)
         }
 
+        private static HierarchySettings instance;
+
         public ThemeData personalTheme;
         public ThemeData professionalTheme;
         public ThemeData playmodeTheme;
@@ -752,11 +754,11 @@ namespace Hierarchy2
                         verticalLayout.Add(comSelBGColor);
                     }
 
-                    Undo.undoRedoPerformed -= SettingsService.NotifySettingsProviderChanged;
-                    Undo.undoRedoPerformed += SettingsService.NotifySettingsProviderChanged;
+                    Undo.undoRedoPerformed -= OnUndoRedoPerformed;
+                    Undo.undoRedoPerformed += OnUndoRedoPerformed;
                 },
 
-                deactivateHandler = () => Undo.undoRedoPerformed -= SettingsService.NotifySettingsProviderChanged,
+                deactivateHandler = () => Undo.undoRedoPerformed -= OnUndoRedoPerformed,
 
                 keywords = new HashSet<string>(new[] {"Hierarchy"})
             };
@@ -764,15 +766,28 @@ namespace Hierarchy2
             return provider;
         }
 
+        private static void OnUndoRedoPerformed()
+		{
+            SettingsService.NotifySettingsProviderChanged();
+
+            if (instance != null)
+            { 
+                instance.onSettingsChanged?.Invoke(nameof(instance.components)); // Refresh components on undo&redo
+            }
+		}
+
         internal static HierarchySettings GetAssets()
         {
+            if (instance != null)
+                return instance;
+
             var guids = AssetDatabase.FindAssets(string.Format("t:{0}", typeof(HierarchySettings).Name));
 
-            if (guids.Length > 0)
+            for (int i = 0; i < guids.Length; i++)
             {
-                var asset = AssetDatabase.LoadAssetAtPath<HierarchySettings>(AssetDatabase.GUIDToAssetPath(guids[0]));
-                if (asset != null)
-                    return asset;
+                instance = AssetDatabase.LoadAssetAtPath<HierarchySettings>(AssetDatabase.GUIDToAssetPath(guids[i]));
+                if (instance != null)
+                    return instance;
             }
 
             return null;
