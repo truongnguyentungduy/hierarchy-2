@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.Serialization;
+using System.IO;
 
 namespace Hierarchy2
 {
@@ -790,7 +791,17 @@ namespace Hierarchy2
                     return instance;
             }
 
-            return null;
+            // Settings file doesn't exist, create one
+            const string settingsSavePath = "Assets/Hierarchy 2/Editor/Settings.asset";
+            Directory.CreateDirectory(Path.GetDirectoryName(settingsSavePath));
+
+            AssetDatabase.CreateAsset(CreateInstance<HierarchySettings>(), settingsSavePath);
+            AssetDatabase.SaveAssets();
+            instance = AssetDatabase.LoadAssetAtPath<HierarchySettings>(settingsSavePath);
+
+            Debug.Log("Created Hierarchy 2 settings file at " + settingsSavePath + ". You can move this file around freely.", instance);
+            
+            return instance;
         }
 
         internal static HierarchySettings CreateAssets()
