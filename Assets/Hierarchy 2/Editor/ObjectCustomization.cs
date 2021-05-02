@@ -70,15 +70,10 @@ namespace Hierarchy2
 
     public class ObjectCustomizationPopup : EditorWindow
     {
-        public class CustomRowItemHolder : ScriptableObject
-        {
-            public CustomRowItem customRowItem;
-        }
-
         static ObjectCustomizationPopup window;
         static GameObject[] gameObjects;
-        HierarchyLocalData hierarchyLocalData;
-        CustomRowItemHolder[] customRowItemHolders;
+        HierarchyLocalData[] hierarchyLocalDatas;
+        CustomRowItem[] customRowItems;
 
         public static ObjectCustomizationPopup ShowPopup(GameObject[] gameObjects)
         {
@@ -119,38 +114,43 @@ namespace Hierarchy2
 
             rootVisualElement.StyleMargin(4, 4, 2, 0);
 
-            customRowItemHolders = new CustomRowItemHolder[_gameObjects.Count];
+            customRowItems = new CustomRowItem[_gameObjects.Count];
 
+            List<HierarchyLocalData> _hierarchyLocalDatas = new List<HierarchyLocalData>(2);
             for (int i = 0; i < _gameObjects.Count; i++)
             {
                 if (_gameObjects[i] == null)
                     continue;
 
-                hierarchyLocalData = HierarchyEditor.Instance.GetHierarchyLocalData(_gameObjects[i].scene);
+                HierarchyLocalData hierarchyLocalData = HierarchyEditor.Instance.GetHierarchyLocalData(_gameObjects[i].scene);
 
                 CustomRowItem customRowItem;
                 if (hierarchyLocalData.TryGetCustomRowData(_gameObjects[i], out customRowItem) == false)
                     customRowItem = hierarchyLocalData.CreateCustomRowItemFor(_gameObjects[i]);
 
-                customRowItemHolders[i] = CreateInstance<CustomRowItemHolder>();
-                customRowItemHolders[i].customRowItem = customRowItem;
+                customRowItems[i] = customRowItem;
+
+                if (!_hierarchyLocalDatas.Contains(hierarchyLocalData))
+                    _hierarchyLocalDatas.Add(hierarchyLocalData);
             }
-            
-            SerializedProperty customRowItemsSerialized = new SerializedObject(customRowItemHolders).FindProperty("customRowItem");
-            SerializedProperty useBackground = customRowItemsSerialized.FindPropertyRelative("useBackground");
-            SerializedProperty backgroundStyle = customRowItemsSerialized.FindPropertyRelative("backgroundStyle");
-            SerializedProperty backgroundMode = customRowItemsSerialized.FindPropertyRelative("backgroundMode");
-            SerializedProperty backgroundColor = customRowItemsSerialized.FindPropertyRelative("backgroundColor");
-            SerializedProperty overrideLabel = customRowItemsSerialized.FindPropertyRelative("overrideLabel");
-            SerializedProperty labelOffset = customRowItemsSerialized.FindPropertyRelative("labelOffset");
-            SerializedProperty labelColor = customRowItemsSerialized.FindPropertyRelative("labelColor");
+
+            hierarchyLocalDatas = _hierarchyLocalDatas.ToArray();
 
             IMGUIContainer iMGUIContainer = new IMGUIContainer(() =>
             {
-                if (hierarchyLocalData == null || EditorApplication.isCompiling)
+                if (hierarchyLocalDatas == null || EditorApplication.isCompiling)
                 {
                     Close();
                     return;
+                }
+
+                for (int i = 0; i < hierarchyLocalDatas.Length; i++)
+                {
+                    if (hierarchyLocalDatas[i] == null) // A scene is closed or user has deleted HierarchyLocalData manually
+                    {
+                        Close();
+                        return;
+                    }
                 }
 
                 var wideMode = EditorGUIUtility.wideMode;
@@ -158,38 +158,47 @@ namespace Hierarchy2
                 EditorGUIUtility.wideMode = true;
                 EditorGUIUtility.labelWidth = 140f;
 
-                EditorGUI.BeginChangeCheck();
+                EditorGUI.showMixedValue = CheckMultipleDifferentValues((customRowItem1, customRowItem2) => customRowItem1.useBackground == customRowItem2.useBackground);
+                bool useBackground = EditorGUILayout.Toggle("Background", customRowItems[0].useBackground);
+                ApplyModifiedProperties((customRowItem) => customRowItem.useBackground = useBackground);
 
-                customRowItemsSerialized.serializedObject.Update();
-
-                EditorGUILayout.PropertyField(useBackground, new GUIContent("Background"));
-
-                GUI.enabled = useBackground.boolValue || useBackground.hasMultipleDifferentValues;
+                GUI.enabled = useBackground || EditorGUI.showMixedValue;
                 EditorGUI.indentLevel++;
 
-                EditorGUILayout.PropertyField(backgroundStyle);
-                EditorGUILayout.PropertyField(backgroundMode);
-                EditorGUILayout.PropertyField(backgroundColor);
+                EditorGUI.showMixedValue = CheckMultipleDifferentValues((customRowItem1, customRowItem2) => customRowItem1.backgroundStyle == customRowItem2.backgroundStyle);
+                CustomRowItem.BackgroundStyle backgroundStyle = (CustomRowItem.BackgroundStyle) EditorGUILayout.EnumPopup("Background Style", customRowItems[0].backgroundStyle);
+                ApplyModifiedProperties((customRowItem) => customRowItem.backgroundStyle = backgroundStyle);
+
+                EditorGUI.showMixedValue = CheckMultipleDifferentValues((customRowItem1, customRowItem2) => customRowItem1.backgroundMode == customRowItem2.backgroundMode);
+                CustomRowItem.BackgroundMode backgroundMode = (CustomRowItem.BackgroundMode) EditorGUILayout.EnumPopup("Background Mode", customRowItems[0].backgroundMode);
+                ApplyModifiedProperties((customRowItem) => customRowItem.backgroundMode = backgroundMode);
+
+                EditorGUI.showMixedValue = CheckMultipleDifferentValues((customRowItem1, customRowItem2) => customRowItem1.backgroundColor == customRowItem2.backgroundColor);
+                Color backgroundColor = EditorGUILayout.ColorField("Background Color", customRowItems[0].backgroundColor);
+                ApplyModifiedProperties((customRowItem) => customRowItem.backgroundColor = backgroundColor);
 
                 EditorGUI.indentLevel--;
                 GUI.enabled = true;
 
-                EditorGUILayout.PropertyField(overrideLabel);
+                EditorGUI.showMixedValue = CheckMultipleDifferentValues((customRowItem1, customRowItem2) => customRowItem1.overrideLabel == customRowItem2.overrideLabel);
+                bool overrideLabel = EditorGUILayout.Toggle("Override Label", customRowItems[0].overrideLabel);
+                ApplyModifiedProperties((customRowItem) => customRowItem.overrideLabel = overrideLabel);
 
-                GUI.enabled = overrideLabel.boolValue || overrideLabel.hasMultipleDifferentValues;
+                GUI.enabled = overrideLabel || EditorGUI.showMixedValue;
                 EditorGUI.indentLevel++;
 
-                EditorGUILayout.PropertyField(labelOffset);
-                EditorGUILayout.PropertyField(labelColor);
+                EditorGUI.showMixedValue = CheckMultipleDifferentValues((customRowItem1, customRowItem2) => customRowItem1.labelOffset == customRowItem2.labelOffset);
+                Vector2 labelOffset = EditorGUILayout.Vector2Field("Label Offset", customRowItems[0].labelOffset);
+                ApplyModifiedProperties((customRowItem) => customRowItem.labelOffset = labelOffset);
+
+                EditorGUI.showMixedValue = CheckMultipleDifferentValues((customRowItem1, customRowItem2) => customRowItem1.labelColor == customRowItem2.labelColor);
+                Color labelColor = EditorGUILayout.ColorField("Label Color", customRowItems[0].labelColor);
+                ApplyModifiedProperties((customRowItem) => customRowItem.labelColor = labelColor);
 
                 EditorGUI.indentLevel--;
                 GUI.enabled = true;
 
-                customRowItemsSerialized.serializedObject.ApplyModifiedProperties();
-                
-                if (EditorGUI.EndChangeCheck())
-                    EditorApplication.RepaintHierarchyWindow();
-
+                EditorGUI.showMixedValue = false;
                 EditorGUIUtility.wideMode = wideMode;
                 EditorGUIUtility.labelWidth = labelWidth;
             } );
@@ -197,17 +206,37 @@ namespace Hierarchy2
 
             Undo.undoRedoPerformed -= Repaint;
             Undo.undoRedoPerformed += Repaint;
-
         }
 
         void OnDisable()
         {
             Undo.undoRedoPerformed -= Repaint;
+        }
 
-            if (customRowItemHolders != null)
+        bool CheckMultipleDifferentValues(System.Func<CustomRowItem, CustomRowItem, bool> equalityComparer)
+        {
+            EditorGUI.BeginChangeCheck();
+
+            for (int i = 1; i < customRowItems.Length; i++)
             {
-                foreach (CustomRowItemHolder customRowItemHolder in customRowItemHolders)
-                    DestroyImmediate(customRowItemHolder);
+                if (equalityComparer (customRowItems[0], customRowItems[i]) == false)
+                    return true;
+            }
+
+            return false;
+        }
+
+        void ApplyModifiedProperties(System.Action<CustomRowItem> applyAction)
+        {
+            if (EditorGUI.EndChangeCheck())
+            {
+                for (int i = 0; i < hierarchyLocalDatas.Length; i++)
+                    Undo.RecordObject(hierarchyLocalDatas[i], "Change Object Customization");
+                
+                for (int i = 0; i < customRowItems.Length; i++)
+                    applyAction(customRowItems[i]);
+
+                EditorApplication.RepaintHierarchyWindow();
             }
         }
     }
