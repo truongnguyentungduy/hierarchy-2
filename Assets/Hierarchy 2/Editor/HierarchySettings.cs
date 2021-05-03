@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.Serialization;
+using System.IO;
 
 namespace Hierarchy2
 {
@@ -85,6 +86,8 @@ namespace Hierarchy2
             Tag = (1 << 1),
             Layer = (1 << 2)
         }
+
+        private static HierarchySettings instance;
 
         public ThemeData personalTheme;
         public ThemeData professionalTheme;
@@ -752,11 +755,11 @@ namespace Hierarchy2
                         verticalLayout.Add(comSelBGColor);
                     }
 
-                    Undo.undoRedoPerformed -= SettingsService.NotifySettingsProviderChanged;
-                    Undo.undoRedoPerformed += SettingsService.NotifySettingsProviderChanged;
+                    Undo.undoRedoPerformed -= OnUndoRedoPerformed;
+                    Undo.undoRedoPerformed += OnUndoRedoPerformed;
                 },
 
-                deactivateHandler = () => Undo.undoRedoPerformed -= SettingsService.NotifySettingsProviderChanged,
+                deactivateHandler = () => Undo.undoRedoPerformed -= OnUndoRedoPerformed,
 
                 keywords = new HashSet<string>(new[] {"Hierarchy"})
             };
@@ -764,18 +767,41 @@ namespace Hierarchy2
             return provider;
         }
 
+        private static void OnUndoRedoPerformed()
+        {
+            SettingsService.NotifySettingsProviderChanged();
+
+            if (instance != null)
+            { 
+                instance.onSettingsChanged?.Invoke(nameof(instance.components)); // Refresh components on undo&redo
+            }
+        }
+
         internal static HierarchySettings GetAssets()
         {
+            if (instance != null)
+                return instance;
+
             var guids = AssetDatabase.FindAssets(string.Format("t:{0}", typeof(HierarchySettings).Name));
 
-            if (guids.Length > 0)
+            for (int i = 0; i < guids.Length; i++)
             {
-                var asset = AssetDatabase.LoadAssetAtPath<HierarchySettings>(AssetDatabase.GUIDToAssetPath(guids[0]));
-                if (asset != null)
-                    return asset;
+                instance = AssetDatabase.LoadAssetAtPath<HierarchySettings>(AssetDatabase.GUIDToAssetPath(guids[i]));
+                if (instance != null)
+                    return instance;
             }
 
-            return null;
+            // Settings file doesn't exist, create one
+            const string settingsSavePath = "Assets/Hierarchy 2/Editor/Settings.asset";
+            Directory.CreateDirectory(Path.GetDirectoryName(settingsSavePath));
+
+            AssetDatabase.CreateAsset(CreateInstance<HierarchySettings>(), settingsSavePath);
+            AssetDatabase.SaveAssets();
+            instance = AssetDatabase.LoadAssetAtPath<HierarchySettings>(settingsSavePath);
+
+            Debug.Log("Created Hierarchy 2 settings file at " + settingsSavePath + ". You can move this file around freely.", instance);
+            
+            return instance;
         }
 
         internal static HierarchySettings CreateAssets()

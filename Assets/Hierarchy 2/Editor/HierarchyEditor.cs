@@ -289,17 +289,16 @@ namespace Hierarchy2
                     break;
                 case nameof(settings.hideHierarchyLocalDatas):
                     foreach (HierarchyLocalData hierarchyLocalData in HierarchyLocalData.instances.Values)
-					{
+                    {
                         if (hierarchyLocalData != null)
-			            {
+                        {
+                            Undo.RegisterCompleteObjectUndo(hierarchyLocalData.gameObject, "Change Settings");
                             if (settings.hideHierarchyLocalDatas)
                                 hierarchyLocalData.gameObject.hideFlags |= HideFlags.HideInHierarchy;
                             else
                                 hierarchyLocalData.gameObject.hideFlags &= ~HideFlags.HideInHierarchy;
-
-                            DirtyScene(hierarchyLocalData.gameObject.scene);
-			            }
-					}
+                        }
+                    }
 
                     break;
             }
@@ -425,12 +424,12 @@ namespace Hierarchy2
 
             HierarchyLocalData hierarchyLocalData;
             if (HierarchyLocalData.GetInstance(scene, out hierarchyLocalData))
-			{
+            {
                 if (settings.hideHierarchyLocalDatas)
                     hierarchyLocalData.gameObject.hideFlags |= HideFlags.HideInHierarchy;
                 else
                     hierarchyLocalData.gameObject.hideFlags &= ~HideFlags.HideInHierarchy;
-			}
+            }
         }
 
         void OnSceneClosed(Scene scene)
@@ -531,6 +530,10 @@ namespace Hierarchy2
             GameObject hierarchyLocalDataObject = new GameObject("HierarchyLocalData", typeof(HierarchyLocalData));
             EditorSceneManager.MoveGameObjectToScene(hierarchyLocalDataObject, scene);
             DirtyScene(scene);
+
+            if (!(settings is null) && settings.hideHierarchyLocalDatas)
+                hierarchyLocalDataObject.hideFlags |= HideFlags.HideInHierarchy;
+
             return hierarchyLocalDataObject.GetComponent<HierarchyLocalData>();
         }
 
@@ -1046,7 +1049,7 @@ namespace Hierarchy2
                         { 
                             if (component)
                             {
-                                Undo.RegisterCompleteObjectUndo (component, "Unlock..." );
+                                Undo.RegisterCompleteObjectUndo (component, "Unlock...");
                                 component.hideFlags = HideFlags.None;
                             }
                         }
