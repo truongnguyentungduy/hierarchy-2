@@ -497,7 +497,7 @@ namespace Hierarchy2
                     verticalLayout.Add(advanced);
 
                     var headerPrefix = new TextField();
-                    headerPrefix.label = "Header Prefix";
+                    headerPrefix.label = "Separator Prefix";
                     headerPrefix.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     headerPrefix.value = settings.headerPrefix;
                     headerPrefix.RegisterValueChangedCallback((evt) =>
@@ -510,7 +510,7 @@ namespace Hierarchy2
                     verticalLayout.Add(headerPrefix);
 
                     var headerDefaultTag = new TagField();
-                    headerDefaultTag.label = "Header Default Tag";
+                    headerDefaultTag.label = "Separator Default Tag";
                     headerDefaultTag.value = settings.headerDefaultTag;
                     headerDefaultTag.RegisterValueChangedCallback((evt) =>
                     {
@@ -527,9 +527,12 @@ namespace Hierarchy2
                     {
                         EditorGUILayout.BeginHorizontal();
                         settings.useInstantBackground = EditorGUILayout.Toggle("Use Instant Background", settings.useInstantBackground);
+                        EditorGUILayout.BeginVertical("helpbox");
                         EditorGUILayout.PropertyField(new SerializedObject(settings).FindProperty(nameof(instantBackgroundColors)), GUIContent.none);
+                        EditorGUILayout.EndVertical();
                         EditorGUILayout.EndHorizontal();
                     });
+                    instantBackgroundIMGUI.StyleMarginTop(7);
                     instantBackgroundIMGUI.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(instantBackgroundIMGUI);
 
@@ -547,7 +550,7 @@ namespace Hierarchy2
                     onlyDisplayWhileMouseHovering.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(onlyDisplayWhileMouseHovering);
 
-                    var hideHierarchyLocalDatas = new Toggle("Hide HierarchyLocalData(s)");
+                    var hideHierarchyLocalDatas = new Toggle("Hide HLD(s)");
                     hideHierarchyLocalDatas.tooltip = "Hide HierarhcyLocalData object(s) in Hierarchy";
                     hideHierarchyLocalDatas.StyleMarginTop(7);
                     hideHierarchyLocalDatas.value = settings.hideHierarchyLocalDatas;
