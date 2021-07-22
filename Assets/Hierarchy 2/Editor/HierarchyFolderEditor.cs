@@ -13,7 +13,6 @@ namespace Hierarchy2
     {
         private void OnEnable()
         {
-
         }
 
         public override VisualElement CreateInspectorGUI()
@@ -32,7 +31,7 @@ namespace Hierarchy2
                 }
             });
             root.Add(imguiContainer);
-            
+
             return root;
         }
 
@@ -42,8 +41,8 @@ namespace Hierarchy2
             GameObject gameObject = new GameObject("Folder", new Type[1] {typeof(HierarchyFolder)});
 
             Undo.RegisterCreatedObjectUndo(gameObject, "Create Hierarchy Folder");
-            if(command.context)
-                Undo.SetTransformParent(gameObject.transform, ( (GameObject) command.context ).transform, "Create Hierarchy Folder");
+            if (command.context)
+                Undo.SetTransformParent(gameObject.transform, ((GameObject) command.context).transform, "Create Hierarchy Folder");
 
             Selection.activeTransform = gameObject.transform;
         }

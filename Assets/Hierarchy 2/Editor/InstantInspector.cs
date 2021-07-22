@@ -196,10 +196,7 @@ namespace Hierarchy2
                     });
                     preview.StyleMarginTop(4);
                     preview.StretchToParentWidth();
-                    inspector.RegisterCallback<GeometryChangedEvent>((callback) =>
-                    {
-                        preview.StyleHeight(Mathf.Clamp(inspector.layout.width / 2, 64, 200));
-                    });
+                    inspector.RegisterCallback<GeometryChangedEvent>((callback) => { preview.StyleHeight(Mathf.Clamp(inspector.layout.width / 2, 64, 200)); });
                     preview.StylePosition(Position.Relative);
                     preview.name = "Material Preview";
                     folout.Add(preview);

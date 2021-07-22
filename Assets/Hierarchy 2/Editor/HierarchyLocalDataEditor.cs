@@ -10,7 +10,7 @@ namespace Hierarchy2
     public class HierarchyLocalDataEditor : Editor
     {
         private HierarchyLocalData hld;
-        
+
         private void OnEnable()
         {
             hld = target as HierarchyLocalData;
@@ -20,7 +20,7 @@ namespace Hierarchy2
         {
             if (!hld.gameObject.CompareTag("EditorOnly"))
                 hld.gameObject.tag = "EditorOnly";
-            
+
             EditorGUILayout.HelpBox("Holding reference custom data of row item on hierarchy\nExclude in build.", MessageType.Info);
             EditorGUILayout.BeginVertical("box");
             base.OnInspectorGUI();
@@ -31,7 +31,7 @@ namespace Hierarchy2
                 hld.ClearNullRef();
                 hld.ConvertToDic();
             }
-            
+
             if (GUILayout.Button("ClearNullRef"))
             {
                 hld.ClearNullRef();
@@ -39,4 +39,3 @@ namespace Hierarchy2
         }
     }
 }
-

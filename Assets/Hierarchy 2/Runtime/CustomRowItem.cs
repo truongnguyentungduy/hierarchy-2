@@ -9,16 +9,30 @@ namespace Hierarchy2
 
         public bool useBackground = false;
         public Color backgroundColor = new Color32(255, 255, 255, 41);
-        public enum BackgroundStyle { Solid = 0, Ramp = 1 }
+
+        public enum BackgroundStyle
+        {
+            Solid = 0,
+            Ramp = 1
+        }
+
         public BackgroundStyle backgroundStyle = BackgroundStyle.Solid;
-        public enum BackgroundMode { Full = 0, Name = 1 }
+
+        public enum BackgroundMode
+        {
+            Full = 0,
+            Name = 1
+        }
+
         public BackgroundMode backgroundMode = BackgroundMode.Full;
 
         public bool overrideLabel = false;
         public Vector2 labelOffset = Vector2.zero;
         public Color labelColor = Color.white;
-        
-        public CustomRowItem() { }
+
+        public CustomRowItem()
+        {
+        }
 
         public CustomRowItem(GameObject gameObject)
         {

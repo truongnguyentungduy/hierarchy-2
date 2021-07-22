@@ -78,10 +78,7 @@ namespace Hierarchy2
             option1.StyleHeight(21);
             option1.StylePadding(4, 4, 0, 0);
             option1.StyleTextAlign(TextAnchor.MiddleLeft);
-            option1.RegisterCallback<MouseEnterEvent>((evt) =>
-            {
-                option1.StyleBackgroundColor(new Color(.5f, .5f, .5f, .5f));
-            });
+            option1.RegisterCallback<MouseEnterEvent>((evt) => { option1.StyleBackgroundColor(new Color(.5f, .5f, .5f, .5f)); });
             option1.RegisterCallback<MouseLeaveEvent>((evt) => { option1.StyleBackgroundColor(Color.clear); });
             option1.RegisterCallback<MouseDownEvent>((evt) =>
             {
@@ -132,10 +129,7 @@ namespace Hierarchy2
             option2.StyleHeight(21);
             option2.StylePadding(4, 4, 0, 0);
             option2.StyleTextAlign(TextAnchor.MiddleLeft);
-            option2.RegisterCallback<MouseEnterEvent>((evt) =>
-            {
-                option2.StyleBackgroundColor(new Color(.5f, .5f, .5f, .5f));
-            });
+            option2.RegisterCallback<MouseEnterEvent>((evt) => { option2.StyleBackgroundColor(new Color(.5f, .5f, .5f, .5f)); });
             option2.RegisterCallback<MouseLeaveEvent>((evt) => { option2.StyleBackgroundColor(Color.clear); });
             option2.RegisterCallback<MouseDownEvent>((evt) =>
             {
@@ -178,10 +172,7 @@ namespace Hierarchy2
             option3.StyleHeight(21);
             option3.StylePadding(4, 4, 0, 0);
             option3.StyleTextAlign(TextAnchor.MiddleLeft);
-            option3.RegisterCallback<MouseEnterEvent>((evt) =>
-            {
-                option3.StyleBackgroundColor(new Color(.5f, .5f, .5f, .5f));
-            });
+            option3.RegisterCallback<MouseEnterEvent>((evt) => { option3.StyleBackgroundColor(new Color(.5f, .5f, .5f, .5f)); });
             option3.RegisterCallback<MouseLeaveEvent>((evt) => { option3.StyleBackgroundColor(Color.clear); });
             option3.RegisterCallback<MouseDownEvent>((evt) =>
             {

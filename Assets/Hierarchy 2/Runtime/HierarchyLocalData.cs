@@ -20,7 +20,7 @@ namespace Hierarchy2
 
             if (!gameObject.CompareTag("EditorOnly"))
                 gameObject.tag = "EditorOnly";
-            
+
             gameObject.hideFlags |= HideFlags.DontSaveInBuild;
 
             ClearNullRef();

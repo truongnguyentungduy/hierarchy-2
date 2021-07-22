@@ -10,22 +10,22 @@ namespace Hierarchy2
     {
         Dictionary<string, Texture2D> dicIcons = new Dictionary<string, Texture2D>();
         public List<Texture2D> listIcons = new List<Texture2D>();
-        
+
         public void GenerateKeyForAssets()
         {
             dicIcons.Clear();
             dicIcons = listIcons.ToDictionary(texture2D => texture2D.name);
         }
-        
+
         public Texture2D GetIcon(string key)
         {
-            Texture2D  texture2D = null;
+            Texture2D texture2D = null;
             var getResult = dicIcons.TryGetValue(key, out texture2D);
             if (getResult == false)
                 Debug.Log(string.Format("Icon with {0} not found, return null.", key));
             return texture2D;
         }
-        
+
         internal static HierarchyResources GetAssets()
         {
             var guids = AssetDatabase.FindAssets(string.Format("t:{0}", typeof(HierarchyResources).Name));
@@ -39,7 +39,7 @@ namespace Hierarchy2
 
             return null;
         }
-        
+
         internal static HierarchyResources CreateAssets()
         {
             String path = EditorUtility.SaveFilePanelInProject("Save as...", "Resources", "asset", "");
@@ -57,7 +57,7 @@ namespace Hierarchy2
             return null;
         }
     }
-    
+
     [CustomEditor(typeof(HierarchyResources))]
     internal class ResourcesInspector : Editor
     {
@@ -73,5 +73,3 @@ namespace Hierarchy2
         }
     }
 }
-
-

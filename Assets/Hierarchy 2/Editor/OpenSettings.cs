@@ -37,10 +37,7 @@ namespace Hierarchy2
                 evt.StopPropagation();
             });
 
-            shelfButton.RegisterCallback<MouseEnterEvent>((evt) =>
-            {
-                shelfButton.StyleBackgroundColor(new Color(.5f, .5f, .5f, .5f));
-            });
+            shelfButton.RegisterCallback<MouseEnterEvent>((evt) => { shelfButton.StyleBackgroundColor(new Color(.5f, .5f, .5f, .5f)); });
 
             shelfButton.RegisterCallback<MouseLeaveEvent>((evt) => { shelfButton.StyleBackgroundColor(Color.clear); });
 

@@ -1051,10 +1051,10 @@ namespace Hierarchy2
                     {
                         Undo.RegisterCompleteObjectUndo(gameObject, "Unlock...");
                         foreach (Component component in gameObject.GetComponents<Component>())
-                        { 
+                        {
                             if (component)
                             {
-                                Undo.RegisterCompleteObjectUndo (component, "Unlock...");
+                                Undo.RegisterCompleteObjectUndo(component, "Unlock...");
                                 component.hideFlags = HideFlags.None;
                             }
                         }
@@ -1404,7 +1404,7 @@ namespace Hierarchy2
                         if (settings.applyTagTargetAndChild)
                             ApplyTagTargetAndChild(gameObject.transform, tag);
                         else
-                        { 
+                        {
                             Undo.RegisterCompleteObjectUndo(gameObject, "Change Tag");
                             gameObject.tag = tag;
                         }
@@ -1471,7 +1471,7 @@ namespace Hierarchy2
                             if (settings.applyLayerTargetAndChild)
                                 ApplyLayerTargetAndChild(gameObject.transform, LayerMask.NameToLayer(layer));
                             else
-                            { 
+                            {
                                 Undo.RegisterCompleteObjectUndo(gameObject, "Change Layer");
                                 gameObject.layer = LayerMask.NameToLayer(layer);
                             }
@@ -1987,12 +1987,12 @@ namespace Hierarchy2
             {
                 Undo.RegisterCompleteObjectUndo(Selection.gameObjects, "Set Selections Flag NotEditable");
                 foreach (GameObject gameObject in Selection.gameObjects)
-                { 
+                {
                     foreach (Component component in gameObject.GetComponents<Component>())
-                    { 
+                    {
                         if (component)
                         {
-                            Undo.RegisterCompleteObjectUndo (component, "Set Selections Flag NotEditable");
+                            Undo.RegisterCompleteObjectUndo(component, "Set Selections Flag NotEditable");
                             component.hideFlags = HideFlags.NotEditable;
                         }
                     }
@@ -2000,7 +2000,7 @@ namespace Hierarchy2
 
                 foreach (GameObject gameObject in Selection.gameObjects)
                     gameObject.hideFlags = HideFlags.NotEditable;
-                
+
                 InternalEditorUtility.RepaintAllViews();
             }
 
@@ -2012,12 +2012,12 @@ namespace Hierarchy2
             {
                 Undo.RegisterCompleteObjectUndo(Selection.gameObjects, "Set Selections Flag Editable");
                 foreach (GameObject gameObject in Selection.gameObjects)
-                { 
+                {
                     foreach (Component component in gameObject.GetComponents<Component>())
-                    { 
+                    {
                         if (component)
                         {
-                            Undo.RegisterCompleteObjectUndo (component, "Set Selections Flag Editable");
+                            Undo.RegisterCompleteObjectUndo(component, "Set Selections Flag Editable");
                             component.hideFlags = HideFlags.None;
                         }
                     }
@@ -2072,7 +2072,7 @@ namespace Hierarchy2
             static void CreateHeaderInstance(UnityEditor.MenuCommand command)
             {
                 GameObject gameObject = new GameObject(string.Format("{0}Header", HierarchyEditor.instance.settings.headerPrefix));
-                
+
                 Undo.RegisterCreatedObjectUndo(gameObject, "Create Header");
                 // Don't create headers as children of the selected objects because only root headers are drawn with background
                 //if(command.context)

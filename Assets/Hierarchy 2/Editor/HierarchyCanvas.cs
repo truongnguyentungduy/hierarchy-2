@@ -85,10 +85,7 @@ namespace Hierarchy2
             mask.focusable = false;
             mask.pickingMode = PickingMode.Ignore;
             mask.StyleDisplay(false);
-            shelfContentElement.RegisterCallback<GeometryChangedEvent>((evt) =>
-            {
-                mask.StyleDisplay(shelfContentElement.style.display.value);
-            });
+            shelfContentElement.RegisterCallback<GeometryChangedEvent>((evt) => { mask.StyleDisplay(shelfContentElement.style.display.value); });
             Add(mask);
 
             List<IHierarchyShelf> listShelf = new List<IHierarchyShelf>();
