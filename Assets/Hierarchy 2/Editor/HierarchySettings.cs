@@ -290,19 +290,6 @@ namespace Hierarchy2
                     displayComponents.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(displayComponents);
 
-                    var onlyDisplayScriptWithAttribute = new Toggle("Script With Attribute");
-                    onlyDisplayScriptWithAttribute.tooltip = "Only display MonoBehaviour script with DisplayOnHierarchyAttribute";
-                    onlyDisplayScriptWithAttribute.value = settings.onlyDisplayScriptWithAttribute;
-                    onlyDisplayScriptWithAttribute.RegisterValueChangedCallback((evt) =>
-                    {
-                        Undo.RecordObject(settings, "Change Settings");
-
-                        settings.onlyDisplayScriptWithAttribute = evt.newValue;
-                        settings.OnSettingsChanged(nameof(settings.onlyDisplayScriptWithAttribute));
-                    });
-                    onlyDisplayScriptWithAttribute.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    verticalLayout.Add(onlyDisplayScriptWithAttribute);
-
                     var componentAlignment = new EnumField(settings.componentAlignment);
                     componentAlignment.label = "Component Alignment";
                     componentAlignment.RegisterValueChangedCallback((evt) =>

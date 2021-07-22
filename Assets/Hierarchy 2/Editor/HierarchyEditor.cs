@@ -40,9 +40,6 @@ namespace Hierarchy2
         UnityEngine.Object activeComponent;
 
         GUIContent tooltipContent = new GUIContent();
-        const string componentDefaultTooltip = "\n\nM2-click: Edit\nM3-click: Instant Inspector";
-
-        const string customIconDefaultTooltip = "M2-click: To customize";
 
         HierarchySettings settings;
         HierarchyResources resources;
@@ -1005,7 +1002,6 @@ namespace Hierarchy2
             {
                 if (rect.Contains(currentEvent.mousePosition))
                 {
-                    GUI.Box(rect, new GUIContent("", customIconDefaultTooltip), GUIStyle.none);
                 }
 
                 if (icon == null)
@@ -1141,7 +1137,8 @@ namespace Hierarchy2
                         if (comType.BaseType == typeof(MonoBehaviour)) isMono = true;
                         if (settings.onlyDisplayScriptWithAttribute && isMono)
                         {
-                            bool shouldIgnoreThisMono = comType.GetCustomAttribute(typeof(DisplayOnHierarchyAttribute), true) != null ? false : true;
+                            //TODO: ???
+                            bool shouldIgnoreThisMono = false;
                             if (shouldIgnoreThisMono) continue;
                         }
 
@@ -1234,7 +1231,7 @@ namespace Hierarchy2
                 }
 
                 string tooltip = isMaterial ? component.name : componentType.Name;
-                tooltipContent.tooltip = tooltip + componentDefaultTooltip;
+                tooltipContent.tooltip = tooltip;
                 GUI.Box(rect, tooltipContent, GUIStyle.none);
 
                 GUI.DrawTexture(rect, image, ScaleMode.ScaleToFit);
@@ -2071,9 +2068,9 @@ namespace Hierarchy2
             [MenuItem("GameObject/Hierarchy 2/Separator", priority = 0)]
             static void CreateHeaderInstance(UnityEditor.MenuCommand command)
             {
-                GameObject gameObject = new GameObject(string.Format("{0}Header", HierarchyEditor.instance.settings.headerPrefix));
+                GameObject gameObject = new GameObject(string.Format("{0}Separator", HierarchyEditor.instance.settings.headerPrefix));
 
-                Undo.RegisterCreatedObjectUndo(gameObject, "Create Header");
+                Undo.RegisterCreatedObjectUndo(gameObject, "Create Separator");
                 // Don't create headers as children of the selected objects because only root headers are drawn with background
                 //if(command.context)
                 //    Undo.SetTransformParent(gameObject.transform, ( (GameObject) command.context ).transform, "Create Header");

@@ -49,7 +49,7 @@ namespace Hierarchy2
 
         private void Init(string title)
         {
-            this.StyleFont(FontStyle.Bold);
+            this.StyleFont(FontStyle.Normal);
             this.StyleMinHeight(20);
             this.StyleBorderWidth(0, 0, 1, 0);
             Color borderColor = EditorGUIUtility.isProSkin
