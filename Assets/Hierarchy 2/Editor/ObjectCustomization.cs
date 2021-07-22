@@ -2,6 +2,7 @@
 using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.Experimental.SceneManagement;
+using UnityEditor.SceneManagement;
 using UnityEditor.UIElements;
 using System.Collections.Generic;
 
@@ -44,7 +45,7 @@ namespace Hierarchy2
                     evt.StopPropagation();
                     return;
                 }
-                
+
                 ObjectCustomizationPopup.ShowPopup(Selection.GetFiltered<GameObject>(SelectionMode.ExcludePrefab));
                 Selection.activeGameObject = null;
 
@@ -52,10 +53,7 @@ namespace Hierarchy2
                 evt.StopPropagation();
             });
 
-            shelfButton.RegisterCallback<MouseEnterEvent>((evt) =>
-            {
-                shelfButton.StyleBackgroundColor(new Color(.5f, .5f, .5f, .5f));
-            });
+            shelfButton.RegisterCallback<MouseEnterEvent>((evt) => { shelfButton.StyleBackgroundColor(new Color(.5f, .5f, .5f, .5f)); });
 
             shelfButton.RegisterCallback<MouseLeaveEvent>((evt) => { shelfButton.StyleBackgroundColor(Color.clear); });
 
@@ -81,7 +79,7 @@ namespace Hierarchy2
                 window.Close();
 
             if (gameObjects == null || gameObjects.Length == 0)
-            { 
+            {
                 Debug.LogWarning("No object has been selected.");
                 return null;
             }
@@ -107,7 +105,7 @@ namespace Hierarchy2
             List<GameObject> _gameObjects = new List<GameObject>(gameObjects);
             _gameObjects.RemoveAll((gameObject) => gameObject == null);
             if (_gameObjects.Count == 0) // All GameObjects are destroyed
-            { 
+            {
                 Close();
                 return;
             }
@@ -201,7 +199,7 @@ namespace Hierarchy2
                 EditorGUI.showMixedValue = false;
                 EditorGUIUtility.wideMode = wideMode;
                 EditorGUIUtility.labelWidth = labelWidth;
-            } );
+            });
             rootVisualElement.Add(iMGUIContainer);
 
             Undo.undoRedoPerformed -= Repaint;
@@ -219,7 +217,7 @@ namespace Hierarchy2
 
             for (int i = 1; i < customRowItems.Length; i++)
             {
-                if (equalityComparer (customRowItems[0], customRowItems[i]) == false)
+                if (equalityComparer(customRowItems[0], customRowItems[i]) == false)
                     return true;
             }
 
@@ -232,7 +230,7 @@ namespace Hierarchy2
             {
                 for (int i = 0; i < hierarchyLocalDatas.Length; i++)
                     Undo.RecordObject(hierarchyLocalDatas[i], "Change Object Customization");
-                
+
                 for (int i = 0; i < customRowItems.Length; i++)
                     applyAction(customRowItems[i]);
 
