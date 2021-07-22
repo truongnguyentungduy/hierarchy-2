@@ -349,7 +349,8 @@ namespace Hierarchy2
 
             EditorApplication.update -= OnEditorUpdate;
 
-            ClearAllCanvas();
+            //TODO: disable canvas feature
+            // ClearAllCanvas();
 
             foreach (EditorWindow window in GetAllSceneHierarchyWindowsDelegate())
             {
@@ -392,8 +393,9 @@ namespace Hierarchy2
                         hierarchyWindow.SetWindowTitle("Hierarchy 2");
                     }
 
-                    if (window.rootVisualElement.childCount == 0)
-                        CreateCanvas(window);
+                    //TODO: disable canvas feature
+                    // if (window.rootVisualElement.childCount == 0)
+                    //     CreateCanvas(window);
                 }
 
                 checkingAllHierarchy = false;
@@ -480,42 +482,45 @@ namespace Hierarchy2
             }
         }
 
-        internal HierarchyCanvas GetHierarchyCanvas()
-        {
-            if (lastInteractedHierarchyWindowDelegate() != null)
-            {
-                if (lastInteractedHierarchyWindowDelegate().rootVisualElement.childCount == 0)
-                    CreateCanvas(lastInteractedHierarchyWindowDelegate());
+        //TODO: disable canvas feature
+        // internal HierarchyCanvas GetHierarchyCanvas()
+        // {
+        //     if (lastInteractedHierarchyWindowDelegate() != null)
+        //     {
+        //         if (lastInteractedHierarchyWindowDelegate().rootVisualElement.childCount == 0)
+        //             CreateCanvas(lastInteractedHierarchyWindowDelegate());
+        //
+        //         HierarchyCanvas canvas = lastInteractedHierarchyWindowDelegate().rootVisualElement
+        //             .FindChildren<HierarchyCanvas>(nameof(HierarchyCanvas));
+        //         canvas = lastInteractedHierarchyWindowDelegate().rootVisualElement
+        //             .FindChildren<HierarchyCanvas>(nameof(HierarchyCanvas));
+        //         return canvas;
+        //     }
+        //
+        //     return null;
+        // }
 
-                HierarchyCanvas canvas = lastInteractedHierarchyWindowDelegate().rootVisualElement
-                    .FindChildren<HierarchyCanvas>(nameof(HierarchyCanvas));
-                canvas = lastInteractedHierarchyWindowDelegate().rootVisualElement
-                    .FindChildren<HierarchyCanvas>(nameof(HierarchyCanvas));
-                return canvas;
-            }
+        //TODO: disable canvas feature
+        // void CreateCanvas(EditorWindow hierarchyWindow)
+        // {
+        //     int hash = hierarchyWindow.GetHashCode();
+        //     if (hierarchyCanvas.ContainsKey(hash))
+        //         return;
+        //
+        //     var root = hierarchyWindow.rootVisualElement;
+        //     HierarchyCanvas canvas = new HierarchyCanvas();
+        //     canvas.name = nameof(HierarchyCanvas);
+        //     root.Add(canvas);
+        //     hierarchyCanvas.Add(hash, canvas);
+        // }
 
-            return null;
-        }
-
-        void CreateCanvas(EditorWindow hierarchyWindow)
-        {
-            int hash = hierarchyWindow.GetHashCode();
-            if (hierarchyCanvas.ContainsKey(hash))
-                return;
-
-            var root = hierarchyWindow.rootVisualElement;
-            HierarchyCanvas canvas = new HierarchyCanvas();
-            canvas.name = nameof(HierarchyCanvas);
-            root.Add(canvas);
-            hierarchyCanvas.Add(hash, canvas);
-        }
-
-        void ClearAllCanvas()
-        {
-            foreach (var canvas in hierarchyCanvas)
-                canvas.Value.RemoveFromHierarchy();
-            hierarchyCanvas.Clear();
-        }
+        //TODO: disable canvas feature
+        // void ClearAllCanvas()
+        // {
+        //     foreach (var canvas in hierarchyCanvas)
+        //         canvas.Value.RemoveFromHierarchy();
+        //     hierarchyCanvas.Clear();
+        // }
 
         public HierarchyLocalData GetHierarchyLocalData(Scene scene)
         {
@@ -1977,7 +1982,7 @@ namespace Hierarchy2
         {
             const int priority = 200;
 
-            [MenuItem("GameObject/Lock Selection %l", false, priority)]
+            [MenuItem("GameObject/Hierarchy 2/Lock Selection %l", false, priority)]
             static void SetNotEditableObject()
             {
                 Undo.RegisterCompleteObjectUndo(Selection.gameObjects, "Set Selections Flag NotEditable");
@@ -1999,10 +2004,10 @@ namespace Hierarchy2
                 InternalEditorUtility.RepaintAllViews();
             }
 
-            [MenuItem("GameObject/Lock Selection %l", true, priority)]
+            [MenuItem("GameObject/Hierarchy 2/Lock Selection %l", true, priority)]
             static bool ValidateSetNotEditableObject() => Selection.gameObjects.Length > 0;
 
-            [MenuItem("GameObject/Unlock Selection %&l", false, priority)]
+            [MenuItem("GameObject/Hierarchy 2/Unlock Selection %&l", false, priority)]
             static void SetEditableObject()
             {
                 Undo.RegisterCompleteObjectUndo(Selection.gameObjects, "Set Selections Flag Editable");
@@ -2024,11 +2029,11 @@ namespace Hierarchy2
                 InternalEditorUtility.RepaintAllViews();
             }
 
-            [MenuItem("GameObject/Unlock Selection %&l", true, priority)]
+            [MenuItem("GameObject/Hierarchy 2/Unlock Selection %&l", true, priority)]
             static bool ValidateSetEditableObject() => Selection.gameObjects.Length > 0;
 
 
-            [MenuItem("GameObject/Move Selection Up #w", false, priority)]
+            [MenuItem("GameObject/Hierarchy 2/Move Selection Up #w", false, priority)]
             static void QuickSiblingUp()
             {
                 var gameObject = Selection.activeGameObject;
@@ -2044,10 +2049,10 @@ namespace Hierarchy2
                 }
             }
 
-            [MenuItem("GameObject/Move Selection Up #w", true)]
+            [MenuItem("GameObject/Hierarchy 2/Move Selection Up #w", true)]
             static bool ValidateQuickSiblingUp() => Selection.activeTransform != null;
 
-            [MenuItem("GameObject/Move Selection Down #s", false, priority)]
+            [MenuItem("GameObject/Hierarchy 2/Move Selection Down #s", false, priority)]
             static void QuickSiblingDown()
             {
                 var gameObject = Selection.activeGameObject;
@@ -2060,10 +2065,10 @@ namespace Hierarchy2
                 gameObject.transform.SetSiblingIndex(++index);
             }
 
-            [MenuItem("GameObject/Move Selection Down #s", true, priority)]
+            [MenuItem("GameObject/Hierarchy 2/Move Selection Down #s", true, priority)]
             static bool ValidateQuickSiblingDown() => Selection.activeTransform != null;
 
-            [MenuItem("GameObject/Header (Separator)", priority = 0)]
+            [MenuItem("GameObject/Hierarchy 2/Separator", priority = 0)]
             static void CreateHeaderInstance(UnityEditor.MenuCommand command)
             {
                 GameObject gameObject = new GameObject(string.Format("{0}Header", HierarchyEditor.instance.settings.headerPrefix));
