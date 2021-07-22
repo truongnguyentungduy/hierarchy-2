@@ -8,64 +8,6 @@ using System.Collections.Generic;
 
 namespace Hierarchy2
 {
-    public class ObjectCustomizationShelf : IHierarchyShelf
-    {
-        HierarchyCanvas canvas;
-
-        public void Canvas(HierarchyCanvas canvas) => this.canvas = canvas;
-
-        public VisualElement CreateShelfElement()
-        {
-            VisualElement shelfButton = new VisualElement();
-            shelfButton.name = nameof(OpenSettings);
-            shelfButton.tooltip = "";
-            shelfButton.StyleHeight(23);
-            shelfButton.StyleJustifyContent(Justify.Center);
-            Color c = EditorGUIUtility.isProSkin ? new Color32(32, 32, 32, 255) : new Color32(128, 128, 128, 255);
-            shelfButton.StyleBorderColor(c);
-            shelfButton.StyleBorderWidth(0, 0, 1, 0);
-
-            shelfButton.Add(new Label("Custom Selection"));
-
-            shelfButton.RegisterCallback<MouseDownEvent>((evt) =>
-            {
-                var isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null ? true : false;
-                if (isPrefabMode)
-                {
-                    Debug.LogWarning("Cannot custom object in prefab.");
-                    shelfButton.parent.StyleDisplay(false);
-                    evt.StopPropagation();
-                    return;
-                }
-
-                if (Application.isPlaying)
-                {
-                    Debug.LogWarning("Cannot custom object in play mode.");
-                    shelfButton.parent.StyleDisplay(false);
-                    evt.StopPropagation();
-                    return;
-                }
-
-                ObjectCustomizationPopup.ShowPopup(Selection.GetFiltered<GameObject>(SelectionMode.ExcludePrefab));
-                Selection.activeGameObject = null;
-
-                shelfButton.parent.StyleDisplay(false);
-                evt.StopPropagation();
-            });
-
-            shelfButton.RegisterCallback<MouseEnterEvent>((evt) => { shelfButton.StyleBackgroundColor(new Color(.5f, .5f, .5f, .5f)); });
-
-            shelfButton.RegisterCallback<MouseLeaveEvent>((evt) => { shelfButton.StyleBackgroundColor(Color.clear); });
-
-            return shelfButton;
-        }
-
-        public int ShelfPriority()
-        {
-            return 98;
-        }
-    }
-
     public class ObjectCustomizationPopup : EditorWindow
     {
         static ObjectCustomizationPopup window;
@@ -86,8 +28,8 @@ namespace Hierarchy2
 
             ObjectCustomizationPopup.gameObjects = gameObjects;
 
-            Vector2 v2 = GUIUtility.GUIToScreenPoint(Event.current.mousePosition);
-            Vector2 size = new Vector2(256, 138);
+            Vector2 v2 = GUIUtility.GUIToScreenPoint(new Vector2(Screen.currentResolution.width / 2, Screen.currentResolution.height / 2));
+            Vector2 size = new Vector2(256, 150);
             window = GetWindow<ObjectCustomizationPopup>(gameObjects[0].name);
             window.position = new Rect(v2.x - size.x - 30f, v2.y - size.y * 0.5f, size.x, size.y);
             window.maxSize = window.minSize = size;
@@ -110,7 +52,7 @@ namespace Hierarchy2
                 return;
             }
 
-            rootVisualElement.StyleMargin(4, 4, 2, 0);
+            rootVisualElement.StyleMargin(2, 2, 2, 2);
 
             customRowItems = new CustomRowItem[_gameObjects.Count];
 

@@ -35,7 +35,7 @@ namespace Hierarchy2
             return root;
         }
 
-        [MenuItem("GameObject/Hierarchy 2/Hierarchy Folder", priority = 0)]
+        [MenuItem("Tools/Hierarchy 2/Hierarchy Folder", priority = 0)]
         static void CreateInstance(UnityEditor.MenuCommand command)
         {
             GameObject gameObject = new GameObject("Folder", new Type[1] {typeof(HierarchyFolder)});
