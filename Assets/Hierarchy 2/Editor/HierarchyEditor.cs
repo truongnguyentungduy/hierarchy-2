@@ -617,7 +617,7 @@ namespace Hierarchy2
 
                 if (rowItem.isSeparator && rowItem.isRootObject)
                 {
-                    ElementAsHeader();
+                    ElementAsSeparator();
                     goto FINISH;
                 }
 
@@ -781,6 +781,7 @@ namespace Hierarchy2
             {
                 if
                 (
+                    settings.instantBackgroundColors[i].active ||
                     (!string.IsNullOrEmpty(settings.instantBackgroundColors[i].tag) && rowItem.gameObject.CompareTag(settings.instantBackgroundColors[i].tag)) ||
                     (1 << rowItem.gameObject.layer & settings.instantBackgroundColors[i].layer) != 0 ||
                     (!string.IsNullOrEmpty(settings.instantBackgroundColors[i].startWith) && rowItem.name.StartsWith(settings.instantBackgroundColors[i].startWith))
@@ -804,7 +805,7 @@ namespace Hierarchy2
             GUI.color = guiColor;
         }
 
-        void ElementAsHeader()
+        void ElementAsSeparator()
         {
             if (currentEvent.type != EventType.Repaint)
                 return;
@@ -1041,7 +1042,7 @@ namespace Hierarchy2
                     {
                         bool isMono = false;
                         if (comType.BaseType == typeof(MonoBehaviour)) isMono = true;
-                        if (settings.onlyDisplayScriptWithAttribute && isMono)
+                        if (isMono)
                         {
                             //TODO: ???
                             bool shouldIgnoreThisMono = false;
