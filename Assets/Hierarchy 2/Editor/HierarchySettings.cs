@@ -122,9 +122,6 @@ namespace Hierarchy2
         }
 
         [HideInInspector] public bool activeHierarchy = true;
-        [HideInInspector] public bool autoCreateHLD = true;
-        [HideInInspector] public bool pingHierarchyLocalDataObject = false;
-        [HideInInspector] public bool displayVersion = true;
         public bool displayCustomObjectIcon = true;
         public bool displayTreeView = true;
         public bool displayRowBackground = true;
@@ -502,18 +499,18 @@ namespace Hierarchy2
                     advanced.StyleMargin(0, 0, TITLE_MARGIN_TOP, TITLE_MARGIN_BOTTOM);
                     verticalLayout.Add(advanced);
 
-                    var headerPrefix = new TextField();
-                    headerPrefix.label = "Separator Prefix";
-                    headerPrefix.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    headerPrefix.value = settings.separatorStartWith;
-                    headerPrefix.RegisterValueChangedCallback((evt) =>
+                    var separatorStartWith = new TextField();
+                    separatorStartWith.label = "Separator StartWith";
+                    separatorStartWith.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    separatorStartWith.value = settings.separatorStartWith;
+                    separatorStartWith.RegisterValueChangedCallback((evt) =>
                     {
                         Undo.RecordObject(settings, "Change Settings");
 
                         settings.separatorStartWith = evt.newValue == String.Empty ? "--->" : evt.newValue;
                         settings.OnSettingsChanged(nameof(settings.separatorStartWith));
                     });
-                    verticalLayout.Add(headerPrefix);
+                    verticalLayout.Add(separatorStartWith);
 
                     var headerDefaultTag = new TagField();
                     headerDefaultTag.label = "Separator Default Tag";

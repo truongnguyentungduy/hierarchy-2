@@ -49,9 +49,6 @@ MonoBehaviour:
     colorHeaderTitle: {r: 0.40399554, g: 0.40399554, b: 0.40399554, a: 1}
     colorHeaderBackground: {r: 0.2462449, g: 0.2462449, b: 0.2462449, a: 1}
   activeHierarchy: 1
-  autoCreateHLD: 0
-  pingHierarchyLocalDataObject: 0
-  displayVersion: 1
   displayCustomObjectIcon: 1
   displayTreeView: 1
   displayRowBackground: 1
@@ -64,7 +61,6 @@ MonoBehaviour:
   components:
   - Transform
   - RectTransform
-  onlyDisplayScriptWithAttribute: 0
   componentLimited: 0
   componentSize: 16
   componentSpacing: 2
