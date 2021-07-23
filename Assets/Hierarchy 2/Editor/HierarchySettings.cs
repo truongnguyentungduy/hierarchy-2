@@ -10,6 +10,7 @@ using System.IO;
 
 namespace Hierarchy2
 {
+    [Serializable]
     internal class HierarchySettings : ScriptableObject
     {
         [Serializable]
@@ -62,7 +63,10 @@ namespace Hierarchy2
         [Serializable]
         public struct InstantBackgroundColor
         {
-            public string text;
+            public bool active;
+            public string startWith;
+            public string tag;
+            public LayerMask layer;
             public Color color;
         }
 
@@ -151,19 +155,15 @@ namespace Hierarchy2
         [HideInInspector] public bool applyStaticTargetAndChild = true;
         public bool applyTagTargetAndChild = false;
         public bool applyLayerTargetAndChild = true;
-        public string headerPrefix = "$h";
-        public string headerDefaultTag = "Untagged";
+        public string separatorStartWith = "--->";
+        public string separatorDefaultTag = "Untagged";
         public bool useInstantBackground = false;
 
-        public List<InstantBackgroundColor> instantBackgroundColors = new List<InstantBackgroundColor>()
-        {
-            new InstantBackgroundColor() {text = "__", color = new Color(0.23f, 0.34f, 0.47f, 0.41f)}
-        };
+        public List<InstantBackgroundColor> instantBackgroundColors = new List<InstantBackgroundColor>();
 
         public bool onlyDisplayWhileMouseEnter = false;
         public ContentDisplay contentDisplay = ContentDisplay.Component | ContentDisplay.Tag | ContentDisplay.Layer;
 
-        public bool hideHierarchyLocalDatas = false;
 
         public delegate void OnSettingsChangedCallback(string param);
 
@@ -201,12 +201,32 @@ namespace Hierarchy2
                     float TITLE_MARGIN_BOTTOM = 8;
                     float CONTENT_MARGIN_LEFT = 10;
 
+                    HorizontalLayout horizontalLayout = new HorizontalLayout();
+                    horizontalLayout.style.backgroundColor = new Color(0, 0, 0, 0.2f);
+                    horizontalLayout.style.paddingTop = 4;
+                    horizontalLayout.style.paddingBottom = 10;
+                    rootElement.Add(horizontalLayout);
+
                     Label hierarchyTitle = new Label("Hierarchy");
                     hierarchyTitle.StyleFontSize(20);
                     hierarchyTitle.StyleMargin(10, 0, 2, 2);
                     hierarchyTitle.StyleFont(FontStyle.Bold);
-                    rootElement.Add(hierarchyTitle);
+                    horizontalLayout.Add(hierarchyTitle);
 
+                    Label importButton = new Label();
+                    importButton.text = "  Import";
+                    importButton.style.unityFontStyleAndWeight = FontStyle.Italic;
+                    Color importExportButtonColor = new Color32(102, 157, 246, 255);
+                    importButton.style.color = importExportButtonColor;
+                    importButton.RegisterCallback<PointerUpEvent>(evt => instance.ImportFromJson());
+                    horizontalLayout.Add(importButton);
+
+                    Label exportButton = new Label();
+                    exportButton.text = "| Export";
+                    exportButton.style.unityFontStyleAndWeight = FontStyle.Italic;
+                    exportButton.style.color = importExportButtonColor;
+                    exportButton.RegisterCallback<PointerUpEvent>(evt => instance.ExportToJson());
+                    horizontalLayout.Add(exportButton);
 
                     ScrollView scrollView = new ScrollView();
                     rootElement.Add(scrollView);
@@ -486,25 +506,25 @@ namespace Hierarchy2
                     var headerPrefix = new TextField();
                     headerPrefix.label = "Separator Prefix";
                     headerPrefix.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    headerPrefix.value = settings.headerPrefix;
+                    headerPrefix.value = settings.separatorStartWith;
                     headerPrefix.RegisterValueChangedCallback((evt) =>
                     {
                         Undo.RecordObject(settings, "Change Settings");
 
-                        settings.headerPrefix = evt.newValue == String.Empty ? "$h" : evt.newValue;
-                        settings.OnSettingsChanged(nameof(settings.headerPrefix));
+                        settings.separatorStartWith = evt.newValue == String.Empty ? "--->" : evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.separatorStartWith));
                     });
                     verticalLayout.Add(headerPrefix);
 
                     var headerDefaultTag = new TagField();
                     headerDefaultTag.label = "Separator Default Tag";
-                    headerDefaultTag.value = settings.headerDefaultTag;
+                    headerDefaultTag.value = settings.separatorDefaultTag;
                     headerDefaultTag.RegisterValueChangedCallback((evt) =>
                     {
                         Undo.RecordObject(settings, "Change Settings");
 
-                        settings.headerDefaultTag = evt.newValue;
-                        settings.OnSettingsChanged(nameof(settings.headerDefaultTag));
+                        settings.separatorDefaultTag = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.separatorDefaultTag));
                     });
                     headerDefaultTag.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     headerDefaultTag.StyleMarginBottom(4);
@@ -536,20 +556,6 @@ namespace Hierarchy2
                     });
                     onlyDisplayWhileMouseHovering.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(onlyDisplayWhileMouseHovering);
-
-                    var hideHierarchyLocalDatas = new Toggle("Hide HLD(s)");
-                    hideHierarchyLocalDatas.tooltip = "Hide HierarhcyLocalData object(s) in Hierarchy";
-                    hideHierarchyLocalDatas.StyleMarginTop(7);
-                    hideHierarchyLocalDatas.value = settings.hideHierarchyLocalDatas;
-                    hideHierarchyLocalDatas.RegisterValueChangedCallback((evt) =>
-                    {
-                        Undo.RecordObject(settings, "Change Settings");
-
-                        settings.hideHierarchyLocalDatas = evt.newValue;
-                        settings.OnSettingsChanged(nameof(settings.hideHierarchyLocalDatas));
-                    });
-                    hideHierarchyLocalDatas.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    verticalLayout.Add(hideHierarchyLocalDatas);
 
                     var contentMaskEnumFlags = new EnumFlagsField(settings.contentDisplay);
                     contentMaskEnumFlags.StyleDisplay(onlyDisplayWhileMouseHovering.value);
@@ -763,7 +769,7 @@ namespace Hierarchy2
 
             if (instance != null)
             {
-                instance.onSettingsChanged?.Invoke(nameof(instance.components)); // Refresh components on undo&redo
+                instance.onSettingsChanged?.Invoke(nameof(instance.components)); // Refresh components on undo & redo
             }
         }
 
@@ -781,22 +787,12 @@ namespace Hierarchy2
                     return instance;
             }
 
-            // Settings file doesn't exist, create one
-            const string settingsSavePath = "Assets/Hierarchy 2/Editor/Settings.asset";
-            Directory.CreateDirectory(Path.GetDirectoryName(settingsSavePath));
-
-            AssetDatabase.CreateAsset(CreateInstance<HierarchySettings>(), settingsSavePath);
-            AssetDatabase.SaveAssets();
-            instance = AssetDatabase.LoadAssetAtPath<HierarchySettings>(settingsSavePath);
-
-            Debug.Log("Created Hierarchy 2 settings file at " + settingsSavePath + ". You can move this file around freely.", instance);
-
-            return instance;
+            return instance = CreateAssets();
         }
 
         internal static HierarchySettings CreateAssets()
         {
-            String path = EditorUtility.SaveFilePanelInProject("Save as...", "Settings", "asset", "");
+            string path = EditorUtility.SaveFilePanelInProject("Save as...", "Hierarchy 2 Settings", "asset", "");
             if (path.Length > 0)
             {
                 HierarchySettings settings = ScriptableObject.CreateInstance<HierarchySettings>();
@@ -806,6 +802,49 @@ namespace Hierarchy2
                 EditorUtility.FocusProjectWindow();
                 Selection.activeObject = settings;
                 return settings;
+            }
+
+            return null;
+        }
+
+        internal bool ImportFromJson()
+        {
+            string path = EditorUtility.OpenFilePanel("Import Hierarchy 2 settings", "", "json");
+            if (path.Length > 0)
+            {
+                string json = string.Empty;
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    json = sr.ReadToEnd();
+                }
+
+                if (string.IsNullOrEmpty(json)) return false;
+                JsonUtility.FromJsonOverwrite(json, this);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+                return true;
+            }
+
+            return false;
+        }
+
+        internal TextAsset ExportToJson()
+        {
+            string path = EditorUtility.SaveFilePanelInProject("Export Hierarchy 2 settings as...", "Hierarchy 2 Settings", "json", "");
+            if (path.Length > 0)
+            {
+                string json = JsonUtility.ToJson(instance, true);
+                using (StreamWriter sw = new StreamWriter(path))
+                {
+                    sw.Write(json);
+                }
+
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+                EditorUtility.FocusProjectWindow();
+                TextAsset asset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
+                Selection.activeObject = asset;
+                return asset;
             }
 
             return null;

@@ -283,20 +283,6 @@ namespace Hierarchy2
                     }
 
                     break;
-                case nameof(settings.hideHierarchyLocalDatas):
-                    foreach (HierarchyLocalData hierarchyLocalData in HierarchyLocalData.instances.Values)
-                    {
-                        if (hierarchyLocalData != null)
-                        {
-                            Undo.RegisterCompleteObjectUndo(hierarchyLocalData.gameObject, "Change Settings");
-                            if (settings.hideHierarchyLocalDatas)
-                                hierarchyLocalData.gameObject.hideFlags |= HideFlags.HideInHierarchy;
-                            else
-                                hierarchyLocalData.gameObject.hideFlags &= ~HideFlags.HideInHierarchy;
-                        }
-                    }
-
-                    break;
             }
 
             EditorApplication.RepaintHierarchyWindow();
@@ -413,15 +399,6 @@ namespace Hierarchy2
         void OnSceneOpened(Scene scene, OpenSceneMode mode)
         {
             if (settings is null) return;
-
-            HierarchyLocalData hierarchyLocalData;
-            if (HierarchyLocalData.GetInstance(scene, out hierarchyLocalData))
-            {
-                if (settings.hideHierarchyLocalDatas)
-                    hierarchyLocalData.gameObject.hideFlags |= HideFlags.HideInHierarchy;
-                else
-                    hierarchyLocalData.gameObject.hideFlags &= ~HideFlags.HideInHierarchy;
-            }
         }
 
         void OnSceneClosed(Scene scene)
@@ -470,26 +447,6 @@ namespace Hierarchy2
             {
                 HierarchyWindow.windows[i].Reflection();
             }
-        }
-
-        public HierarchyLocalData GetHierarchyLocalData(Scene scene)
-        {
-            HierarchyLocalData hierarchyLocalData = null;
-            if (HierarchyLocalData.GetInstance(scene, out hierarchyLocalData))
-                return hierarchyLocalData;
-            return hierarchyLocalData = CreateHierarchyLocalData(scene);
-        }
-
-        HierarchyLocalData CreateHierarchyLocalData(Scene scene)
-        {
-            GameObject hierarchyLocalDataObject = new GameObject("HierarchyLocalData", typeof(HierarchyLocalData));
-            EditorSceneManager.MoveGameObjectToScene(hierarchyLocalDataObject, scene);
-            DirtyScene(scene);
-
-            if (!(settings is null) && settings.hideHierarchyLocalDatas)
-                hierarchyLocalDataObject.hideFlags |= HideFlags.HideInHierarchy;
-
-            return hierarchyLocalDataObject.GetComponent<HierarchyLocalData>();
         }
 
         void HierarchyOnGUI(int selectionID, Rect selectionRect)
@@ -545,11 +502,11 @@ namespace Hierarchy2
             {
                 rowItem.hierarchyFolder = rowItem.gameObject.GetComponent<HierarchyFolder>();
                 if (!(rowItem.isFolder = rowItem.hierarchyFolder))
-                    rowItem.isHeader = rowItem.name.StartsWith(settings.headerPrefix);
+                    rowItem.isSeparator = rowItem.name.StartsWith(settings.separatorStartWith);
 
                 rowItem.isDirty = EditorUtility.IsDirty(selectionID);
 
-                if (true && !rowItem.isHeader && rowItem.isDirty)
+                if (true && !rowItem.isSeparator && rowItem.isDirty)
                 {
                     rowItem.isPrefab = PrefabUtility.IsPartOfAnyPrefab(rowItem.gameObject);
 
@@ -658,26 +615,17 @@ namespace Hierarchy2
                     DisplayCustomObjectIcon(icon);
                 }
 
-                if (rowItem.isHeader && rowItem.isRootObject)
+                if (rowItem.isSeparator && rowItem.isRootObject)
                 {
                     ElementAsHeader();
                     goto FINISH;
-                }
-
-
-                HierarchyLocalData hld = null;
-                bool hasHierarchyLocalData =
-                    HierarchyLocalData.instances.TryGetValue(rowItem.gameObject.scene, out hld);
-                if (hasHierarchyLocalData)
-                {
-                    rowItem.hasCustom = hld.TryGetCustomRowData(rowItem.gameObject, out rowItem.customRowItem);
                 }
 
                 if (rowItem.hasCustom)
                     CustomRow();
 
                 if (settings.useInstantBackground && (!rowItem.hasCustom || !rowItem.customRowItem.useBackground))
-                    CustomRowBGPrefix();
+                    CustomRowBackground();
 
                 if (settings.displayTreeView && !rowItem.isRootObject)
                     DisplayTreeView();
@@ -822,7 +770,7 @@ namespace Hierarchy2
             }
         }
 
-        void CustomRowBGPrefix()
+        void CustomRowBackground()
         {
             if (currentEvent.type != EventType.Repaint)
                 return;
@@ -831,7 +779,12 @@ namespace Hierarchy2
             bool contain = false;
             for (int i = 0; i < settings.instantBackgroundColors.Count; ++i)
             {
-                if (rowItem.name.StartsWith(settings.instantBackgroundColors[i].text))
+                if
+                (
+                    (!string.IsNullOrEmpty(settings.instantBackgroundColors[i].tag) && rowItem.gameObject.CompareTag(settings.instantBackgroundColors[i].tag)) ||
+                    (1 << rowItem.gameObject.layer & settings.instantBackgroundColors[i].layer) != 0 ||
+                    (!string.IsNullOrEmpty(settings.instantBackgroundColors[i].startWith) && rowItem.name.StartsWith(settings.instantBackgroundColors[i].startWith))
+                )
                 {
                     contain = true;
                     instantBackgroundColor = settings.instantBackgroundColors[i];
@@ -856,8 +809,8 @@ namespace Hierarchy2
             if (currentEvent.type != EventType.Repaint)
                 return;
 
-            if (!rowItem.gameObject.CompareTag(settings.headerDefaultTag))
-                rowItem.gameObject.tag = settings.headerDefaultTag;
+            if (!rowItem.gameObject.CompareTag(settings.separatorDefaultTag))
+                rowItem.gameObject.tag = settings.separatorDefaultTag;
 
             var rect = EditorGUIUtility.PixelsToPoints(RectFromLeft(rowItem.rect, Screen.width, 0));
             rect.y = rowItem.rect.y;
@@ -869,7 +822,7 @@ namespace Hierarchy2
             GUI.color = ThemeData.colorHeaderBackground;
             GUI.DrawTexture(rect, Resources.PixelWhite, ScaleMode.StretchToFill);
 
-            var content = new GUIContent(rowItem.name.Remove(0, settings.headerPrefix.Length));
+            var content = new GUIContent(rowItem.name.Remove(0, settings.separatorStartWith.Length));
             rect.x += (rect.width - Styles.Header.CalcSize(content).x) / 2;
             GUI.color = ThemeData.colorHeaderTitle;
             GUI.Label(rect, content, Styles.Header);
@@ -1727,7 +1680,7 @@ namespace Hierarchy2
             public bool isSelected = false;
             public bool isFirstRow = false;
             public bool isFirstElement = false;
-            public bool isHeader = false;
+            public bool isSeparator = false;
             public bool isFolder = false;
             public bool isDirty = false;
             public bool isMouseHovering = false;
@@ -1771,7 +1724,7 @@ namespace Hierarchy2
                 isSelected = false;
                 isFirstRow = false;
                 isFirstElement = false;
-                isHeader = false;
+                isSeparator = false;
                 isFolder = false;
                 isDirty = false;
                 isMouseHovering = false;
@@ -2021,7 +1974,7 @@ namespace Hierarchy2
             [MenuItem("Tools/Hierarchy 2/Separator", priority = 0)]
             static void CreateHeaderInstance(UnityEditor.MenuCommand command)
             {
-                GameObject gameObject = new GameObject(string.Format("{0}Separator", HierarchyEditor.instance.settings.headerPrefix));
+                GameObject gameObject = new GameObject(string.Format("{0}Separator", HierarchyEditor.instance.settings.separatorStartWith));
 
                 Undo.RegisterCreatedObjectUndo(gameObject, "Create Separator");
                 // Don't create headers as children of the selected objects because only root headers are drawn with background
@@ -2029,26 +1982,6 @@ namespace Hierarchy2
                 //    Undo.SetTransformParent(gameObject.transform, ( (GameObject) command.context ).transform, "Create Header");
 
                 Selection.activeTransform = gameObject.transform;
-            }
-
-            [MenuItem("Tools/Hierarchy 2/Customization", false, priority = 100)]
-            static void ObjectCustomization()
-            {
-                var isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null ? true : false;
-                if (isPrefabMode)
-                {
-                    Debug.LogWarning("Cannot custom object in prefab mode.");
-                    return;
-                }
-
-                if (Application.isPlaying)
-                {
-                    Debug.LogWarning("Cannot custom object in play mode.");
-                    return;
-                }
-
-                ObjectCustomizationPopup.ShowPopup(Selection.GetFiltered<GameObject>(SelectionMode.ExcludePrefab));
-                Selection.activeGameObject = null;
             }
         }
     }

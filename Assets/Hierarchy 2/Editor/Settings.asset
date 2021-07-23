@@ -64,6 +64,7 @@ MonoBehaviour:
   components:
   - Transform
   - RectTransform
+  onlyDisplayScriptWithAttribute: 0
   componentLimited: 0
   componentSize: 16
   componentSpacing: 2
@@ -74,7 +75,9 @@ MonoBehaviour:
   applyStaticTargetAndChild: 1
   applyTagTargetAndChild: 0
   applyLayerTargetAndChild: 1
-  headerPrefix: $h
-  headerDefaultTag: Untagged
+  separatorStartWith: --->
+  separatorDefaultTag: Untagged
+  useInstantBackground: 1
+  instantBackgroundColors: []
   onlyDisplayWhileMouseEnter: 0
   contentDisplay: 1
