@@ -144,7 +144,6 @@ namespace Hierarchy2
 
         public ComponentDisplayMode componentDisplayMode = ComponentDisplayMode.Ignore;
         public string[] components = new string[] {"Transform", "RectTransform"};
-        public bool onlyDisplayScriptWithAttribute = false;
         [HideInInspector] public int componentLimited = 0;
         [Range(12, 16)] public int componentSize = 16;
         public int componentSpacing = 0;
