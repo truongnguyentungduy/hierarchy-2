@@ -49,7 +49,7 @@ namespace Hierarchy2
 
         private void Init(string title)
         {
-            this.StyleFont(FontStyle.Bold);
+            this.StyleFont(FontStyle.Normal);
             this.StyleMinHeight(20);
             this.StyleBorderWidth(0, 0, 1, 0);
             Color borderColor = EditorGUIUtility.isProSkin
@@ -94,10 +94,7 @@ namespace Hierarchy2
             imageElement.StyleSize(16, 16);
             headerElement.Add(imageElement);
             imageElement.SendToBack();
-            imageElement.RegisterCallback<GeometryChangedEvent>((evt) =>
-            {
-                imageElement.StyleDisplay(imageElement.image == null ? DisplayStyle.None : DisplayStyle.Flex);
-            });
+            imageElement.RegisterCallback<GeometryChangedEvent>((evt) => { imageElement.StyleDisplay(imageElement.image == null ? DisplayStyle.None : DisplayStyle.Flex); });
 
             foloutImage = new Image();
             foloutImage.StyleWidth(13);
@@ -141,16 +138,13 @@ namespace Hierarchy2
             style.marginLeft = style.marginRight = style.marginTop = style.marginBottom = 4;
             Label = text;
 
-            IMGUIContainer iMGUIContainer = new IMGUIContainer(() =>
-            {
-                EditorGUILayout.HelpBox(label, messageType, wide);
-            });
+            IMGUIContainer iMGUIContainer = new IMGUIContainer(() => { EditorGUILayout.HelpBox(label, messageType, wide); });
 
             iMGUIContainer.name = nameof(IMGUIContainer);
             Add(iMGUIContainer);
         }
     }
-    
+
 #endif
 
     public class HorizontalLayout : VisualElement

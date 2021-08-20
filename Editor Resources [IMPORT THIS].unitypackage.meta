@@ -1,6 +1,11 @@
 fileFormatVersion: 2
+<<<<<<< HEAD:Editor Resources [IMPORT THIS].unitypackage.meta
 guid: 1a0a94f26df751b459880055df267bad
 DefaultImporter:
+=======
+guid: b17f1efeae860a940881c042d852487a
+AssemblyDefinitionImporter:
+>>>>>>> master:Editor/Hierarchy2.Editor.asmdef.meta
   externalObjects: {}
   userData: 
   assetBundleName: 

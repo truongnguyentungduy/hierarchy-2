@@ -34,15 +34,11 @@ namespace Hierarchy2
             private set { instance = value; }
         }
 
-        Dictionary<int, HierarchyCanvas> hierarchyCanvas = new Dictionary<int, HierarchyCanvas>();
         Dictionary<int, UnityEngine.Object> selectedComponents = new Dictionary<int, UnityEngine.Object>();
         Dictionary<string, string> dicComponents = new Dictionary<string, string>(StringComparer.Ordinal);
         UnityEngine.Object activeComponent;
 
         GUIContent tooltipContent = new GUIContent();
-        const string componentDefaultTooltip = "\n\nM2-click: Edit\nM3-click: Instant Inspector";
-
-        const string customIconDefaultTooltip = "M2-click: To customize";
 
         HierarchySettings settings;
         HierarchyResources resources;
@@ -88,6 +84,8 @@ namespace Hierarchy2
 
         static List<Type> InternalEditorType = new List<Type>();
         static Dictionary<string, Type> dicInternalEditorType = new Dictionary<string, Type>();
+        static List<Type> DisplayOnHierarchyScriptType = new List<Type>();
+        static Dictionary<string, Type> dicDisplayOnHierarchyScriptType = new Dictionary<string, Type>();
 
         static Type SceneHierarchyWindow;
         static Type SceneHierarchy;
@@ -112,68 +110,43 @@ namespace Hierarchy2
             InternalEditorType = arrayInteralEditorType.ToList();
             dicInternalEditorType = arrayInteralEditorType.ToDictionary(type => type.FullName);
 
-            FieldInfo refreshHierarchy = typeof(EditorApplication).GetField(nameof(refreshHierarchy),
-                BindingFlags.Static | BindingFlags.NonPublic);
-            MethodInfo OnRepaintHierarchyWindow = typeof(HierarchyEditor).GetMethod(nameof(OnRepaintHierarchyWindow),
-                BindingFlags.NonPublic | BindingFlags.Static);
-            Delegate refreshHierarchyDelegate =
-                Delegate.CreateDelegate(typeof(EditorApplication.CallbackFunction), OnRepaintHierarchyWindow);
+            FieldInfo refreshHierarchy = typeof(EditorApplication).GetField(nameof(refreshHierarchy), BindingFlags.Static | BindingFlags.NonPublic);
+            MethodInfo OnRepaintHierarchyWindow = typeof(HierarchyEditor).GetMethod(nameof(OnRepaintHierarchyWindow), BindingFlags.NonPublic | BindingFlags.Static);
+            Delegate refreshHierarchyDelegate = Delegate.CreateDelegate(typeof(EditorApplication.CallbackFunction), OnRepaintHierarchyWindow);
             refreshHierarchy.SetValue(null, refreshHierarchyDelegate);
 
 
-            FieldInfo windowsReordered = typeof(EditorApplication).GetField(nameof(windowsReordered),
-                BindingFlags.Static | BindingFlags.NonPublic);
-            MethodInfo OnWindowsReordered = typeof(HierarchyEditor).GetMethod(nameof(OnWindowsReordered),
-                BindingFlags.NonPublic | BindingFlags.Static);
-            Delegate windowsReorderedDelegate =
-                Delegate.CreateDelegate(typeof(EditorApplication.CallbackFunction), OnWindowsReordered);
+            FieldInfo windowsReordered = typeof(EditorApplication).GetField(nameof(windowsReordered), BindingFlags.Static | BindingFlags.NonPublic);
+            MethodInfo OnWindowsReordered = typeof(HierarchyEditor).GetMethod(nameof(OnWindowsReordered), BindingFlags.NonPublic | BindingFlags.Static);
+            Delegate windowsReorderedDelegate = Delegate.CreateDelegate(typeof(EditorApplication.CallbackFunction), OnWindowsReordered);
             windowsReordered.SetValue(null, windowsReorderedDelegate);
 
             {
-                dicInternalEditorType.TryGetValue(nameof(UnityEditor) + "." + nameof(SceneHierarchyWindow),
-                    out SceneHierarchyWindow);
-                dicInternalEditorType.TryGetValue(nameof(UnityEditor) + "." + nameof(GameObjectTreeViewGUI),
-                    out GameObjectTreeViewGUI); //GameObjectTreeViewGUI : TreeViewGUI
-                dicInternalEditorType.TryGetValue(nameof(UnityEditor) + "." + nameof(SceneHierarchy),
-                    out SceneHierarchy);
+                dicInternalEditorType.TryGetValue(nameof(UnityEditor) + "." + nameof(SceneHierarchyWindow), out SceneHierarchyWindow);
+                dicInternalEditorType.TryGetValue(nameof(UnityEditor) + "." + nameof(GameObjectTreeViewGUI), out GameObjectTreeViewGUI); //GameObjectTreeViewGUI : TreeViewGUI
+                dicInternalEditorType.TryGetValue(nameof(UnityEditor) + "." + nameof(SceneHierarchy), out SceneHierarchy);
             }
 
-            FieldInfo s_LastInteractedHierarchy = SceneHierarchyWindow.GetField(nameof(s_LastInteractedHierarchy),
-                BindingFlags.NonPublic | BindingFlags.Static);
+            FieldInfo s_LastInteractedHierarchy = SceneHierarchyWindow.GetField(nameof(s_LastInteractedHierarchy), BindingFlags.NonPublic | BindingFlags.Static);
 
-            MethodInfo lastInteractedHierarchyWindow = SceneHierarchyWindow
-                .GetProperty(nameof(lastInteractedHierarchyWindow), BindingFlags.Static | BindingFlags.Public)
-                .GetGetMethod();
-            lastInteractedHierarchyWindowDelegate =
-                Delegate.CreateDelegate(typeof(Func<SearchableEditorWindow>), lastInteractedHierarchyWindow) as
-                    Func<SearchableEditorWindow>;
+            MethodInfo lastInteractedHierarchyWindow = SceneHierarchyWindow.GetProperty(nameof(lastInteractedHierarchyWindow), BindingFlags.Static | BindingFlags.Public).GetGetMethod();
+            lastInteractedHierarchyWindowDelegate = Delegate.CreateDelegate(typeof(Func<SearchableEditorWindow>), lastInteractedHierarchyWindow) as Func<SearchableEditorWindow>;
 
-            MethodInfo GetAllSceneHierarchyWindows = SceneHierarchyWindow.GetMethod(nameof(GetAllSceneHierarchyWindows),
-                BindingFlags.Static | BindingFlags.Public);
-            GetAllSceneHierarchyWindowsDelegate =
-                Delegate.CreateDelegate(typeof(Func<IEnumerable>), GetAllSceneHierarchyWindows) as Func<IEnumerable>;
-
+            MethodInfo GetAllSceneHierarchyWindows = SceneHierarchyWindow.GetMethod(nameof(GetAllSceneHierarchyWindows), BindingFlags.Static | BindingFlags.Public);
+            GetAllSceneHierarchyWindowsDelegate = Delegate.CreateDelegate(typeof(Func<IEnumerable>), GetAllSceneHierarchyWindows) as Func<IEnumerable>;
 
             {
-                m_SceneHierarchy = SceneHierarchyWindow.GetField(nameof(m_SceneHierarchy),
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-                m_TreeView =
-                    SceneHierarchy.GetField(nameof(m_TreeView), BindingFlags.NonPublic | BindingFlags.Instance);
-                gui = m_TreeView.FieldType.GetProperty(nameof(gui).ToLower(),
-                    BindingFlags.Public | BindingFlags.Instance);
-                k_IconWidth =
-                    GameObjectTreeViewGUI.GetField(nameof(k_IconWidth), BindingFlags.Public | BindingFlags.Instance);
+                m_SceneHierarchy = SceneHierarchyWindow.GetField(nameof(m_SceneHierarchy), BindingFlags.NonPublic | BindingFlags.Instance);
+                m_TreeView = SceneHierarchy.GetField(nameof(m_TreeView), BindingFlags.NonPublic | BindingFlags.Instance);
+                gui = m_TreeView.FieldType.GetProperty(nameof(gui).ToLower(), BindingFlags.Public | BindingFlags.Instance);
+                k_IconWidth = GameObjectTreeViewGUI.GetField(nameof(k_IconWidth), BindingFlags.Public | BindingFlags.Instance);
             }
 
-            MethodInfo DisplayObjectContextMenu = typeof(EditorUtility)
-                .GetMethods(BindingFlags.Static | BindingFlags.NonPublic).Single
-                (
-                    method => method.Name == nameof(DisplayObjectContextMenu) &&
-                              method.GetParameters()[1].ParameterType == typeof(UnityEngine.Object)
-                );
-            DisplayObjectContextMenuDelegate =
-                Delegate.CreateDelegate(typeof(Action<Rect, UnityEngine.Object, int>), DisplayObjectContextMenu) as
-                    Action<Rect, UnityEngine.Object, int>;
+            MethodInfo DisplayObjectContextMenu = typeof(EditorUtility).GetMethods(BindingFlags.Static | BindingFlags.NonPublic).Single
+            (
+                method => method.Name == nameof(DisplayObjectContextMenu) && method.GetParameters()[1].ParameterType == typeof(UnityEngine.Object)
+            );
+            DisplayObjectContextMenuDelegate = Delegate.CreateDelegate(typeof(Action<Rect, UnityEngine.Object, int>), DisplayObjectContextMenu) as Action<Rect, UnityEngine.Object, int>;
 
 
             Type IconSelector = typeof(EditorWindow).Assembly.GetTypes().Single(type =>
@@ -183,59 +156,24 @@ namespace Hierarchy2
                 method => method.Name == nameof(ShowAtPosition) &&
                           method.GetParameters()[0].ParameterType == typeof(UnityEngine.Object)
             );
-            IconSelectorShowAtPositionDelegate =
-                Delegate.CreateDelegate(typeof(Func<GameObject, Rect, bool, bool>), ShowAtPosition) as
-                    Func<GameObject, Rect, bool, bool>;
+            IconSelectorShowAtPositionDelegate = Delegate.CreateDelegate(typeof(Func<GameObject, Rect, bool, bool>), ShowAtPosition) as Func<GameObject, Rect, bool, bool>;
 
-            GetItemAndRowIndexMethod = m_TreeView.FieldType.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
-                .Single(method => method.Name == "GetItemAndRowIndex");
-            
-            m_TreeView_IData = m_TreeView.FieldType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Single(property => property.Name == "data");
+            GetItemAndRowIndexMethod = m_TreeView.FieldType.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Single(method => method.Name == "GetItemAndRowIndex");
 
-            m_Rows = InternalEditorType.Find(type => type.Name == "TreeViewDataSource")
-                .GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
-                .Single(field => field.Name.Contains(nameof(m_Rows)));
+            m_TreeView_IData = m_TreeView.FieldType.GetProperties(BindingFlags.Public | BindingFlags.Instance).Single(property => property.Name == "data");
+
+            m_Rows = InternalEditorType.Find(type => type.Name == "TreeViewDataSource").GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Single(field => field.Name.Contains(nameof(m_Rows)));
         }
 
         public static IEnumerable GetAllSceneHierarchyWindows() => GetAllSceneHierarchyWindowsDelegate();
 
-        public static void DisplayObjectContextMenu(Rect rect, UnityEngine.Object unityObject, int value) =>
-            DisplayObjectContextMenuDelegate(rect, unityObject, value);
+        public static void DisplayObjectContextMenu(Rect rect, UnityEngine.Object unityObject, int value) => DisplayObjectContextMenuDelegate(rect, unityObject, value);
 
-        public static bool IconSelectorShowAtPosition(GameObject gameObject, Rect rect, bool value) =>
-            IconSelectorShowAtPositionDelegate(gameObject, rect, value);
+        public static bool IconSelectorShowAtPosition(GameObject gameObject, Rect rect, bool value) => IconSelectorShowAtPositionDelegate(gameObject, rect, value);
 
         private static MethodInfo GetItemAndRowIndexMethod;
         private static PropertyInfo m_TreeView_IData;
         private static FieldInfo m_Rows;
-        
-        internal static void ReplaceObjectIcon(int id, Texture icon)
-        {
-            // var row = -1;
-            // for (int i = 0; i < HierarchyWindow.windows.Count; ++i)
-            // {
-            //     var window = HierarchyWindow.windows[i];
-            //     if (window.editorWindow == null) continue;
-            //     var item = window.GetItemAndRowIndex(id, out row);
-            //     if (item == null) return;
-            //     item.icon = icon as Texture2D;
-            // }
-        }
-
-        [Obsolete]
-        internal static void HideNameObject(int id)
-        {
-            // var row = -1;
-            // for (int i = 0; i < HierarchyWindow.windows.Count; ++i)
-            // {
-            //     var window = HierarchyWindow.windows[i];
-            //     if (window.editorWindow == null) continue;
-            //     var item = window.GetItemAndRowIndex(id, out row);
-            //     if (item == null) return;
-            //     item.displayName = "";
-            // }
-        }
 
         static void OnRepaintHierarchyWindow()
         {
@@ -333,7 +271,6 @@ namespace Hierarchy2
 
             EditorApplication.update -= OnEditorUpdate;
 
-            ClearAllCanvas();
 
             foreach (EditorWindow window in GetAllSceneHierarchyWindowsDelegate())
             {
@@ -367,7 +304,7 @@ namespace Hierarchy2
                         --i;
                     }
                 }
-                
+
                 foreach (EditorWindow window in GetAllSceneHierarchyWindowsDelegate())
                 {
                     if (!HierarchyWindow.instances.ContainsKey(window.GetInstanceID()))
@@ -375,9 +312,6 @@ namespace Hierarchy2
                         var hierarchyWindow = new HierarchyWindow(window);
                         hierarchyWindow.SetWindowTitle("Hierarchy 2");
                     }
-
-                    if (window.rootVisualElement.childCount == 0)
-                        CreateCanvas(window);
                 }
 
                 checkingAllHierarchy = false;
@@ -404,6 +338,7 @@ namespace Hierarchy2
 
         void OnSceneOpened(Scene scene, OpenSceneMode mode)
         {
+            if (settings is null) return;
         }
 
         void OnSceneClosed(Scene scene)
@@ -447,64 +382,11 @@ namespace Hierarchy2
         void OnPrefabStageClosing(PrefabStage stage)
         {
             prefabStageChanged = true;
-            
+
             for (int i = 0; i < HierarchyWindow.windows.Count; ++i)
             {
                 HierarchyWindow.windows[i].Reflection();
             }
-        }
-
-        internal HierarchyCanvas GetHierarchyCanvas()
-        {
-            if (lastInteractedHierarchyWindowDelegate() != null)
-            {
-                if (lastInteractedHierarchyWindowDelegate().rootVisualElement.childCount == 0)
-                    CreateCanvas(lastInteractedHierarchyWindowDelegate());
-
-                HierarchyCanvas canvas = lastInteractedHierarchyWindowDelegate().rootVisualElement
-                    .FindChildren<HierarchyCanvas>(nameof(HierarchyCanvas));
-                canvas = lastInteractedHierarchyWindowDelegate().rootVisualElement
-                    .FindChildren<HierarchyCanvas>(nameof(HierarchyCanvas));
-                return canvas;
-            }
-
-            return null;
-        }
-
-        void CreateCanvas(EditorWindow hierarchyWindow)
-        {
-            int hash = hierarchyWindow.GetHashCode();
-            if (hierarchyCanvas.ContainsKey(hash))
-                return;
-
-            var root = hierarchyWindow.rootVisualElement;
-            HierarchyCanvas canvas = new HierarchyCanvas();
-            canvas.name = nameof(HierarchyCanvas);
-            root.Add(canvas);
-            hierarchyCanvas.Add(hash, canvas);
-        }
-
-        void ClearAllCanvas()
-        {
-            foreach (var canvas in hierarchyCanvas)
-                canvas.Value.RemoveFromHierarchy();
-            hierarchyCanvas.Clear();
-        }
-
-        public HierarchyLocalData GetHierarchyLocalData(Scene scene)
-        {
-            HierarchyLocalData hierarchyLocalData = null;
-            if (HierarchyLocalData.GetInstance(scene, out hierarchyLocalData))
-                return hierarchyLocalData;
-            return hierarchyLocalData = CreateHierarchyLocalData(scene);
-        }
-
-        HierarchyLocalData CreateHierarchyLocalData(Scene scene)
-        {
-            GameObject hierarchyLocalDataObject = new GameObject("HierarchyLocalData", typeof(HierarchyLocalData));
-            EditorSceneManager.MoveGameObjectToScene(hierarchyLocalDataObject, scene);
-            DirtyScene(scene);
-            return hierarchyLocalDataObject.GetComponent<HierarchyLocalData>();
         }
 
         void HierarchyOnGUI(int selectionID, Rect selectionRect)
@@ -542,7 +424,6 @@ namespace Hierarchy2
 
             if (selectionStyleAfterInvoke == false && currentEvent.type == EventType.MouseDown)
             {
-
                 selectionStyleAfterInvoke = true;
             }
 
@@ -561,11 +442,11 @@ namespace Hierarchy2
             {
                 rowItem.hierarchyFolder = rowItem.gameObject.GetComponent<HierarchyFolder>();
                 if (!(rowItem.isFolder = rowItem.hierarchyFolder))
-                    rowItem.isHeader = rowItem.name.Contains(settings.headerPrefix);
-                
+                    rowItem.isSeparator = rowItem.name.StartsWith(settings.separatorStartWith);
+
                 rowItem.isDirty = EditorUtility.IsDirty(selectionID);
 
-                if (true && !rowItem.isHeader && rowItem.isDirty)
+                if (true && !rowItem.isSeparator && rowItem.isDirty)
                 {
                     rowItem.isPrefab = PrefabUtility.IsPartOfAnyPrefab(rowItem.gameObject);
 
@@ -667,30 +548,21 @@ namespace Hierarchy2
                         DisplayRowBackground();
                 }
 
-                
+
                 if (rowItem.isFolder)
                 {
                     var icon = rowItem.childCount > 0 ? Resources.FolderIcon : Resources.EmptyFolderIcon;
                     DisplayCustomObjectIcon(icon);
                 }
-                
-                if (rowItem.isHeader && rowItem.isRootObject)
+
+                if (rowItem.isSeparator && rowItem.isRootObject)
                 {
-                    ElementAsHeader();
+                    ElementAsSeparator();
                     goto FINISH;
                 }
 
-
-                HierarchyLocalData hld = null;
-                bool hasHierarchyLocalData =
-                    HierarchyLocalData.instances.TryGetValue(rowItem.gameObject.scene, out hld);
-                if (hasHierarchyLocalData)
-                {
-                    rowItem.hasCustom = hld.TryGetCustomRowData(rowItem.gameObject, out rowItem.customRowItem);
-                }
-
-                if (rowItem.hasCustom)
-                    CustomRow();
+                if (settings.useInstantBackground)
+                    CustomRowBackground();
 
                 if (settings.displayTreeView && !rowItem.isRootObject)
                     DisplayTreeView();
@@ -789,58 +661,48 @@ namespace Hierarchy2
             return style;
         }
 
-        void CustomRow()
+        void CustomRowBackground()
         {
             if (currentEvent.type != EventType.Repaint)
                 return;
 
-            if (rowItem.customRowItem.useBackground)
+            HierarchySettings.InstantBackgroundColor instantBackgroundColor = new HierarchySettings.InstantBackgroundColor();
+            bool contain = false;
+            for (int i = 0; i < settings.instantBackgroundColors.Count; ++i)
             {
-                Color guiColor = GUI.color;
-                GUI.color = rowItem.customRowItem.backgroundColor;
-                Texture2D texture = rowItem.customRowItem.backgroundStyle == CustomRowItem.BackgroundStyle.Ramp
-                    ? Resources.Ramp8x8White
-                    : Resources.PixelWhite;
-                Rect rect;
-
-                if (rowItem.customRowItem.backgroundMode == CustomRowItem.BackgroundMode.Name)
-                    rect = RectFromRight(rowItem.nameRect, rowItem.nameRect.width, 0);
-                else
+                if
+                (
+                    settings.instantBackgroundColors[i].active ||
+                    (!string.IsNullOrEmpty(settings.instantBackgroundColors[i].tag) && rowItem.gameObject.CompareTag(settings.instantBackgroundColors[i].tag)) ||
+                    (1 << rowItem.gameObject.layer & settings.instantBackgroundColors[i].layer) != 0 ||
+                    (!string.IsNullOrEmpty(settings.instantBackgroundColors[i].startWith) && rowItem.name.StartsWith(settings.instantBackgroundColors[i].startWith))
+                )
                 {
-                    rect = RectFromRight(rowItem.rect, rowItem.rect.width + 16, 0);
-                    rect.x += 16;
-                    rect.xMin = 32;
+                    contain = true;
+                    instantBackgroundColor = settings.instantBackgroundColors[i];
                 }
-
-                GUI.DrawTexture(rect, texture, ScaleMode.StretchToFill);
-                GUI.color = guiColor;
             }
 
-            if (rowItem.customRowItem.overrideLabel)
-            {
-                var rect = rowItem.nameRect;
-                rect.center += rowItem.customRowItem.labelOffset;
-                
-                Color guiColor = GUI.color;
-                var color = rowItem.customRowItem.labelColor;
-                if (!rowItem.gameObject.activeInHierarchy)
-                {
-                    rect.y += 1;
-                    color = Color.Lerp(color, Color.gray, .5f);
-                }
-                GUI.color = color;
-                GUI.Label(rect, rowItem.name, Styles.TreeLabel);
-                GUI.color = guiColor;
-            }
+            if (!contain) return;
+            Color guiColor = GUI.color;
+            GUI.color = instantBackgroundColor.color;
+            Rect rect;
+            var texture = Resources.PixelWhite;
+            rect = RectFromRight(rowItem.rect, rowItem.rect.width + 16, 0);
+            rect.x += 16;
+            rect.xMin = 32;
+
+            GUI.DrawTexture(rect, texture, ScaleMode.StretchToFill);
+            GUI.color = guiColor;
         }
 
-        void ElementAsHeader()
+        void ElementAsSeparator()
         {
             if (currentEvent.type != EventType.Repaint)
                 return;
 
-            if (!rowItem.gameObject.CompareTag(settings.headerDefaultTag))
-                rowItem.gameObject.tag = settings.headerDefaultTag;
+            if (!rowItem.gameObject.CompareTag(settings.separatorDefaultTag))
+                rowItem.gameObject.tag = settings.separatorDefaultTag;
 
             var rect = EditorGUIUtility.PixelsToPoints(RectFromLeft(rowItem.rect, Screen.width, 0));
             rect.y = rowItem.rect.y;
@@ -852,7 +714,7 @@ namespace Hierarchy2
             GUI.color = ThemeData.colorHeaderBackground;
             GUI.DrawTexture(rect, Resources.PixelWhite, ScaleMode.StretchToFill);
 
-            var content = new GUIContent(rowItem.name.Remove(0, settings.headerPrefix.Length));
+            var content = new GUIContent(rowItem.name.Remove(0, settings.separatorStartWith.Length));
             rect.x += (rect.width - Styles.Header.CalcSize(content).x) / 2;
             GUI.color = ThemeData.colorHeaderTitle;
             GUI.Label(rect, content, Styles.Header);
@@ -883,7 +745,6 @@ namespace Hierarchy2
                 Undo.RegisterCompleteObjectUndo(element.gameObject,
                     element.gameObject.activeSelf ? "Inactive object" : "Active object");
                 element.gameObject.SetActive(!element.gameObject.activeSelf);
-                DirtyScene(element.gameObject.scene);
                 currentEvent.Use();
                 return;
             }
@@ -939,7 +800,6 @@ namespace Hierarchy2
             {
                 if (rect.Contains(currentEvent.mousePosition))
                 {
-                    GUI.Box(rect, new GUIContent("", customIconDefaultTooltip), GUIStyle.none);
                 }
 
                 if (icon == null)
@@ -950,7 +810,7 @@ namespace Hierarchy2
                         icon.name == "d_PrefabModel Icon")
                         return;
                 }
-                
+
                 Color guiColor = GUI.color;
                 GUI.color = rowItem.rowIndex % 2 != 0 ? ThemeData.colorRowEven : ThemeData.colorRowOdd;
                 GUI.DrawTexture(rect, Resources.PixelWhite);
@@ -984,8 +844,18 @@ namespace Hierarchy2
                     lockMenu.AddItem(new GUIContent("Unlock"), false, () =>
                     {
                         Undo.RegisterCompleteObjectUndo(gameObject, "Unlock...");
+                        foreach (Component component in gameObject.GetComponents<Component>())
+                        {
+                            if (component)
+                            {
+                                Undo.RegisterCompleteObjectUndo(component, "Unlock...");
+                                component.hideFlags = HideFlags.None;
+                            }
+                        }
+
                         gameObject.hideFlags = HideFlags.None;
-                        EditorUtility.SetDirty(gameObject);
+
+                        InternalEditorUtility.RepaintAllViews();
                     });
                     lockMenu.ShowAsContext();
                     currentEvent.Use();
@@ -1063,6 +933,12 @@ namespace Hierarchy2
                     {
                         bool isMono = false;
                         if (comType.BaseType == typeof(MonoBehaviour)) isMono = true;
+                        if (isMono)
+                        {
+                            //TODO: ???
+                            bool shouldIgnoreThisMono = false;
+                            if (shouldIgnoreThisMono) continue;
+                        }
 
                         switch (settings.componentDisplayMode)
                         {
@@ -1071,7 +947,7 @@ namespace Hierarchy2
                                     continue;
                                 break;
 
-                            case HierarchySettings.ComponentDisplayMode.Below:
+                            case HierarchySettings.ComponentDisplayMode.Specified:
                                 if (!dicComponents.ContainsKey(comType.Name))
                                     continue;
                                 break;
@@ -1153,7 +1029,7 @@ namespace Hierarchy2
                 }
 
                 string tooltip = isMaterial ? component.name : componentType.Name;
-                tooltipContent.tooltip = tooltip + componentDefaultTooltip;
+                tooltipContent.tooltip = tooltip;
                 GUI.Box(rect, tooltipContent, GUIStyle.none);
 
                 GUI.DrawTexture(rect, image, ScaleMode.ScaleToFit);
@@ -1323,9 +1199,10 @@ namespace Hierarchy2
                         if (settings.applyTagTargetAndChild)
                             ApplyTagTargetAndChild(gameObject.transform, tag);
                         else
+                        {
+                            Undo.RegisterCompleteObjectUndo(gameObject, "Change Tag");
                             gameObject.tag = tag;
-
-                        DirtyScene(gameObject.scene);
+                        }
                     });
                 }
 
@@ -1336,6 +1213,7 @@ namespace Hierarchy2
 
         void ApplyTagTargetAndChild(Transform target, string tag)
         {
+            Undo.RegisterCompleteObjectUndo(target.gameObject, "Change Tag");
             target.gameObject.tag = tag;
 
             for (int i = 0; i < target.childCount; ++i)
@@ -1388,9 +1266,10 @@ namespace Hierarchy2
                             if (settings.applyLayerTargetAndChild)
                                 ApplyLayerTargetAndChild(gameObject.transform, LayerMask.NameToLayer(layer));
                             else
+                            {
+                                Undo.RegisterCompleteObjectUndo(gameObject, "Change Layer");
                                 gameObject.layer = LayerMask.NameToLayer(layer);
-
-                            DirtyScene(gameObject.scene);
+                            }
                         });
                 }
 
@@ -1401,6 +1280,7 @@ namespace Hierarchy2
 
         void ApplyLayerTargetAndChild(Transform target, int layer)
         {
+            Undo.RegisterCompleteObjectUndo(target.gameObject, "Change Layer");
             target.gameObject.layer = layer;
 
             for (int i = 0; i < target.childCount; ++i)
@@ -1634,12 +1514,12 @@ namespace Hierarchy2
             public HierarchyWindow(EditorWindow editorWindow)
             {
                 this.editorWindow = editorWindow;
-                
+
                 instanceID = this.editorWindow.GetInstanceID();
-                
+
                 instances.Add(instanceID, this.editorWindow);
                 windows.Add(this);
-                
+
                 // Debug.Log(string.Format("HierarchyWindow {0} Instanced.", instanceID));
 
                 Reflection();
@@ -1649,14 +1529,14 @@ namespace Hierarchy2
             {
                 // treeview = m_TreeView.GetValue(m_SceneHierarchy.GetValue(editorWindow));
             }
-            
+
             public void Dispose()
             {
                 editorWindow = null;
                 treeview = null;
                 instances.Remove(instanceID);
                 windows.Remove(this);
-                
+
                 // Debug.Log(string.Format("HierarchyWindow {0} Disposed.", instanceID));
             }
 
@@ -1677,7 +1557,7 @@ namespace Hierarchy2
                 editorWindow.titleContent.text = value;
             }
         }
-        
+
         sealed class RowItem
         {
             public int ID = int.MinValue;
@@ -1692,12 +1572,10 @@ namespace Hierarchy2
             public bool isSelected = false;
             public bool isFirstRow = false;
             public bool isFirstElement = false;
-            public bool isHeader = false;
+            public bool isSeparator = false;
             public bool isFolder = false;
             public bool isDirty = false;
             public bool isMouseHovering = false;
-            public bool hasCustom = false;
-            public CustomRowItem customRowItem;
             public HierarchyFolder hierarchyFolder;
 
             public string name
@@ -1736,12 +1614,10 @@ namespace Hierarchy2
                 isSelected = false;
                 isFirstRow = false;
                 isFirstElement = false;
-                isHeader = false;
+                isSeparator = false;
                 isFolder = false;
                 isDirty = false;
                 isMouseHovering = false;
-                hasCustom = false;
-                customRowItem = null;
             }
         }
 
@@ -1809,7 +1685,7 @@ namespace Hierarchy2
             internal static readonly Texture lockIconOn = EditorGUIUtility.IconContent("LockIcon-On").image;
 
             private static Texture folderIcon;
-            
+
             public static Texture FolderIcon
             {
                 get
@@ -1821,7 +1697,7 @@ namespace Hierarchy2
             }
 
             private static Texture emptyFolderIcon;
-            
+
             public static Texture EmptyFolderIcon
             {
                 get
@@ -1897,36 +1773,58 @@ namespace Hierarchy2
         {
             const int priority = 200;
 
-            [MenuItem("GameObject/Lock Selection %l", false, priority)]
+            [MenuItem("Tools/Hierarchy 2/Lock Selection %l", false, priority)]
             static void SetNotEditableObject()
             {
                 Undo.RegisterCompleteObjectUndo(Selection.gameObjects, "Set Selections Flag NotEditable");
-                for (int i = 0; i < Selection.gameObjects.Length; ++i)
+                foreach (GameObject gameObject in Selection.gameObjects)
                 {
-                    Selection.gameObjects[i].hideFlags = HideFlags.NotEditable;
-                    EditorUtility.SetDirty(Selection.gameObjects[i]);
+                    foreach (Component component in gameObject.GetComponents<Component>())
+                    {
+                        if (component)
+                        {
+                            Undo.RegisterCompleteObjectUndo(component, "Set Selections Flag NotEditable");
+                            component.hideFlags = HideFlags.NotEditable;
+                        }
+                    }
                 }
+
+                foreach (GameObject gameObject in Selection.gameObjects)
+                    gameObject.hideFlags = HideFlags.NotEditable;
+
+                InternalEditorUtility.RepaintAllViews();
             }
 
-            [MenuItem("GameObject/Lock Selection %l", true, priority)]
+            [MenuItem("Tools/Hierarchy 2/Lock Selection %l", true, priority)]
             static bool ValidateSetNotEditableObject() => Selection.gameObjects.Length > 0;
 
-            [MenuItem("GameObject/Unlock Selection %&l", false, priority)]
+            [MenuItem("Tools/Hierarchy 2/Unlock Selection %&l", false, priority)]
             static void SetEditableObject()
             {
                 Undo.RegisterCompleteObjectUndo(Selection.gameObjects, "Set Selections Flag Editable");
-                for (int i = 0; i < Selection.gameObjects.Length; ++i)
+                foreach (GameObject gameObject in Selection.gameObjects)
                 {
-                    Selection.gameObjects[i].hideFlags = HideFlags.None;
-                    EditorUtility.SetDirty(Selection.gameObjects[i]);
+                    foreach (Component component in gameObject.GetComponents<Component>())
+                    {
+                        if (component)
+                        {
+                            Undo.RegisterCompleteObjectUndo(component, "Set Selections Flag Editable");
+                            component.hideFlags = HideFlags.None;
+                        }
+                    }
                 }
+
+                foreach (GameObject gameObject in Selection.gameObjects)
+                    gameObject.hideFlags = HideFlags.None;
+
+                InternalEditorUtility.RepaintAllViews();
             }
 
-            [MenuItem("GameObject/Unlock Selection %&l", true, priority)]
+            [MenuItem("Tools/Hierarchy 2/Unlock Selection %&l", true, priority)]
             static bool ValidateSetEditableObject() => Selection.gameObjects.Length > 0;
 
 
-            [MenuItem("GameObject/Move Selection Up #w", false, priority)]
+            [MenuItem("Tools/Hierarchy 2/Move Selection Up #w", false, priority)]
             static void QuickSiblingUp()
             {
                 var gameObject = Selection.activeGameObject;
@@ -1936,37 +1834,43 @@ namespace Hierarchy2
                 var index = gameObject.transform.GetSiblingIndex();
                 if (index > 0)
                 {
-                    Undo.RegisterCompleteObjectUndo(gameObject, string.Format("{0} Parenting", gameObject.name));
+                    Undo.SetTransformParent(gameObject.transform, gameObject.transform.parent, string.Format("{0} Parenting", gameObject.name));
 
                     gameObject.transform.SetSiblingIndex(--index);
-                    if (!EditorApplication.isPlaying)
-                        EditorSceneManager.MarkSceneDirty(gameObject.scene);
                 }
             }
 
-            [MenuItem("GameObject/Move Selection Up #w", true)]
+            [MenuItem("Tools/Hierarchy 2/Move Selection Up #w", true)]
             static bool ValidateQuickSiblingUp() => Selection.activeTransform != null;
 
-            [MenuItem("GameObject/Move Selection Down #s", false, priority)]
+            [MenuItem("Tools/Hierarchy 2/Move Selection Down #s", false, priority)]
             static void QuickSiblingDown()
             {
                 var gameObject = Selection.activeGameObject;
                 if (gameObject == null)
                     return;
 
-                Undo.RegisterCompleteObjectUndo(gameObject, string.Format("{0} Parenting", gameObject.name));
+                Undo.SetTransformParent(gameObject.transform, gameObject.transform.parent, string.Format("{0} Parenting", gameObject.name));
 
                 var index = gameObject.transform.GetSiblingIndex();
                 gameObject.transform.SetSiblingIndex(++index);
-                if (!EditorApplication.isPlaying)
-                    EditorSceneManager.MarkSceneDirty(gameObject.scene);
             }
 
-            [MenuItem("GameObject/Move Selection Down #s", true, priority)]
+            [MenuItem("Tools/Hierarchy 2/Move Selection Down #s", true, priority)]
             static bool ValidateQuickSiblingDown() => Selection.activeTransform != null;
-            
-            [MenuItem("GameObject/Header (Separator)", priority = 0)]
-            static void CreateHeaderInstance() => new GameObject(string.Format("{0}Header", HierarchyEditor.instance.settings.headerPrefix));
+
+            [MenuItem("Tools/Hierarchy 2/Separator", priority = 0)]
+            static void CreateHeaderInstance(UnityEditor.MenuCommand command)
+            {
+                GameObject gameObject = new GameObject(string.Format("{0}Separator", HierarchyEditor.instance.settings.separatorStartWith));
+
+                Undo.RegisterCreatedObjectUndo(gameObject, "Create Separator");
+                // Don't create headers as children of the selected objects because only root headers are drawn with background
+                //if(command.context)
+                //    Undo.SetTransformParent(gameObject.transform, ( (GameObject) command.context ).transform, "Create Header");
+
+                Selection.activeTransform = gameObject.transform;
+            }
         }
     }
 }

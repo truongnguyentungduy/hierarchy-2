@@ -13,7 +13,6 @@ namespace Hierarchy2
     {
         private void OnEnable()
         {
-
         }
 
         public override VisualElement CreateInspectorGUI()
@@ -32,11 +31,20 @@ namespace Hierarchy2
                 }
             });
             root.Add(imguiContainer);
-            
+
             return root;
         }
 
-        [MenuItem("GameObject/Hierarchy Folder", priority = 0)]
-        static void CreateInstance() => new GameObject("Folder", new Type[1] {typeof(HierarchyFolder)});
+        [MenuItem("Tools/Hierarchy 2/Hierarchy Folder", priority = 0)]
+        static void CreateInstance(UnityEditor.MenuCommand command)
+        {
+            GameObject gameObject = new GameObject("Folder", new Type[1] {typeof(HierarchyFolder)});
+
+            Undo.RegisterCreatedObjectUndo(gameObject, "Create Hierarchy Folder");
+            if (command.context)
+                Undo.SetTransformParent(gameObject.transform, ((GameObject) command.context).transform, "Create Hierarchy Folder");
+
+            Selection.activeTransform = gameObject.transform;
+        }
     }
 }
