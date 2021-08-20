@@ -36,6 +36,7 @@ namespace Hierarchy2
 
         Dictionary<int, UnityEngine.Object> selectedComponents = new Dictionary<int, UnityEngine.Object>();
         Dictionary<string, string> dicComponents = new Dictionary<string, string>(StringComparer.Ordinal);
+        Dictionary<string, string> dicBaseComponents = new Dictionary<string, string>(StringComparer.Ordinal);
         UnityEngine.Object activeComponent;
 
         GUIContent tooltipContent = new GUIContent();
@@ -190,6 +191,7 @@ namespace Hierarchy2
             settings = HierarchySettings.GetAssets();
             if (settings is null) return;
             OnSettingsChanged(nameof(settings.components));
+            OnSettingsChanged(nameof(settings.baseComponents));
             settings.onSettingsChanged += OnSettingsChanged;
 
             resources = HierarchyResources.GetAssets();
@@ -220,6 +222,14 @@ namespace Hierarchy2
                     {
                         if (!dicComponents.ContainsKey(componentType))
                             dicComponents.Add(componentType, componentType);
+                    }
+                    break;
+                case nameof(settings.baseComponents):
+                    dicBaseComponents.Clear();
+                    foreach (string componentType in settings.baseComponents)
+                    {
+                        if (!dicBaseComponents.ContainsKey(componentType))
+                            dicBaseComponents.Add(componentType, componentType);
                     }
 
                     break;
@@ -929,6 +939,7 @@ namespace Hierarchy2
                 {
                     Type comType = component.GetType();
 
+
                     if (comType != null)
                     {
                         bool isMono = false;
@@ -956,6 +967,12 @@ namespace Hierarchy2
                                 if (dicComponents.ContainsKey(comType.Name))
                                     continue;
                                 break;
+                        }
+
+                        if (settings.ignoreComponentBase)
+                        {
+                            if (dicBaseComponents.ContainsKey(comType.BaseType.Name))
+                                continue;
                         }
 
                         Rect rect = Rect.zero;

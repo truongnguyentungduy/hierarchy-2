@@ -141,6 +141,8 @@ namespace Hierarchy2
 
         public ComponentDisplayMode componentDisplayMode = ComponentDisplayMode.Ignore;
         public string[] components = new string[] {"Transform", "RectTransform"};
+        public bool ignoreComponentBase;
+        public string[] baseComponents = new string[] { "Command", "EventHandler" };
         [HideInInspector] public int componentLimited = 0;
         [Range(12, 16)] public int componentSize = 16;
         public int componentSpacing = 0;
@@ -359,6 +361,33 @@ namespace Hierarchy2
                         }
 
                         settings.OnSettingsChanged(nameof(settings.componentDisplayMode));
+                    });
+
+                    var ignoreComponentBase = new Toggle("Ignore Component Base");
+                    ignoreComponentBase.value = settings.ignoreComponentBase;
+                    ignoreComponentBase.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    verticalLayout.Add(ignoreComponentBase);
+
+                    var baseComponents = new TextField("Base Components");
+                    baseComponents.value = string.Join(" ", settings.baseComponents);
+                    baseComponents.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    baseComponents.style.display = settings.ignoreComponentBase ? DisplayStyle.Flex : DisplayStyle.None;
+                    verticalLayout.Add(baseComponents);
+                    baseComponents.RegisterValueChangedCallback((evt) =>
+                    {
+                        Undo.RecordObject(settings, "Change Settings");
+
+                        settings.baseComponents = evt.newValue.Split(' ');
+                        settings.OnSettingsChanged(nameof(settings.baseComponents));
+                    });
+                    ignoreComponentBase.RegisterValueChangedCallback((evt) =>
+                    {
+                        Undo.RecordObject(settings, "Change Settings");
+
+                        baseComponents.style.display = evt.newValue ? DisplayStyle.Flex : DisplayStyle.None;
+
+                        settings.ignoreComponentBase = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.ignoreComponentBase));
                     });
 
                     var componentSizeEnum = ComponentSize.Normal;
