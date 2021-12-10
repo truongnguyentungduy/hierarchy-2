@@ -531,9 +531,11 @@ namespace Hierarchy2
                         EditorGUILayout.BeginHorizontal();
                         settings.useInstantBackground = EditorGUILayout.Toggle("Use Instant Background", settings.useInstantBackground);
                         EditorGUILayout.BeginVertical("helpbox");
-                        EditorGUILayout.PropertyField(new SerializedObject(settings).FindProperty(nameof(instantBackgroundColors)), GUIContent.none);
+                        SerializedObject serializedSetting = new SerializedObject(settings);
+                        EditorGUILayout.PropertyField(serializedSetting.FindProperty(nameof(instantBackgroundColors)), GUIContent.none);
                         EditorGUILayout.EndVertical();
                         EditorGUILayout.EndHorizontal();
+                        serializedSetting.ApplyModifiedProperties();
                     });
                     instantBackgroundIMGUI.StyleMarginTop(7);
                     instantBackgroundIMGUI.StyleMarginLeft(CONTENT_MARGIN_LEFT);
