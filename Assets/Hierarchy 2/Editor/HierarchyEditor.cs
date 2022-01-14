@@ -670,12 +670,12 @@ namespace Hierarchy2
             bool contain = false;
             for (int i = 0; i < settings.instantBackgroundColors.Count; ++i)
             {
+                if (!settings.instantBackgroundColors[i].active) continue;
                 if
                 (
-                    settings.instantBackgroundColors[i].active ||
-                    (!string.IsNullOrEmpty(settings.instantBackgroundColors[i].tag) && rowItem.gameObject.CompareTag(settings.instantBackgroundColors[i].tag)) ||
-                    (1 << rowItem.gameObject.layer & settings.instantBackgroundColors[i].layer) != 0 ||
-                    (!string.IsNullOrEmpty(settings.instantBackgroundColors[i].startWith) && rowItem.name.StartsWith(settings.instantBackgroundColors[i].startWith))
+                    (settings.instantBackgroundColors[i].useTag && !string.IsNullOrEmpty(settings.instantBackgroundColors[i].tag) && rowItem.gameObject.CompareTag(settings.instantBackgroundColors[i].tag)) ||
+                    (settings.instantBackgroundColors[i].useLayer && (1 << rowItem.gameObject.layer & settings.instantBackgroundColors[i].layer) != 0) ||
+                    (settings.instantBackgroundColors[i].useStartWith && !string.IsNullOrEmpty(settings.instantBackgroundColors[i].startWith) && rowItem.name.StartsWith(settings.instantBackgroundColors[i].startWith))
                 )
                 {
                     contain = true;

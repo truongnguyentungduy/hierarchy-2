@@ -64,6 +64,7 @@ namespace Hierarchy2
         public struct InstantBackgroundColor
         {
             public bool active;
+            public bool useStartWith, useTag, useLayer;
             public string startWith;
             public string tag;
             public LayerMask layer;
@@ -526,12 +527,12 @@ namespace Hierarchy2
                     headerDefaultTag.StyleMarginBottom(4);
                     verticalLayout.Add(headerDefaultTag);
 
+                    SerializedObject serializedSetting = new SerializedObject(settings);
                     IMGUIContainer instantBackgroundIMGUI = new IMGUIContainer(() =>
                     {
                         EditorGUILayout.BeginHorizontal();
                         settings.useInstantBackground = EditorGUILayout.Toggle("Use Instant Background", settings.useInstantBackground);
                         EditorGUILayout.BeginVertical("helpbox");
-                        SerializedObject serializedSetting = new SerializedObject(settings);
                         EditorGUILayout.PropertyField(serializedSetting.FindProperty(nameof(instantBackgroundColors)), GUIContent.none);
                         EditorGUILayout.EndVertical();
                         EditorGUILayout.EndHorizontal();
