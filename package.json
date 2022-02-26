@@ -2,7 +2,7 @@
   "name": "com.truongnguyentungduy.hierarchy-2",
   "author": "Trương Nguyễn Tùng Duy",
   "displayName": "Hierarchy 2",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "unity": "2019.3",
   "description": "Editor extension to improve hierarchy window. Makes the hierarchy more detail, but still clean and easy to organize.",
   "type": "tool",
