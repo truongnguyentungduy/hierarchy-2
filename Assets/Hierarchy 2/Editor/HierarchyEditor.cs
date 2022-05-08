@@ -1759,10 +1759,10 @@ namespace Hierarchy2
 
             internal static GUIStyle TreeBoldLabel
             {
-                get { return TreeView.DefaultStyles.boldLabel; }
+                get { return UnityEditor.IMGUI.Controls.TreeView.DefaultStyles.boldLabel; }
             }
 
-            internal static GUIStyle TreeLabel = new GUIStyle(TreeView.DefaultStyles.label)
+            internal static GUIStyle TreeLabel = new GUIStyle(UnityEditor.IMGUI.Controls.TreeView.DefaultStyles.label)
             {
                 richText = true,
                 normal = new GUIStyleState() {textColor = Color.white}
