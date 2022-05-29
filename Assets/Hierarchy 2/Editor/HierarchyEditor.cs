@@ -907,7 +907,7 @@ namespace Hierarchy2
                 }
             }
 
-            int length = components.Count;
+            int length = components.Count < settings.maxComponents || settings.displayEveryComponent ? components.Count : settings.maxComponents ;
             bool separator = false;
             float widthUsedCached = 0;
             if (settings.componentAlignment == HierarchySettings.ElementAlignment.AfterName)

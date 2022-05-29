@@ -145,6 +145,8 @@ namespace Hierarchy2
         [HideInInspector] public int componentLimited = 0;
         [Range(12, 16)] public int componentSize = 16;
         public int componentSpacing = 0;
+        public bool displayEveryComponent = true;
+        public int maxComponents = 10;
         public bool displayTag = true;
         public ElementAlignment tagAlignment = ElementAlignment.AfterName;
         public bool displayLayer = true;
@@ -176,6 +178,10 @@ namespace Hierarchy2
 
                 case nameof(componentSpacing):
                     if (componentSpacing < 0) componentSpacing = 0;
+                    break;
+                
+                case nameof(maxComponents):
+                    if (maxComponents < 0) maxComponents = 0;
                     break;
             }
 
@@ -416,6 +422,31 @@ namespace Hierarchy2
                         settings.OnSettingsChanged(nameof(settings.componentSpacing));
                     });
                     verticalLayout.Add(componentSpacing);
+                    
+                    var displayEveryComponent = new Toggle("Display Every Component");
+                    displayEveryComponent.value = settings.displayEveryComponent;
+                    displayEveryComponent.RegisterValueChangedCallback((evt) =>
+                    {
+                        Undo.RecordObject(settings, "Change Settings");
+
+                        settings.displayEveryComponent = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.displayEveryComponent));
+                    });
+                    displayEveryComponent.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    verticalLayout.Add(displayEveryComponent);
+                    
+                    var maxComponents = new IntegerField();
+                    maxComponents.label = "Max Components";
+                    maxComponents.value = settings.maxComponents;
+                    maxComponents.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    maxComponents.RegisterValueChangedCallback((evt) =>
+                    {
+                        Undo.RecordObject(settings, "Change Settings");
+
+                        settings.maxComponents = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.maxComponents));
+                    });
+                    verticalLayout.Add(maxComponents);
 
                     var TagAndLayer = new Label("Tag And Layer");
                     TagAndLayer.StyleFont(FontStyle.Bold);
