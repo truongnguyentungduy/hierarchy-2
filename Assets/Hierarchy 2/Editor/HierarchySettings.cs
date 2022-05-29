@@ -145,7 +145,7 @@ namespace Hierarchy2
         [HideInInspector] public int componentLimited = 0;
         [Range(12, 16)] public int componentSize = 16;
         public int componentSpacing = 0;
-        public bool displayEveryComponent = true;
+        public bool enableMaxComponents = false;
         public int maxComponents = 10;
         public bool displayTag = true;
         public ElementAlignment tagAlignment = ElementAlignment.AfterName;
@@ -423,17 +423,17 @@ namespace Hierarchy2
                     });
                     verticalLayout.Add(componentSpacing);
                     
-                    var displayEveryComponent = new Toggle("Display Every Component");
-                    displayEveryComponent.value = settings.displayEveryComponent;
-                    displayEveryComponent.RegisterValueChangedCallback((evt) =>
+                    var enableMaxComponents = new Toggle("Enable Max Components");
+                    enableMaxComponents.value = settings.enableMaxComponents;
+                    enableMaxComponents.RegisterValueChangedCallback((evt) =>
                     {
                         Undo.RecordObject(settings, "Change Settings");
 
-                        settings.displayEveryComponent = evt.newValue;
-                        settings.OnSettingsChanged(nameof(settings.displayEveryComponent));
+                        settings.enableMaxComponents = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.enableMaxComponents));
                     });
-                    displayEveryComponent.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    verticalLayout.Add(displayEveryComponent);
+                    enableMaxComponents.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    verticalLayout.Add(enableMaxComponents);
                     
                     var maxComponents = new IntegerField();
                     maxComponents.label = "Max Components";
