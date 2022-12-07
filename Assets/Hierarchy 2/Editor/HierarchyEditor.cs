@@ -1774,6 +1774,7 @@ namespace Hierarchy2
             const int priority = 200;
 
             [MenuItem("Tools/Hierarchy 2/Lock Selection %l", false, priority)]
+            [MenuItem("GameObject/Hierarchy 2/Lock Selection", false, priority)]
             static void SetNotEditableObject()
             {
                 Undo.RegisterCompleteObjectUndo(Selection.gameObjects, "Set Selections Flag NotEditable");
@@ -1796,9 +1797,11 @@ namespace Hierarchy2
             }
 
             [MenuItem("Tools/Hierarchy 2/Lock Selection %l", true, priority)]
+            [MenuItem("GameObject/Hierarchy 2/Lock Selection", true, priority)]
             static bool ValidateSetNotEditableObject() => Selection.gameObjects.Length > 0;
 
             [MenuItem("Tools/Hierarchy 2/Unlock Selection %&l", false, priority)]
+            [MenuItem("GameObject/Hierarchy 2/Unlock Selection", false, priority)]
             static void SetEditableObject()
             {
                 Undo.RegisterCompleteObjectUndo(Selection.gameObjects, "Set Selections Flag Editable");
@@ -1821,10 +1824,12 @@ namespace Hierarchy2
             }
 
             [MenuItem("Tools/Hierarchy 2/Unlock Selection %&l", true, priority)]
+            [MenuItem("GameObject/Hierarchy 2/Unlock Selection", true, priority)]
             static bool ValidateSetEditableObject() => Selection.gameObjects.Length > 0;
 
 
             [MenuItem("Tools/Hierarchy 2/Move Selection Up #w", false, priority)]
+            [MenuItem("GameObject/Hierarchy 2/Move Selection Up", false, priority)]
             static void QuickSiblingUp()
             {
                 var gameObject = Selection.activeGameObject;
@@ -1841,9 +1846,11 @@ namespace Hierarchy2
             }
 
             [MenuItem("Tools/Hierarchy 2/Move Selection Up #w", true)]
+            [MenuItem("GameObject/Hierarchy 2/Move Selection Up", true)]
             static bool ValidateQuickSiblingUp() => Selection.activeTransform != null;
 
             [MenuItem("Tools/Hierarchy 2/Move Selection Down #s", false, priority)]
+            [MenuItem("GameObject/Hierarchy 2/Move Selection Down", false, priority)]
             static void QuickSiblingDown()
             {
                 var gameObject = Selection.activeGameObject;
@@ -1857,9 +1864,11 @@ namespace Hierarchy2
             }
 
             [MenuItem("Tools/Hierarchy 2/Move Selection Down #s", true, priority)]
+            [MenuItem("GameObject/Hierarchy 2/Move Selection Down", true, priority)]
             static bool ValidateQuickSiblingDown() => Selection.activeTransform != null;
 
             [MenuItem("Tools/Hierarchy 2/Separator", priority = 0)]
+            [MenuItem("GameObject/Hierarchy 2/Separator", priority = 0)]
             static void CreateHeaderInstance(UnityEditor.MenuCommand command)
             {
                 GameObject gameObject = new GameObject(string.Format("{0}Separator", HierarchyEditor.instance.settings.separatorStartWith));
