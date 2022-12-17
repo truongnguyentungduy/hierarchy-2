@@ -141,9 +141,13 @@ namespace Hierarchy2
         }
 
         public ComponentDisplayMode componentDisplayMode = ComponentDisplayMode.Ignore;
+<<<<<<< HEAD:Editor/HierarchySettings.cs
         public string[] components = new string[] {"Transform", "RectTransform"};
         public bool ignoreComponentBase;
         public string[] baseComponents = new string[] { "Command", "EventHandler" };
+=======
+        public string[] components = new string[] { "Transform", "RectTransform" };
+>>>>>>> upstream/master:Assets/Hierarchy 2/Editor/HierarchySettings.cs
         [HideInInspector] public int componentLimited = 0;
         [Range(12, 16)] public int componentSize = 16;
         public int componentSpacing = 0;
@@ -315,7 +319,7 @@ namespace Hierarchy2
                     {
                         Undo.RecordObject(settings, "Change Settings");
 
-                        settings.componentAlignment = (ElementAlignment) evt.newValue;
+                        settings.componentAlignment = (ElementAlignment)evt.newValue;
                         settings.OnSettingsChanged(nameof(settings.componentAlignment));
                     });
                     componentAlignment.StyleMarginLeft(CONTENT_MARGIN_LEFT);
@@ -341,7 +345,7 @@ namespace Hierarchy2
                     {
                         Undo.RecordObject(settings, "Change Settings");
 
-                        settings.componentDisplayMode = (ComponentDisplayMode) evt.newValue;
+                        settings.componentDisplayMode = (ComponentDisplayMode)evt.newValue;
                         switch (settings.componentDisplayMode)
                         {
                             case ComponentDisplayMode.Specified:
@@ -481,7 +485,7 @@ namespace Hierarchy2
                     {
                         Undo.RecordObject(settings, "Change Settings");
 
-                        settings.tagAlignment = (ElementAlignment) evt.newValue;
+                        settings.tagAlignment = (ElementAlignment)evt.newValue;
                         settings.OnSettingsChanged(nameof(settings.tagAlignment));
                     });
                     tagAlignment.StyleMarginLeft(CONTENT_MARGIN_LEFT);
@@ -518,7 +522,7 @@ namespace Hierarchy2
                     {
                         Undo.RecordObject(settings, "Change Settings");
 
-                        settings.layerAlignment = (ElementAlignment) evt.newValue;
+                        settings.layerAlignment = (ElementAlignment)evt.newValue;
                         settings.OnSettingsChanged(nameof(settings.layerAlignment));
                     });
                     layerAlignment.StyleMarginLeft(CONTENT_MARGIN_LEFT);
@@ -593,7 +597,7 @@ namespace Hierarchy2
                     {
                         Undo.RecordObject(settings, "Change Settings");
 
-                        settings.contentDisplay = (ContentDisplay) evt.newValue;
+                        settings.contentDisplay = (ContentDisplay)evt.newValue;
                         settings.OnSettingsChanged(nameof(settings.contentDisplay));
                     });
                     contentMaskEnumFlags.style.marginLeft = CONTENT_MARGIN_LEFT;
@@ -781,11 +785,15 @@ namespace Hierarchy2
 
                     Undo.undoRedoPerformed -= OnUndoRedoPerformed;
                     Undo.undoRedoPerformed += OnUndoRedoPerformed;
+                    EditorUtility.SetDirty(settings);
                 },
 
-                deactivateHandler = () => Undo.undoRedoPerformed -= OnUndoRedoPerformed,
+                deactivateHandler = () =>
+                {
+                    Undo.undoRedoPerformed -= OnUndoRedoPerformed;
+                },
 
-                keywords = new HashSet<string>(new[] {"Hierarchy"})
+                keywords = new HashSet<string>(new[] { "Hierarchy" })
             };
 
             return provider;
