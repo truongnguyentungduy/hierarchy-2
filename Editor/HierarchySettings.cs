@@ -141,13 +141,9 @@ namespace Hierarchy2
         }
 
         public ComponentDisplayMode componentDisplayMode = ComponentDisplayMode.Ignore;
-<<<<<<< HEAD:Editor/HierarchySettings.cs
         public string[] components = new string[] {"Transform", "RectTransform"};
-        public bool ignoreComponentBase;
+        public bool ignoreBaseComponents = true;
         public string[] baseComponents = new string[] { "Command", "EventHandler" };
-=======
-        public string[] components = new string[] { "Transform", "RectTransform" };
->>>>>>> upstream/master:Assets/Hierarchy 2/Editor/HierarchySettings.cs
         [HideInInspector] public int componentLimited = 0;
         [Range(12, 16)] public int componentSize = 16;
         public int componentSpacing = 0;
@@ -161,6 +157,9 @@ namespace Hierarchy2
         public string separatorStartWith = "--->";
         public string separatorDefaultTag = "Untagged";
         public bool useInstantBackground = false;
+        public int groupSize = 5;
+        public float disabledAlpha = 0.4f;
+        public int currentGroupIndex = 0;
 
         public List<InstantBackgroundColor> instantBackgroundColors = new List<InstantBackgroundColor>();
 
@@ -368,15 +367,15 @@ namespace Hierarchy2
                         settings.OnSettingsChanged(nameof(settings.componentDisplayMode));
                     });
 
-                    var ignoreComponentBase = new Toggle("Ignore Component Base");
-                    ignoreComponentBase.value = settings.ignoreComponentBase;
+                    var ignoreComponentBase = new Toggle("Ignore Base Components");
+                    ignoreComponentBase.value = settings.ignoreBaseComponents;
                     ignoreComponentBase.StyleMarginLeft(CONTENT_MARGIN_LEFT);
                     verticalLayout.Add(ignoreComponentBase);
 
                     var baseComponents = new TextField("Base Components");
                     baseComponents.value = string.Join(" ", settings.baseComponents);
                     baseComponents.StyleMarginLeft(CONTENT_MARGIN_LEFT);
-                    baseComponents.style.display = settings.ignoreComponentBase ? DisplayStyle.Flex : DisplayStyle.None;
+                    baseComponents.style.display = settings.ignoreBaseComponents ? DisplayStyle.Flex : DisplayStyle.None;
                     verticalLayout.Add(baseComponents);
                     baseComponents.RegisterValueChangedCallback((evt) =>
                     {
@@ -391,8 +390,8 @@ namespace Hierarchy2
 
                         baseComponents.style.display = evt.newValue ? DisplayStyle.Flex : DisplayStyle.None;
 
-                        settings.ignoreComponentBase = evt.newValue;
-                        settings.OnSettingsChanged(nameof(settings.ignoreComponentBase));
+                        settings.ignoreBaseComponents = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.ignoreBaseComponents));
                     });
 
                     var componentSizeEnum = ComponentSize.Normal;
@@ -602,6 +601,32 @@ namespace Hierarchy2
                     });
                     contentMaskEnumFlags.style.marginLeft = CONTENT_MARGIN_LEFT;
                     verticalLayout.Add(contentMaskEnumFlags);
+
+                    var groupSize = new IntegerField();
+                    groupSize.label = "Group Size";
+                    groupSize.value = settings.groupSize;
+                    groupSize.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    groupSize.RegisterValueChangedCallback((evt) =>
+                    {
+                        Undo.RecordObject(settings, "Change Settings");
+
+                        settings.groupSize = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.groupSize));
+                    });
+                    verticalLayout.Add(groupSize);
+
+                    var disabledAlpha = new FloatField();
+                    disabledAlpha.label = "Disabled Alpha";
+                    disabledAlpha.value = settings.disabledAlpha;
+                    disabledAlpha.StyleMarginLeft(CONTENT_MARGIN_LEFT);
+                    disabledAlpha.RegisterValueChangedCallback((evt) =>
+                    {
+                        Undo.RecordObject(settings, "Change Settings");
+
+                        settings.disabledAlpha = evt.newValue;
+                        settings.OnSettingsChanged(nameof(settings.disabledAlpha));
+                    });
+                    verticalLayout.Add(disabledAlpha);
 
                     var Theme = new Label("Theme");
                     Theme.StyleFont(FontStyle.Bold);
