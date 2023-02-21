@@ -35,8 +35,10 @@ namespace Hierarchy2
         }
 
         Dictionary<int, UnityEngine.Object> selectedComponents = new Dictionary<int, UnityEngine.Object>();
-        Dictionary<string, string> dicComponents = new Dictionary<string, string>(StringComparer.Ordinal);
+        Dictionary<string, string> dicComponents = new(StringComparer.Ordinal);
+        Dictionary<string, string> dicBaseComponents = new(StringComparer.Ordinal);
         UnityEngine.Object activeComponent;
+        readonly Dictionary<UnityEngine.GameObject, int> compGroupIndexes = new(); 
 
         GUIContent tooltipContent = new GUIContent();
 
@@ -190,6 +192,7 @@ namespace Hierarchy2
             settings = HierarchySettings.GetAssets();
             if (settings is null) return;
             OnSettingsChanged(nameof(settings.components));
+            OnSettingsChanged(nameof(settings.baseComponents));
             settings.onSettingsChanged += OnSettingsChanged;
 
             resources = HierarchyResources.GetAssets();
@@ -220,6 +223,14 @@ namespace Hierarchy2
                     {
                         if (!dicComponents.ContainsKey(componentType))
                             dicComponents.Add(componentType, componentType);
+                    }
+                    break;
+                case nameof(settings.baseComponents):
+                    dicBaseComponents.Clear();
+                    foreach (string componentType in settings.baseComponents)
+                    {
+                        if (!dicBaseComponents.ContainsKey(componentType))
+                            dicBaseComponents.Add(componentType, componentType);
                     }
 
                     break;
@@ -621,7 +632,7 @@ namespace Hierarchy2
 
                 ElementEvent(rowItem);
 
-                FINISH:
+            FINISH:
                 if (settings.displayGrid)
                     DisplayGrid();
 
@@ -921,10 +932,17 @@ namespace Hierarchy2
                 widthUse.right += 2;
             }
 
-            for (int i = 0; i < length; ++i)
+            if (!compGroupIndexes.ContainsKey(rowItem.gameObject))
+                compGroupIndexes.Add(rowItem.gameObject, 0);
+
+            int groupsCount = length > settings.groupSize ? (length / settings.groupSize + (length % settings.groupSize > 0 ? 1 : 0)) : 1;
+            int iStart = groupsCount > 1 ? settings.groupSize * compGroupIndexes[rowItem.gameObject] : 0;
+            int iEnd = groupsCount > 1 ? (iStart + (iStart + settings.groupSize > length ? length % settings.groupSize : settings.groupSize)) : length;
+
+            for (int i = iStart; i < iEnd; ++i)
             {
                 var component = components[i];
-
+                
                 try
                 {
                     Type comType = component.GetType();
@@ -958,15 +976,25 @@ namespace Hierarchy2
                                 break;
                         }
 
+                        if (settings.ignoreBaseComponents)
+                        {
+                            if (dicBaseComponents.ContainsKey(comType.BaseType.Name))
+                                continue;
+                        }
+
                         Rect rect = Rect.zero;
 
-                        if (settings.componentAlignment == HierarchySettings.ElementAlignment.AfterName)
-                            rect = RectFromLeft(rowItem.nameRect, settings.componentSize, ref widthUse.afterName);
-                        else
-                            rect = RectFromRight(rowItem.rect, settings.componentSize, ref widthUse.right);
+                        if (i == iStart && compGroupIndexes[rowItem.gameObject] > 0)
+                        {
+                            //Debug.Log($"PrevButton; GO: {rowItem.name}; Start: {iStart} End: {iEnd}");
+                            NextRect(ref rect);
 
+                            NextPrevButton(rect, groupsCount, false);
+                        }
 
-                        if (hasMaterial && i == length - rendererComponent.sharedMaterials.Length &&
+                        NextRect(ref rect);
+
+                        if (hasMaterial && i == iEnd - rendererComponent.sharedMaterials.Length &&
                             settings.componentDisplayMode != HierarchySettings.ComponentDisplayMode.ScriptOnly)
                         {
                             for (int m = 0; m < rendererComponent.sharedMaterials.Length; ++m)
@@ -988,6 +1016,12 @@ namespace Hierarchy2
                         }
 
                         ComponentIcon(component, comType, rect);
+
+                        if (i == iEnd - 1 && groupsCount > compGroupIndexes[rowItem.gameObject] + 1)
+                        {
+                            NextRect(ref rect);
+                            NextPrevButton(rect, groupsCount, true);
+                        }
 
                         if (settings.componentAlignment == HierarchySettings.ElementAlignment.AfterName)
                             widthUse.afterName += settings.componentSpacing;
@@ -1012,6 +1046,14 @@ namespace Hierarchy2
             }
         }
 
+        void NextRect(ref Rect rect)
+        {
+            if (settings.componentAlignment == HierarchySettings.ElementAlignment.AfterName)
+                rect = RectFromLeft(rowItem.nameRect, settings.componentSize, ref widthUse.afterName);
+            else
+                rect = RectFromRight(rowItem.rect, settings.componentSize, ref widthUse.right);
+        }
+
         void ComponentIcon(UnityEngine.Object component, Type componentType, Rect rect, bool isMaterial = false)
         {
             int comHash = component.GetHashCode();
@@ -1032,7 +1074,25 @@ namespace Hierarchy2
                 tooltipContent.tooltip = tooltip;
                 GUI.Box(rect, tooltipContent, GUIStyle.none);
 
+                Color oldColor = GUI.color;
+                Color newColor = oldColor;
+                bool isEnabled = true;
+                switch (component)
+                {
+                    case Behaviour b:
+                        isEnabled = b.enabled;
+                        break;
+                    case Renderer r:
+                        isEnabled = r.enabled;
+                        break;
+                    case Collider c:
+                        isEnabled = c.enabled;
+                        break;
+                }
+                newColor.a = isEnabled ? 1 : settings.disabledAlpha;
+                GUI.color = newColor;
                 GUI.DrawTexture(rect, image, ScaleMode.ScaleToFit);
+                GUI.color = oldColor;
             }
 
 
@@ -1087,6 +1147,40 @@ namespace Hierarchy2
 
                                 selectedComponents.Clear();
                             });
+                            
+                            componentGenericMenu.AddItem(new GUIContent("Enable or Disable All Behaviour"), false, () => {
+                                if (!selectedComponents.ContainsKey(comHash))
+                                    selectedComponents.Add(comHash, component);
+
+                                foreach (var selectedComponent in selectedComponents.ToList())
+                                {
+                                    //Debug.Log($"{selectedComponent.Value.GetType()}; Is Behaviour:{selectedComponent.Value is Behaviour}");
+                                    GameObject go = null;
+                                    switch (selectedComponent.Value)
+                                    {
+                                        case Behaviour b:
+                                            b.enabled = !b.enabled;
+                                            go = b.gameObject;
+                                            break;
+                                        case Renderer r:
+                                            r.enabled = !r.enabled;
+                                            go = r.gameObject;
+                                            break;
+                                        case Collider c:
+                                            c.enabled = !c.enabled;
+                                            go = c.gameObject;
+                                            break;
+                                        default:
+                                            continue;
+                                    }
+                                    if (go != null)
+                                    {
+                                        Debug.Log("Undo.RecordObject: Enable or Disable");
+                                        Undo.RecordObject(go, $"Enable or Disable");
+                                    }
+                                }
+                            });
+                            
                             componentGenericMenu.ShowAsContext();
                         }
                         else
@@ -1130,6 +1224,51 @@ namespace Hierarchy2
             {
                 selectedComponents.Clear();
                 activeComponent = null;
+            }
+        }
+
+        void NextPrevButton(Rect rect, int groupsCount, bool goToNext)
+        {
+            if (currentEvent.type == EventType.Repaint)
+            {
+                if (settings.componentAlignment == HierarchySettings.ElementAlignment.Right)
+                    goToNext = !goToNext;
+
+                Texture image = EditorGUIUtility.FindTexture(goToNext ? "d_tab_next" : "d_tab_prev");
+
+                string tooltip = goToNext ? "Next Component Group" : "Prev Component Group";
+                tooltipContent.tooltip = tooltip;
+                GUI.Box(rect, tooltipContent, GUIStyle.none);
+                GUI.DrawTexture(rect, image, ScaleMode.ScaleToFit);
+            }
+
+
+            if (rect.Contains(currentEvent.mousePosition))
+            {
+                if (currentEvent.type == EventType.MouseDown)
+                {
+                    if (currentEvent.button == 0)
+                    {
+                        if (goToNext)
+                        {
+                            compGroupIndexes[rowItem.gameObject]++;
+
+                            if (compGroupIndexes[rowItem.gameObject] >= groupsCount)
+                                compGroupIndexes[rowItem.gameObject] = groupsCount - 1;
+                        }
+                        else
+                        {
+                            compGroupIndexes[rowItem.gameObject]--;
+
+                            if (compGroupIndexes[rowItem.gameObject] < 0)
+                                compGroupIndexes[rowItem.gameObject] = 0;
+                        }
+                        currentEvent.Use();
+                        return;
+                    }
+
+                }
+
             }
         }
 
@@ -1413,7 +1552,7 @@ namespace Hierarchy2
 
         bool IsFirstRow(Rect rect) => rect.y / rect.height == 0;
 
-        int GetRowIndex(Rect rect) => (int) (rect.y / rect.height);
+        int GetRowIndex(Rect rect) => (int)(rect.y / rect.height);
 
         bool InSelection(int ID) => Selection.Contains(ID) ? true : false;
 
@@ -1650,8 +1789,8 @@ namespace Hierarchy2
                     {
                         alphaTexture = new Texture2D(16, 16, TextureFormat.RGBA32, false);
                         for (int x = 0; x < 16; ++x)
-                        for (int y = 0; y < 16; ++y)
-                            alphaTexture.SetPixel(x, y, Color.clear);
+                            for (int y = 0; y < 16; ++y)
+                                alphaTexture.SetPixel(x, y, Color.clear);
                         alphaTexture.Apply();
                     }
 
@@ -1743,7 +1882,8 @@ namespace Hierarchy2
                 border = new RectOffset(12, 12, 8, 8),
             };
 
-            [System.Obsolete] internal static GUIStyle DirtyLabel = new GUIStyle(EditorStyles.label)
+            [System.Obsolete]
+            internal static GUIStyle DirtyLabel = new GUIStyle(EditorStyles.label)
             {
                 padding = new RectOffset(-1, 0, 0, 0),
                 margin = new RectOffset(0, 0, 0, 0),
@@ -1754,7 +1894,7 @@ namespace Hierarchy2
             internal static GUIStyle Header = new GUIStyle(TreeBoldLabel)
             {
                 richText = true,
-                normal = new GUIStyleState() {textColor = Color.white}
+                normal = new GUIStyleState() { textColor = Color.white }
             };
 
             internal static GUIStyle TreeBoldLabel
@@ -1765,7 +1905,7 @@ namespace Hierarchy2
             internal static GUIStyle TreeLabel = new GUIStyle(UnityEditor.IMGUI.Controls.TreeView.DefaultStyles.label)
             {
                 richText = true,
-                normal = new GUIStyleState() {textColor = Color.white}
+                normal = new GUIStyleState() { textColor = Color.white }
             };
         }
 
